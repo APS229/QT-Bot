@@ -56,7 +56,6 @@ const commands = {
         execute(target, channel, user, server, client) {
             const validModules = ['config', 'games', 'tools', 'commands', 'events', 'shop', 'database'];
             const module = Tools.toId(target);
-            channel.say('test');
             switch (module) {
                 case 'config':
                     Tools.uncacheTree('../config.js');
@@ -103,6 +102,13 @@ const commands = {
                     break;
             }
             channel.say(`Reloaded module: ${module}`)
+        }
+    },
+    masskick: {
+        devOnly: true,
+        hidden: true,
+        async execute(target, channel, user, server, client) {
+            channel.say("how many times you gonna masskick bruh");
         }
     }
 };
