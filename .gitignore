@@ -62,7 +62,3 @@ typings/
 
 # OS files
 desktop.ini
-
-# Qt Bot files
-config.js
-private-code/
