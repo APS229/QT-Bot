@@ -1,0 +1,42 @@
+{
+  "name": "discord-bot",
+  "description": "A bot for discord",
+  "version": "0.0.1",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "deasync": "^0.1.24",
+    "discord-yt-player": "^1.1.1",
+    "discord.js": "^13.5.1",
+    "google-search": "0.0.5",
+    "node-gyp": "^7.1.2",
+    "nodemailer": "^5.1.1",
+    "opusscript": "0.0.6",
+    "origindb": "^2.6.1",
+    "owlbot-dictionary": "^1.0.1",
+    "oxford-dictionary-api": "^1.0.1",
+    "ps-client": "^1.2.0",
+    "relevant-urban": "^2.0.0",
+    "request": "^2.88.2",
+    "ws": "^7.4.5",
+    "youtube-api": "^2.0.10",
+    "ytdl-core": "^0.20.4"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZardMX/QT-Bot.git"
+  },
+  "author": "Harman Singh <harmansinghgwalior1@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/ZardMX/QT-Bot/issues"
+  },
+  "homepage": "https://github.com/ZardMX/QT-Bot#readme",
+  "keywords": [],
+  "license": "ISC"
+}
