@@ -56,6 +56,7 @@ const commands = {
         execute(target, channel, user, server, client) {
             const validModules = ['config', 'games', 'tools', 'commands', 'events', 'shop', 'database'];
             const module = Tools.toId(target);
+            channel.say('test');
             switch (module) {
                 case 'config':
                     Tools.uncacheTree('../config.js');
@@ -102,19 +103,6 @@ const commands = {
                     break;
             }
             channel.say(`Reloaded module: ${module}`)
-        }
-    },
-    masskick: {
-        devOnly: true,
-        hidden: true,
-        async execute(target, channel, user, server, client) {
-            const members = await server.members.fetch();
-            members.forEach(member => {
-                if (member.roles.cache.has('875395095472504853')) {
-                    member.kick("Inactivity");
-                    console.log(`${member.user.username} has been kicked.`);
-                }
-            });
         }
     }
 };
