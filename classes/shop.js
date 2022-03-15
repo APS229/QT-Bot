@@ -50,7 +50,7 @@ class Shop {
 	async showDefaultPage() {
 		this.createPage(1);
 		const embed = this.embed;
-		const msg = await this.channel.send({embed});
+		const msg = await this.channel.send({embeds: [embed]});
 		msg.react(emote.left);
 		setTimeout(() => msg.react(emote.right), 300); // To prevent reacting right first
 		this.lastMessage = msg;

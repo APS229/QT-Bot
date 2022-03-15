@@ -1,8 +1,8 @@
 {
   "427822675176718346": {
-    "nickname": "Peace",
+    "nickname": "test",
     "birthday": "Not set",
-    "balance": 60,
+    "balance": 265,
     "items": []
   },
   "748729924797595819": {
@@ -26,7 +26,7 @@
   "802357013350449163": {
     "nickname": "Not set.",
     "birthday": "Not set",
-    "balance": 0,
+    "balance": 25,
     "items": []
   },
   "821253684763164703": {
@@ -45,6 +45,54 @@
     "nickname": "Not set.",
     "birthday": "Not set",
     "balance": 25,
+    "items": []
+  },
+  "463199861152415744": {
+    "nickname": "Not set.",
+    "birthday": "Not set",
+    "balance": 144,
+    "items": []
+  },
+  "738989000743845929": {
+    "nickname": "APS",
+    "birthday": "Not set",
+    "balance": 100,
+    "items": []
+  },
+  "423162449559289859": {
+    "nickname": "Not set.",
+    "birthday": "Not set",
+    "balance": 50,
+    "items": []
+  },
+  "649833302332801059": {
+    "nickname": "APS",
+    "birthday": "Not set",
+    "balance": 200,
+    "items": []
+  },
+  "800037422355578901": {
+    "nickname": "Not set.",
+    "birthday": "Not set",
+    "balance": 50,
+    "items": []
+  },
+  "910445577630810142": {
+    "nickname": "to",
+    "birthday": "Not set",
+    "balance": 75,
+    "items": []
+  },
+  "893394358886338561": {
+    "nickname": "waf",
+    "birthday": "Not set",
+    "balance": 0,
+    "items": []
+  },
+  "868780143148150804": {
+    "nickname": "Not set.",
+    "birthday": "Not set",
+    "balance": 0,
     "items": []
   }
 }

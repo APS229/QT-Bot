@@ -51,7 +51,7 @@ const commands = {
 				}
 				return realItems.join('\n');
 			}
-			channel.send({embed});
+			channel.send({embeds: [embed]});
 		},
 		execute(target, channel, user, server, client) {
 			setHelp(user);
@@ -70,7 +70,7 @@ const commands = {
 
 			switch (cmd) {
 				case 'help':
-					channel.send({embed});
+					channel.send({embeds: [embed]});
 				break;
 				case 'birthday':
 					channel.say(`:confetti_ball: Birthday: ${profile.birthday}`);
