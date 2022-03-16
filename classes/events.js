@@ -86,13 +86,13 @@ class Events {
                     const command = Client.commands.get(commandName) || Client.commands.find(cmd => cmd.aliases.length && cmd.aliases.includes(commandName));
 
                     if (!command) return;
-                    if (command.devOnly && !user.isDev()) return;
-                    if (Client.disabled && !user.isDev()) return;
-                    if (channel.type === 'text') {
+                    if ((Client.disabled || command.devOnly) && !user.isDev()) return;
+                    if (channel.type === 'GUILD_TEXT') {
                         const member = await server.members.fetch(user);
                         if (command.supermod && !member.roles.cache.find(r => r.name === 'Super Moderator') && !user.isDev()) return;
                         if (command.mod && !member.roles.cache.find(r => r.name === 'Moderator' || r.name === 'Super Moderator') && !user.isDev()) return;
                         if (command.target && !target) return channel.say("This command needs an argument.");
+                        if (command.cooldown && Date.now() - command.cooldown < 60000) return channel.say("You need to wait 1 minute before using this command again.");
                     }
                     if (command.server && channel.type !== 'GUILD_TEXT') return channel.say("This command is only available in servers.");
                     if (command.execute) command.execute(target, channel, user, server, discord);
@@ -206,6 +206,7 @@ class Events {
                     catch (err) {}
                 }
                 reaction.message.delete();
+                Client.nicknames.delete(reaction.message.id);
             }
         });
 

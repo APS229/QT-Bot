@@ -1,8 +1,8 @@
 {
   "427822675176718346": {
-    "nickname": "test",
+    "nickname": "APS",
     "birthday": "Not set",
-    "balance": 265,
+    "balance": 640,
     "items": []
   },
   "748729924797595819": {
@@ -32,7 +32,7 @@
   "821253684763164703": {
     "nickname": "Not set.",
     "birthday": "Not set",
-    "balance": 50,
+    "balance": 100,
     "items": []
   },
   "716589339395489814": {
@@ -56,19 +56,19 @@
   "738989000743845929": {
     "nickname": "APS",
     "birthday": "Not set",
-    "balance": 100,
+    "balance": 200,
     "items": []
   },
   "423162449559289859": {
     "nickname": "Not set.",
     "birthday": "Not set",
-    "balance": 50,
+    "balance": 100200,
     "items": []
   },
   "649833302332801059": {
     "nickname": "APS",
     "birthday": "Not set",
-    "balance": 200,
+    "balance": 425,
     "items": []
   },
   "800037422355578901": {
@@ -93,6 +93,12 @@
     "nickname": "Not set.",
     "birthday": "Not set",
     "balance": 0,
+    "items": []
+  },
+  "856903748953047080": {
+    "nickname": "Not set.",
+    "birthday": "Not set",
+    "balance": 50,
     "items": []
   }
 }
