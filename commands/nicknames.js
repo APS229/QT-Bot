@@ -19,11 +19,19 @@ const commands = {
                 .setDescription(`\`\`${currentName}\`\` => \`\`${target}\`\``)
                 .setTimestamp()
                 .setFooter({ text: user.id });
-            const message = await requestChannel.send({ embeds: [embed] });
-            message.react('✅');
-            message.react('❌');
+            const entry = [...Client.nicknames.keys()].find(key => Client.nicknames.get(key).user === user.id);
+            let message = null;
+            if (entry) {
+                message = await requestChannel.messages.fetch(entry);
+                message.edit({embeds: [embed]}).catch(console.log);
+            }
+            else {
+                message = await requestChannel.send({ embeds: [embed] });
+                message.react('✅');
+                message.react('❌');
+            }
             Client.nicknames.set(message.id, {user: user.id, nick: target});
-            channel.say("Nickname request submitted: ``" + target + "``");
+            channel.say(`Nickname request ${entry ? 'edited' : 'submitted'}: \`\`${target}\`\``);
         }
     }
 };

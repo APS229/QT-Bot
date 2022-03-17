@@ -5,10 +5,6 @@ class Nugget {
 		this.name = 'Nugget';
 		this.before = null;
 		this.user = client.mentions.users.first();
-        if (this.user.bot) {
-            channel.say("You can't nugget a bot bruh.");
-            return delete channel.game;
-        }
 		this.channel = channel;
 		this.client = client;
 		channel.say(`The nugget has been handed to <@${this.user.id}>! Pass it before it explodes.`);
