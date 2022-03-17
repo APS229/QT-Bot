@@ -1,7 +1,7 @@
 'use strict';
 
 class Nugget {
-	constructor(channel, client) {
+	constructor(eggedBY, channel, client) {
 		this.name = 'Nugget';
 		this.before = null;
 		this.user = client.mentions.users.first();

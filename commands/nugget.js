@@ -10,7 +10,7 @@ const commands = {
             if (!client.mentions.users.first()) return channel.say("Mention a user, you nugget.");
 			if (channel.game?.id === 'nugget') return Client.commands.get('pass').execute(target, channel, user, server, client);
 			const Nugget = Client.games.get('nugget');
-			channel.game = new Nugget(channel, client);
+			channel.game = new Nugget(Tools.toId(target), channel, client);
 		}
 	},
 	pass: {
