@@ -1,12 +1,12 @@
 'use strict';
 
 class Nugget {
-	constructor(eggedBY, channel, client) {
+	constructor(channel, client) {
 		this.name = 'Nugget';
 		this.before = null;
 		this.user = client.mentions.users.first();
         if (this.user.bot) {
-            this.channel.say("You can't nugget a bot bruh.");
+            channel.say("You can't nugget a bot bruh.");
             return delete channel.game;
         }
 		this.channel = channel;
