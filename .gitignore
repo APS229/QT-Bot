@@ -62,3 +62,6 @@ typings/
 
 # OS files
 desktop.ini
+
+# Database files
+database/

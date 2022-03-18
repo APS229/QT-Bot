@@ -106,11 +106,30 @@ class Events {
                     console.log(err);
                 }
             }
-            if (channel.id === '811901919395708969') {
-                let xp = 0;
-                if (Db('exp2').has(user.id)) xp = Db('exp2').get(user.id);
-                Db('exp2').set(user.id, xp + parseInt(Math.random() * 6) + 5);
+            if (user.id === '270904126974590976' && discord.type === 'REPLY' && discord.mentions.users.first()) {
+                const pointsFor = discord.mentions.users.first().id;
+                let points = 0;
+                if (message.includes("TINY portion")) {
+                    points = 1;
+                } else if (message.includes("small portion")) {
+                    points = 2;
+                } else if (message.includes("decent chunk")) {
+                    points = 3;
+                } else if (message.includes("BASICALLY EVERYTHING")) {
+                    points = 4;
+                }
+                if (points) {
+                    if (Db('dank').has(pointsFor)) points += Db('dank').get(pointsFor);
+                    Db('dank').set(pointsFor, points);
+                }
             }
+
+            // qt-weekend
+            // if (channel.id === '811901919395708969') {
+            //     let xp = 0;
+            //     if (Db('exp2').has(user.id)) xp = Db('exp2').get(user.id);
+            //     Db('exp2').set(user.id, xp + parseInt(Math.random() * 6) + 5);
+            // }
             // if (channel.name === 'rebel-kills') {
             // 	if (!discord.attachments.size) return;
             // 	if (!Db('rebel-kills-count').has(user.id)) Db('rebel-kills-count').set(user.id, {});
@@ -203,7 +222,7 @@ class Events {
                     try {
                         member.setNickname(data.nick);
                     }
-                    catch (err) {}
+                    catch (err) { }
                 }
                 reaction.message.delete();
                 Client.nicknames.delete(reaction.message.id);
