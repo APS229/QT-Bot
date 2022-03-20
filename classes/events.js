@@ -109,7 +109,7 @@ class Events {
                         if (command.supermod && !member.roles.cache.find(r => r.name === 'Super Moderator') && !user.isDev()) return;
                         if (command.mod && !member.roles.cache.find(r => r.name === 'Moderator' || r.name === 'Super Moderator') && !user.isDev()) return;
                         if (command.target && !target) return channel.say("This command needs an argument.");
-                        if (command.cooldown && Date.now() - command.cooldown < 60000) return channel.say(`You need to wait ${Tools.toDurationString(Date.now() - command.cooldown)} before using this command again.`);
+                        if (command.cooldown && Date.now() - command.cooldown < 60000) return channel.say(`You need to wait ${Tools.toDurationString(60000 - (Date.now() - command.cooldown))} before using this command again.`);
                     }
                     if (command.server && channel.type !== 'GUILD_TEXT') return channel.say("This command is only available in servers.");
                     if (command.execute) command.execute(target, channel, user, server, discord);
