@@ -10,13 +10,6 @@ class Nugget {
         channel.say(`The nugget has been handed to <@${this.user.id}>! Pass it before it explodes.`);
         setTimeout(() => {
             channel.say(`**BOOOOM**! The nugget exploded on ${this.user.username}.`);
-            if (this.before) {
-                if (!profile.nickname) profile.nickname = 'Not set.';
-                if (!profile.birthday) profile.birthday = 'Not set';
-                if (isNaN(profile.balance)) profile.balance = 0;
-                profile.balance += 25;
-                if (!profile.items) profile.items = [];
-            }
             Client.commands.get('nugget').cooldown = Date.now();
             delete channel.game;
         }, Math.random() * 10000 + 8000);
