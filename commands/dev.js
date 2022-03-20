@@ -39,7 +39,7 @@ const commands = {
         hidden: true,
         execute(target, channel, user, server, client) {
             Client.disabled = true;
-            channel.say("Commands has been disabled.");
+            channel.say("Commands have been disabled.");
         }
     },
     enable: {
@@ -47,7 +47,7 @@ const commands = {
         hidden: true,
         execute(target, channel, user, server, client) {
             Client.disabled = false;
-            channel.say("Commands has been enabled.");
+            channel.say("Commands have been enabled.");
         }
     },
     reload: {

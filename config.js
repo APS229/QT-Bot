@@ -2,7 +2,7 @@
 
 exports.token = 'NDQxNTc2MzM1MTY1NjIwMjI0.WusAAg.Ao66mHOBXFd89xDozOuLDleDqyo';
 
-exports.username = 'Qt Bot';
+exports.username = 'QT Bot';
 
 exports.id = '441576335165620224';
 

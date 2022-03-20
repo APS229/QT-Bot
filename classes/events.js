@@ -65,6 +65,23 @@ class Events {
             // this.setPrototypes(user, channel);
             user.isDev = () => Config.developers.includes(user.id); // inconsistent
             if (channel.type === 'text' && user.guild && user.id === user.guild.ownerID) user.owner = true;
+            // if (user.id === '270904126974590976' && discord.type === 'REPLY' && discord.mentions.users.first()) {
+            //     const pointsFor = discord.mentions.users.first().id;
+            //     let points = 0;
+            //     if (message.includes("TINY portion")) {
+            //         points = 1;
+            //     } else if (message.includes("small portion")) {
+            //         points = 2;
+            //     } else if (message.includes("decent chunk")) {
+            //         points = 3;
+            //     } else if (message.includes("BASICALLY EVERYTHING")) {
+            //         points = 4;
+            //     }
+            //     if (points) {
+            //         if (Db('dank').has(pointsFor)) points += Db('dank').get(pointsFor);
+            //         Db('dank').set(pointsFor, points);
+            //     }
+            // }
             if (user.bot) return;
             // if (channel.name === 'hit-or-miss' && message && (!message.startsWith('||') || !message.endsWith('||'))) {
             // 	channel.say(`${user} please spoiler your messages in this channel.`);
@@ -92,35 +109,18 @@ class Events {
                         if (command.supermod && !member.roles.cache.find(r => r.name === 'Super Moderator') && !user.isDev()) return;
                         if (command.mod && !member.roles.cache.find(r => r.name === 'Moderator' || r.name === 'Super Moderator') && !user.isDev()) return;
                         if (command.target && !target) return channel.say("This command needs an argument.");
-                        if (command.cooldown && Date.now() - command.cooldown < 60000) return channel.say("You need to wait 1 minute before using this command again.");
+                        if (command.cooldown && Date.now() - command.cooldown < 60000) return channel.say(`You need to wait ${Tools.toDurationString(Date.now() - command.cooldown)} before using this command again.`);
                     }
                     if (command.server && channel.type !== 'GUILD_TEXT') return channel.say("This command is only available in servers.");
                     if (command.execute) command.execute(target, channel, user, server, discord);
                 }
                 catch (err) {
-                    channel.say("There was an error occured. Developers has been notified.");
+                    channel.say("There was an error occured. Developers have been notified.");
                     for (const dev of Config.developers) {
                         const user = await Client.bot.users.fetch(dev);
                         if (user) user.say(err.name + ': ' + err.message);
                     }
                     console.log(err);
-                }
-            }
-            if (user.id === '270904126974590976' && discord.type === 'REPLY' && discord.mentions.users.first()) {
-                const pointsFor = discord.mentions.users.first().id;
-                let points = 0;
-                if (message.includes("TINY portion")) {
-                    points = 1;
-                } else if (message.includes("small portion")) {
-                    points = 2;
-                } else if (message.includes("decent chunk")) {
-                    points = 3;
-                } else if (message.includes("BASICALLY EVERYTHING")) {
-                    points = 4;
-                }
-                if (points) {
-                    if (Db('dank').has(pointsFor)) points += Db('dank').get(pointsFor);
-                    Db('dank').set(pointsFor, points);
                 }
             }
 
