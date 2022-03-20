@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs');
-let Shop = require('./shop.js');
 
 class Client {
     constructor() {

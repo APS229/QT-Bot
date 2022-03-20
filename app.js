@@ -8,10 +8,6 @@ global.Events = require('./classes/events.js');
 
 global.Db = require('origindb')('database');
 
-global.emote = require('./emojis.js');
-
-global.Shop = require('./classes/shop.js');
-
 global.Config = require('./config.js');
 
 global.Request = require('request');
