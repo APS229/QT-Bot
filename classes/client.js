@@ -6,7 +6,6 @@ class Client {
     constructor() {
         this.discord = require('discord.js');
         this.bot = new this.discord.Client({ intents: ['GUILDS', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS'] });
-        this.shop = {};
         this.disconnected = false;
         this.disabled = false;
         this.games = new Map();
@@ -58,7 +57,6 @@ class Client {
         this.bot.login(Config.token);
         this.loadCommands();
         this.loadGames();
-        this.shop = new Shop({}, {});
         this.events = new Events(this.bot);
         this.events.parse();
     }
