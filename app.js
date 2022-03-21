@@ -14,8 +14,7 @@ const PG = require('pg').Client;
 
 global.Database = new PG({
     user: "postgres",
-    connectionString: process.env.DATABASE_URL,
-    ssl: false
+    connectionString: process.env.DATABASE_URL
 });
 
 Database.connect();
