@@ -14,6 +14,7 @@
     "origindb": "^2.6.1",
     "owlbot-dictionary": "^1.0.1",
     "oxford-dictionary-api": "^1.0.1",
+    "pg": "^8.7.3",
     "ps-client": "^1.2.0",
     "relevant-urban": "^2.0.0",
     "request": "^2.88.2",
@@ -24,9 +25,9 @@
   "engines": {
     "node": ">=8.0.0"
   },
-  "main": "app.js",
+  "main": "test.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node test.js"
   },
   "repository": {
     "type": "git",
