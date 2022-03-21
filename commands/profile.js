@@ -7,7 +7,7 @@ const commands = {
         devOnly: true,
         hidden: true,
         execute(target, channel, user, server, client) {
-            Database.query(`select * from profile where userid='${user.id}'`, (err, res) => {
+            Database.query(`select * from profile where id='${user.id}'`, (err, res) => {
                 if (err) return console.log(err);
                 console.log(res);
             });
