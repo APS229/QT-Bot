@@ -6,11 +6,19 @@ global.Client = require('./classes/client.js');
 
 global.Events = require('./classes/events.js');
 
-global.Db = require('origindb')('database');
-
 global.Config = require('./config.js');
 
 global.Request = require('request');
+
+const PG = require('pg').Client;
+
+global.Database = new PG({
+    user: "postgres",
+    connectionString: process.env.DATABASE_URL,
+    ssl: false
+});
+
+Database.connect();
 
 global.info = text => {
     if (typeof text !== 'string') return false;

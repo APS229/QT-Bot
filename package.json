@@ -25,9 +25,9 @@
   "engines": {
     "node": ">=8.0.0"
   },
-  "main": "test.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node test.js"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
