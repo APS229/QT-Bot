@@ -54,7 +54,7 @@ const commands = {
         devOnly: true,
         hidden: true,
         execute(target, channel, user, server, client) {
-            const validModules = ['config', 'games', 'tools', 'commands', 'events', 'shop', 'database'];
+            const validModules = ['config', 'games', 'tools', 'commands', 'events'];
             const module = Tools.toId(target);
             switch (module) {
                 case 'config':
@@ -86,14 +86,6 @@ const commands = {
                 case 'shop':
                     Tools.uncacheTree('../classes/shop.js');
                     require('../classes/shop.js')
-                    break;
-                case 'database':
-                    const database = fs.readdirSync('./database/');
-                    for (const databaseFile of database) {
-                        const file = JSON.parse(fs.readFileSync('./database/' + databaseFile));
-                        console.log(file);
-                        fs.writeFileSync('./database/' + databaseFile, JSON.stringify(file, null, 4))
-                    }
                     break;
                 default:
                     channel.say("Invalid module.");

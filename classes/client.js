@@ -5,7 +5,7 @@ const fs = require('fs');
 class Client {
     constructor() {
         this.discord = require('discord.js');
-        this.bot = new this.discord.Client({ intents: ['GUILDS', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS'] });
+        this.bot = new this.discord.Client({ intents: ['GUILDS', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES'] });
         this.disconnected = false;
         this.disabled = false;
         this.games = new Map();
