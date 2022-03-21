@@ -13,8 +13,10 @@ global.Request = require('request');
 const PG = require('pg').Client;
 
 global.Database = new PG({
-    user: "postgres",
-    connectionString: process.env.DATABASE_URL
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false,
+    }
 });
 
 Database.connect();
