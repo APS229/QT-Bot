@@ -129,16 +129,16 @@ class Events {
                     if (err) return console.log(err);
                     if (res.rows.length) {
                         const xp = res.rows[0].xp + 10;
-                        Database.query(`update profile set xp = ${xp} where id = '${user.id}'`, (err, res) => {
-                            if (err) return console.log(err);
-                            channel.say(res.rows[0].xp);
-                        });
+                        // Database.query(`update profile set xp = ${xp} where id = '${user.id}'`, (err, res) => {
+                        //     if (err) return console.log(err);
+                        //     channel.say(res.rows[0].xp);
+                        // });
                     }
                     else {
-                        Database.query(`insert into profile values('${user.id}', 1, 0, 0)`, (err, res) => {
-                            if (err) return console.log(err);
-                            channel.say(res.rows[0]);
-                        });
+                        // Database.query(`insert into profile values('${user.id}', 1, 0, 0)`, (err, res) => {
+                        //     if (err) return console.log(err);
+                        //     channel.say(res.rows[0]);
+                        // });
                     }
 
                 });
