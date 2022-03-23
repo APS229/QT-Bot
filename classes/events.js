@@ -106,7 +106,7 @@ class Events {
                             update = ", level=level+1";
                             const level = res.rows[0].level;
                             if (level > 1) {
-                                let base = 20;
+                                let base = 220;
                                 for (let i = 0; i < level; base += 75 + i * 10, i++){}
                                 update += ", toxp=" + base;
                             }
@@ -119,7 +119,7 @@ class Events {
                         });
                     }
                     else {
-                        Database.query(`insert into profile values('${user.id}', 1, 0, 20, 0)`).then(res => {
+                        Database.query(`insert into profile values('${user.id}', 1, 0, 220, 0)`).then(res => {
                             channel.say(res.rows[0]);
                         });
                     }
