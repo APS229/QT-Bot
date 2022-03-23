@@ -133,11 +133,12 @@ class Events {
                         });
                     }
                     else {
-                        const xp = res.rows[0].xp + 10;
-                        Database.query(`update profile set xp = ${xp} where id = ${user.id}`, (err, res) => {
-                            if (err) return console.log(err);
-                            channel.say(res.rows[0].xp);
-                        });
+                        console.log(res);
+                        // const xp = res.rows[0].xp + 10;
+                        // Database.query(`update profile set xp = ${xp} where id = ${user.id}`, (err, res) => {
+                        //     if (err) return console.log(err);
+                        //     channel.say(res.rows[0].xp);
+                        // });
                     }
 
                 });
