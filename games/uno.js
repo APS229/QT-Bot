@@ -1,16 +1,21 @@
 'use strict';
 
 const colors = ['blue', 'green', 'red', 'yellow'];
+const CARDS = [];
 
 class UNO {
-    constructor(channel) {
+    constructor(channel, server) {
         this.name = 'UNO';
         this.players = new Map();
         this.roles = new Map();
         this.CARDS = [];
         this.channel = channel;
-        const cache = channel.guild.channels.cache;
-        this.unoChannels = [cache.find(ch => ch.name === "uno-player1"), cache.find(ch => ch.name === "uno-player2"), cache.find(ch => ch.name === "uno-player3"), cache.find(ch => ch.name === "uno-player4"), cache.find(ch => ch.name === "uno-player5"), cache.find(ch => ch.name === "uno-player6"),];
+        this.unoChannels = [];
+        for (let i = 0; i < 6; i++) {
+            server.channels.create('uno-player-' + i, {
+                
+            });
+        }
         this.started = false;
         this.firstCard = true;
         this.winner = null;

@@ -124,12 +124,24 @@ class Events {
                 }
             }
 
-            // qt-weekend
-            // if (channel.id === '811901919395708969') {
-            //     let xp = 0;
-            //     if (Db('exp2').has(user.id)) xp = Db('exp2').get(user.id);
-            //     Db('exp2').set(user.id, xp + parseInt(Math.random() * 6) + 5);
-            // }
+            if (!Config.excludedCh.includes(channel.name)) {
+                Database.query('select * from profile where id = ' + user.id, (err, res) => {
+                    if (err) {
+                        Database.query(`insert into profile values('${user.id}', 1, 0, 0)`, (err, res) => {
+                            if (err) return console.log(err);
+                            channel.say(res.rows[0]);
+                        });
+                    }
+                    else {
+                        const xp = res.rows[0].xp + 10;
+                        Database.query(`update profile set xp = ${xp} where id = ${user.id}`, (err, res) => {
+                            if (err) return console.log(err);
+                            channel.say(res.rows[0].xp);
+                        });
+                    }
+
+                });
+            }
             // if (channel.name === 'rebel-kills') {
             // 	if (!discord.attachments.size) return;
             // 	if (!Db('rebel-kills-count').has(user.id)) Db('rebel-kills-count').set(user.id, {});

@@ -49,5 +49,4 @@ if (!Config.token || !Config.cmdchar) {
     console.log("You need to fill out the config.js file.");
     process.exit(-1);
 }
-const util = require('util');
 Client.connect();
