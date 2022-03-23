@@ -104,14 +104,14 @@ class Events {
                         if (xp >= res.rows[0].toxp) {
                             xp -= res.rows[0].toxp;
                             update = ", level=level+1";
-                            const level = 5;
+                            const level = res.rows[0].level;
                             if (level > 1) {
                                 let base = 20;
                                 for (let i = 0; i < level; base += 75 + i * 10, i++){}
-                                update += ", toXp=" + base;
+                                update += ", toxp=" + base;
                             }
                             else {
-                                update += ", toXp=toXp+75";
+                                update += ", toxp=toxp+75";
                             }
                         }
                         Database.query(`update profile set xp = ${xp}${update} where id = '${user.id}'`).then(res => {
