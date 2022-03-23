@@ -124,18 +124,16 @@ class Events {
                 }
             }
 
-            if (Config.excludedCh.includes(channel.name)) {
+            if (!Config.excludedCh.includes(channel.name)) {
                 Database.query(`select * from profile where id = '${user.id}'`, (err, res) => {
                     if (err) return console.log(err);
                     if (res.rows.length) {
-                        channel.say(JSON.stringify(res.rows[0]));
                         const xp = res.rows[0].xp + 10;
                         Database.query(`update profile set xp = ${xp} where id = '${user.id}'`).then(res => {
                             channel.say(res.rows[0]);
                         });
                     }
                     else {
-                        channel.say("no data found, adding you in database");
                         Database.query(`insert into profile values('${user.id}', 1, 0, 0)`).then(res => {
                             channel.say(res.rows[0]);
                         });
