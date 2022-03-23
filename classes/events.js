@@ -99,13 +99,27 @@ class Events {
             if (!Config.excludedCh.includes(channel.name)) {
                 Database.query(`select * from profile where id = '${user.id}'`).then(res => {
                     if (res.rows.length) {
-                        const xp = res.rows[0].xp + 10;
-                        Database.query(`update profile set xp = ${xp} where id = '${user.id}'`).then(res => {
+                        let xp = res.rows[0].xp + 10;
+                        let update = "";
+                        if (xp > res.rows[0].toXp) {
+                            xp = res.rows[0].toXp - xp;
+                            update = ", level=level+1";
+                            const level = 5;
+                            if (level > 1) {
+                                let base = 20;
+                                for (let i = 0; i < level; base += 75 + i * 10, i++){}
+                                update += ", toXp=" + base;
+                            }
+                            else {
+                                update += ", toXp=toXp+75";
+                            }
+                        }
+                        Database.query(`update profile set xp = ${xp}${update} where id = '${user.id}'`).then(res => {
                             channel.say(res.rows[0]);
                         });
                     }
                     else {
-                        Database.query(`insert into profile values('${user.id}', 1, 0, 0)`).then(res => {
+                        Database.query(`insert into profile values('${user.id}', 1, 0, 20, 0)`).then(res => {
                             channel.say(res.rows[0]);
                         });
                     }
