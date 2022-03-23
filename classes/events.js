@@ -136,11 +136,11 @@ class Events {
                         // });
                     }
                     else {
-                        channel.say("no data found");
-                        // Database.query(`insert into profile values('${user.id}', 1, 0, 0)`, (err, res) => {
-                        //     if (err) return console.log(err);
-                        //     channel.say(res.rows[0]);
-                        // });
+                        channel.say("no data found, adding you in database");
+                        Database.query(`insert into profile values('${user.id}', 1, 0, 0)`, (err, res) => {
+                            if (err) return console.log(err);
+                            channel.say(res.rows[0]);
+                        });
                     }
 
                 });
