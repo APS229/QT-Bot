@@ -129,17 +129,16 @@ class Events {
                     if (err) return console.log(err);
                     if (res.rows.length) {
                         channel.say(JSON.stringify(res.rows[0]));
-                        // const xp = res.rows[0].xp + 10;
-                        // Database.query(`update profile set xp = ${xp} where id = '${user.id}'`, (err, res) => {
-                        //     if (err) return console.log(err);
-                        //     channel.say(res.rows[0].xp);
-                        // });
+                        const xp = res.rows[0].xp + 10;
+                        Database.query(`update profile set xp = ${xp} where id = '${user.id}'`, (err, res) => {
+                            if (err) return console.log(err);
+                            channel.say(res.rows[0].xp);
+                        });
                     }
                     else {
                         channel.say("no data found, adding you in database");
                         Database.query(`insert into profile values('${user.id}', 1, 0, 0)`, (err, res) => {
                             if (err) return console.log(err);
-                            channel.say(JSON.stringify(res.rows[0]));
                         });
                     }
 
