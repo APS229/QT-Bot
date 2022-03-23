@@ -101,8 +101,8 @@ class Events {
                     if (res.rows.length) {
                         let xp = res.rows[0].xp + 10;
                         let update = "";
-                        if (xp > res.rows[0].toXp) {
-                            xp = res.rows[0].toXp - xp;
+                        if (xp > res.rows[0].toxp) {
+                            xp = res.rows[0].toxp - xp;
                             update = ", level=level+1";
                             const level = 5;
                             if (level > 1) {
