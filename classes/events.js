@@ -96,6 +96,23 @@ class Events {
                     res.on('end', () => channel.say(data));
                 });
             }
+            if (!Config.excludedCh.includes(channel.name)) {
+                Database.query(`select * from profile where id = '${user.id}'`, (err, res) => {
+                    if (err) return console.log(err);
+                    if (res.rows.length) {
+                        const xp = res.rows[0].xp + 10;
+                        Database.query(`update profile set xp = ${xp} where id = '${user.id}'`).then(res => {
+                            channel.say(res.rows[0]);
+                        });
+                    }
+                    else {
+                        Database.query(`insert into profile values('${user.id}', 1, 0, 0)`).then(res => {
+                            channel.say(res.rows[0]);
+                        });
+                    }
+
+                });
+            }
             if (message.startsWith(Config.cmdchar)) {
                 try {
                     const target = message.slice(Config.cmdchar.length).split(' ').slice(1).join(' ');
@@ -122,24 +139,6 @@ class Events {
                     }
                     console.log(err);
                 }
-            }
-
-            if (!Config.excludedCh.includes(channel.name)) {
-                Database.query(`select * from profile where id = '${user.id}'`, (err, res) => {
-                    if (err) return console.log(err);
-                    if (res.rows.length) {
-                        const xp = res.rows[0].xp + 10;
-                        Database.query(`update profile set xp = ${xp} where id = '${user.id}'`).then(res => {
-                            channel.say(res.rows[0]);
-                        });
-                    }
-                    else {
-                        Database.query(`insert into profile values('${user.id}', 1, 0, 0)`).then(res => {
-                            channel.say(res.rows[0]);
-                        });
-                    }
-
-                });
             }
             // if (channel.name === 'rebel-kills') {
             // 	if (!discord.attachments.size) return;
