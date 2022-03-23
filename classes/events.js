@@ -97,8 +97,7 @@ class Events {
                 });
             }
             if (!Config.excludedCh.includes(channel.name)) {
-                Database.query(`select * from profile where id = '${user.id}'`, (err, res) => {
-                    if (err) return console.log(err);
+                Database.query(`select * from profile where id = '${user.id}'`).then(res => {
                     if (res.rows.length) {
                         const xp = res.rows[0].xp + 10;
                         Database.query(`update profile set xp = ${xp} where id = '${user.id}'`).then(res => {
@@ -110,7 +109,6 @@ class Events {
                             channel.say(res.rows[0]);
                         });
                     }
-
                 });
             }
             if (message.startsWith(Config.cmdchar)) {
