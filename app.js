@@ -20,6 +20,9 @@ global.Database = new PG({
 });
 
 Database.connect();
+Database.on('error', err => {
+    console.log(err);
+});
 
 global.info = text => {
     if (typeof text !== 'string') return false;

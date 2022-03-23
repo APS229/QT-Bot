@@ -130,15 +130,14 @@ class Events {
                     if (res.rows.length) {
                         channel.say(JSON.stringify(res.rows[0]));
                         const xp = res.rows[0].xp + 10;
-                        Database.query(`update profile set xp = ${xp} where id = '${user.id}'`, (err, res) => {
-                            if (err) return console.log(err);
-                            channel.say(res.rows[0].xp);
+                        Database.query(`update profile set xp = ${xp} where id = '${user.id}'`).then(res => {
+                            channel.say(res.rows[0]);
                         });
                     }
                     else {
                         channel.say("no data found, adding you in database");
-                        Database.query(`insert into profile values('${user.id}', 1, 0, 0)`, (err, res) => {
-                            if (err) return console.log(err);
+                        Database.query(`insert into profile values('${user.id}', 1, 0, 0)`).then(res => {
+                            channel.say(res.rows[0]);
                         });
                     }
 
