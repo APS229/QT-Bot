@@ -2,6 +2,7 @@
 
 const colors = ['blue', 'green', 'red', 'yellow'];
 const CARDS = [];
+const { Permissions } = require('discord.js');
 
 class UNO {
     constructor(channel, server) {
@@ -10,12 +11,9 @@ class UNO {
         this.roles = new Map();
         this.CARDS = [];
         this.channel = channel;
+        this.server = server;
+        this.unoRoles = [];
         this.unoChannels = [];
-        for (let i = 0; i < 6; i++) {
-            server.channels.create('uno-player-' + i, {
-                
-            });
-        }
         this.started = false;
         this.firstCard = true;
         this.winner = null;
@@ -43,10 +41,26 @@ class UNO {
             this.CARDS.push('wild +4');
         }
     }
-    onStart() {
-        // if (this.players.size < 2) return this.channel.say("There are not enough players to start the game.");
+    async onStart() {
+        if (this.players.size < 2) return this.channel.say("There are not enough players to start the game.");
         this.started = true;
         this.channel.say("**The game of UNO is now starting!**");
+        const playersLen = Array.from(this.players.keys()).length;
+        for (let i = 0; i < playersLen; i++) {
+            const unoRole = await this.server.roles.create({
+                name: 'UNO Player ' + (i + 1),
+                color: 'PURPLE'
+            });
+            this.unoRoles.push(unoRole);
+            const unoChannel = await this.server.channels.create('uno-player-' + (i + 1), {
+                parent: '777956702741463071',
+                permissionOverwrites: [
+                    { id: '777956702741463070', deny: Permissions.FLAGS.VIEW_CHANNEL },
+                    { id: unoRole.id, allow: Permissions.FLAGS.VIEW_CHANNEL }
+                ]
+            })
+            this.unoChannels.push(unoChannel);
+        }
         this.assignRoles();
         this.assignCards();
         let card = this.CARDS.random();
@@ -62,6 +76,7 @@ class UNO {
                     this.topCard = cardValue;
                 }
                 else if (cardValue === '+4') {
+                    const drawnCards = [];
                     const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
                     const drawnPlayerCh = this.unoChannels[this.roles.get(drawnPlayer) - 1];
                     for (let i = 0; i < 4; i++) {
@@ -69,6 +84,7 @@ class UNO {
                         this.players.get(drawnPlayer).push(drawnCard);
                         drawnCards.push(this.format(drawnCard));
                     }
+                    this.channel.say(`<@${drawnPlayer}> was forced to draw 4 cards.`);
                     drawnPlayerCh.say(`You were forced to draw: ${drawnCards.join(', ')}`);
                     this.queue.shift();
                     this.queue.push(drawnPlayer);
@@ -89,7 +105,7 @@ class UNO {
                             this.players.get(drawnPlayer).push(drawnCard);
                             drawnCards.push(this.format(drawnCard));
                         }
-                        this.channel.say(`${drawnPlayer.displayName} was forced to draw 2 cards.`)
+                        this.channel.say(`<@${drawnPlayer}> was forced to draw 2 cards.`);
                         drawnPlayerCh.say(`You were forced to draw: ${drawnCards.join(', ')}`);
                         this.queue.shift();
                         this.queue.push(drawnPlayer);
@@ -109,14 +125,14 @@ class UNO {
                 }
                 break;
         }
-        this.channel.say(`<@${this.queue[0].user.id}>'s turn.`);
+        this.channel.say(`<@${this.queue[0]}>'s turn.`);
         this.firstCard = false;
     }
     assignRoles() {
         const players = Array.from(this.players.keys());
         let n = 1;
         while (players.length > 0) {
-            let player = players.random();
+            const player = players.random();
             this.roles.set(player, n);
             players.splice(players.indexOf(player), 1);
             n++;
@@ -124,9 +140,9 @@ class UNO {
         let i = 1;
         for (const player of this.roles.keys()) {
             this.queue.push(player);
-            const role = this.channel.guild.roles.cache.find(r => r.name === ('UNO Player ' + i));
-            this.channel.guild.members.cache.find(m => m.user.id === player.id).roles.add(role);
-            i++
+            const role = this.unoRoles.find(unoRole => unoRole.name.endsWith(this.roles.get(player)));
+            this.server.members.cache.find(m => m.user.id === player).roles.add(role);
+            i++;
         }
     }
     assignCards() {
@@ -138,8 +154,8 @@ class UNO {
             this.players.set(player, cards);
         }
         for (const player of this.roles.keys()) {
-            const channel = this.channel.guild.channels.cache.find(ch => ch.name === 'uno-player' + this.roles.get(player));
-            channel.say(`<@${player.user.id}> Your cards are: `);
+            const channel = this.unoChannels.find(unoChannel => unoChannel.name.endsWith(this.roles.get(player)));
+            channel.say(`<@${player}> Your cards are: `);
             const cards = [];
             this.players.get(player).forEach(c => cards.push(this.format(c)));
             channel.say(cards.join(', '));
@@ -148,7 +164,7 @@ class UNO {
     showPlayers() {
         const players = [];
         for (const player of this.players.keys()) {
-            players.push(player.displayName);
+            players.push(this.server.members.cache.find(m => m.user.id === player).user.username);
         }
         this.channel.say(`**Players:** ${players.join(', ')}.`);
     }
@@ -174,7 +190,7 @@ class UNO {
     showTurnOrder() {
         const playerNames = [];
         for (const player of this.queue) {
-            playerNames.push(player.displayName);
+            playerNames.push(this.server.members.cache.find(m => m.user.id === player).user.username);
         }
         this.channel.say(`Turn order: ${playerNames.join(', ')}`);
         this.channel.say(`Top Card: **${this.format(this.topCard)}**`)
@@ -189,8 +205,8 @@ class UNO {
         this.queue.push(currentPlayer);
         channel.say(`You have drawn: ${this.format(card)}`);
         this.showTurnOrder();
-        this.channel.say(`${player.displayName} has drawn a card.`);
-        this.channel.say(`<@${this.queue[0].user.id}>'s turn.`);
+        this.channel.say(`<@${player}> has drawn a card.`);
+        this.channel.say(`<@${this.queue[0]}>'s turn.`);
     }
     play(player, card) {
         card = card.toLowerCase();
@@ -264,7 +280,7 @@ class UNO {
                             this.players.get(drawnPlayer).push(drawnCard);
                             drawnCards.push(this.format(drawnCard));
                         }
-                        this.channel.say(`${drawnPlayer.displayName} was forced to draw 2 cards.`)
+                        this.channel.say(`<@${drawnPlayer}> was forced to draw 2 cards.`)
                         drawnPlayerCh.say(`You were forced to draw: ${drawnCards.join(', ')}`);
                         this.queue.shift();
                         this.queue.push(currentPlayer);
@@ -274,7 +290,7 @@ class UNO {
                     case 'skip':
                         const skippedPlayer = this.queue[this.firstCard ? 0 : 1];
                         const skippedPlayerCh = this.unoChannels[this.roles.get(skippedPlayer) - 1];
-                        this.channel.say(`${skippedPlayer.displayName}'s turn was skipped!`);
+                        this.channel.say(`<@${skippedPlayer}>'s turn was skipped!`);
                         skippedPlayerCh.say("Your turn was skipped.");
                         this.queue.shift();
                         this.queue.push(currentPlayer);
@@ -292,12 +308,24 @@ class UNO {
         }
         channel.say(`You have played: ${this.format(card)}`);
         this.showTurnOrder();
-        this.channel.say(`${player.displayName} has played ${this.format(card)}.`);
+        this.channel.say(`<@${player}> has played ${this.format(card)}.`);
         if (!this.players.get(player).length) {
             this.winner = player;
             return this.onEnd();
         }
-        this.channel.say(`<@${this.queue[0].user.id}>'s turn.`);
+        this.channel.say(`<@${this.queue[0]}>'s turn.`);
+    }
+    disqualify(players) {
+        for (const player of players) {
+            this.players.delete(player);
+            this.queue.splice(this.queue.indexOf(player), 1);
+        }
+        if (this.queue.length < 2) {
+            this.winner = this.queue[0];
+            return this.onEnd();
+        }
+        this.showTurnOrder();
+        this.channel.say(`<@${this.queue[0]}>'s turn!`);
     }
     showHand(player) {
         const channel = this.unoChannels[this.roles.get(player) - 1];
@@ -306,13 +334,16 @@ class UNO {
         channel.say(`Your current hand: ${cards.join(', ')}.`);
     }
     onEnd() {
-        this.channel.say("**The game of UNO has been ended.**");
+        this.channel.say("**The game of UNO has ended.**");
+        if (this.winner) this.channel.say(`**Congratulations to <@${this.winner}> for winning the UNO game!**`);
         if (this.started) {
-            for (const player of this.players.keys()) {
-                player.roles.remove(player.roles.cache.find(r => r.name.startsWith('UNO Player')));
+            for (const unoRole of this.unoRoles) {
+                unoRole.delete();
+            }
+            for (const unoChannel of this.unoChannels) {
+                unoChannel.delete();
             }
         }
-        if (this.winner) this.channel.say(`**Congratulations to <@${this.winner.id}> for winning the UNO game!**`);
         delete this.channel.game;
     }
 }
