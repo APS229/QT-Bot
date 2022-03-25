@@ -27,8 +27,8 @@ const commands = {
         usage: ['.leave'],
         execute(target, channel, user, server, client) {
             if (!channel.game || channel.game.name !== 'UNO') return;
-            if (!channel.game.players.has(server.members.cache.find(m => m.user === user))) return user.say("You are not in the current game of UNO.");
-            channel.game.players.delete(server.members.cache.find(m => m.user === user));
+            if (!channel.game.players.has(user.id)) return user.say("You are not in the current game of UNO.");
+            channel.game.disqualify([user.id]);
             user.send("You have left the game of UNO!").catch(() => {});
         }
     },

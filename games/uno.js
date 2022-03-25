@@ -1,7 +1,7 @@
 'use strict';
 
 const colors = ['blue', 'green', 'red', 'yellow'];
-const CARDS = [];
+global.CARDS = [];
 const { Permissions } = require('discord.js');
 
 class UNO {
@@ -10,6 +10,7 @@ class UNO {
         this.players = new Map();
         this.roles = new Map();
         this.CARDS = [];
+        this.DISCARDED_CARDS = [];
         this.channel = channel;
         this.server = server;
         this.unoRoles = [];
@@ -29,17 +30,18 @@ class UNO {
             this.CARDS.push(colors[i] + ' ' + 0);
             for (let j = 0; j < 2; j++) {
                 for (let k = 1; k <= 9; k++) {
-                    this.CARDS.push(colors[i] + ' ' + k);
+                    CARDS.push(colors[i] + ' ' + k);
                 }
-                this.CARDS.push(colors[i] + ' ' + '+2');
-                this.CARDS.push(colors[i] + ' ' + 'skip');
-                this.CARDS.push(colors[i] + ' ' + 'reverse');
+                CARDS.push(colors[i] + ' ' + '+2');
+                CARDS.push(colors[i] + ' ' + 'skip');
+                CARDS.push(colors[i] + ' ' + 'reverse');
             }
         }
         for (let i = 0; i < 4; i++) {
-            this.CARDS.push('wild');
-            this.CARDS.push('wild +4');
+            CARDS.push('wild');
+            CARDS.push('wild +4');
         }
+        this.CARDS = [...CARDS];
     }
     async onStart() {
         if (this.players.size < 2) return this.channel.say("There are not enough players to start the game.");
@@ -64,6 +66,8 @@ class UNO {
         this.assignRoles();
         this.assignCards();
         let card = this.CARDS.random();
+        this.CARDS.splice(this.CARDS.indexOf(card), 1);
+        this.DISCARDED_CARDS.push(card);
         if (card.startsWith('wild')) card += ' ' + colors.random();
         this.topCard = card;
         this.channel.say(`The top card is: **${this.format(this.topCard)}**`);
@@ -81,6 +85,7 @@ class UNO {
                     const drawnPlayerCh = this.unoChannels[this.roles.get(drawnPlayer) - 1];
                     for (let i = 0; i < 4; i++) {
                         const drawnCard = this.CARDS.random();
+                        this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
                         this.players.get(drawnPlayer).push(drawnCard);
                         drawnCards.push(this.format(drawnCard));
                     }
@@ -102,6 +107,7 @@ class UNO {
                         const drawnPlayerCh = this.unoChannels[this.roles.get(drawnPlayer) - 1];
                         for (let i = 0; i < 2; i++) {
                             const drawnCard = this.CARDS.random();
+                            this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
                             this.players.get(drawnPlayer).push(drawnCard);
                             drawnCards.push(this.format(drawnCard));
                         }
@@ -113,7 +119,7 @@ class UNO {
                     case 'skip':
                         const skippedPlayer = this.queue[this.firstCard ? 0 : 1];
                         const skippedPlayerCh = this.unoChannels[this.roles.get(skippedPlayer) - 1];
-                        this.channel.say(`${skippedPlayer.displayName}'s turn was skipped!`);
+                        this.channel.say(`<@${skippedPlayer}>'s turn was skipped!`);
                         skippedPlayerCh.say("Your turn was skipped.");
                         this.queue.shift();
                         this.queue.push(skippedPlayer);
@@ -149,7 +155,9 @@ class UNO {
         for (const player of this.players.keys()) {
             const cards = [];
             for (let i = 0; i < 5; i++) {
-                cards.push(this.CARDS.random());
+                const card = this.CARDS.random();
+                cards.push(card);
+                this.CARDS.splice(this.CARDS.indexOf(card), 1);
             }
             this.players.set(player, cards);
         }
@@ -166,7 +174,7 @@ class UNO {
         for (const player of this.players.keys()) {
             players.push(this.server.members.cache.find(m => m.user.id === player).user.username);
         }
-        this.channel.say(`**Players:** ${players.join(', ')}.`);
+        this.channel.say(`**Players (${players.length}):** ${players.join(', ')}.`);
     }
     format(card) {
         card = Tools.toTitleCase(card);
@@ -199,13 +207,19 @@ class UNO {
         const currentPlayer = this.queue[0];
         const channel = this.unoChannels[this.roles.get(player) - 1];
         if (currentPlayer !== player) return channel.say("It is currently not your turn!");
+        if (!this.CARDS.length) {
+            this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(this.topCard.split(' ')[0] + ' ' + this.topCard.split(' ')[1]), 1);
+            this.CARDS = [...this.DISCARDED_CARDS];
+            this.DISCARDED_CARDS = [this.topCard.split(' ')[0] + ' ' + this.topCard.split(' ')[1]];
+        }
         const card = this.CARDS.random();
         this.players.get(player).push(card);
+        this.CARDS.splice(this.CARDS.indexOf(card), 1);
         this.queue.shift();
         this.queue.push(currentPlayer);
         channel.say(`You have drawn: ${this.format(card)}`);
-        this.showTurnOrder();
         this.channel.say(`<@${player}> has drawn a card.`);
+        this.showTurnOrder();
         this.channel.say(`<@${this.queue[0]}>'s turn.`);
     }
     play(player, card) {
@@ -218,10 +232,12 @@ class UNO {
         const topCardName = this.topCard.split(' ')[0];
         const topCardValue = this.topCard.split(' ')[1];
         if (currentPlayer !== player) return channel.say("It is currently not your turn!");
-        if (!this.CARDS.includes(card) || !this.players.get(player).includes(card)) {
+        if (!CARDS.includes(card) || !this.players.get(player).includes(card)) {
             if (!card.startsWith('wild +4') && !card.startsWith('wild')) return channel.say("Invalid card.")
             if (thirdValue && !colors.includes(thirdValue)) return channel.say("Invalid color. Format ``.play Wild +4 [color]``");
         }
+        this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
+        this.topCard = card;
         switch (cardName) {
             case 'wild':
                 if (colors.includes(cardValue)) {
@@ -237,6 +253,12 @@ class UNO {
                     const drawnPlayerCh = this.unoChannels[this.roles.get(drawnPlayer) - 1];
                     for (let i = 0; i < 4; i++) {
                         const drawnCard = this.CARDS.random();
+                        this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
+                        if (!this.CARDS.length) {
+                            this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(cardName + ' ' + cardValue), 1);
+                            this.CARDS = [...this.DISCARDED_CARDS];
+                            this.DISCARDED_CARDS = [topCardName + ' ' + topCardValue];
+                        }
                         this.players.get(drawnPlayer).push(drawnCard);
                         drawnCards.push(this.format(drawnCard));
                     }
@@ -256,7 +278,7 @@ class UNO {
             case 'yellow':
             case 'blue':
             case 'green':
-                if (topCardName !== cardName && topCardValue !== cardValue && !!channel) return channel.say("The card must match a color or a value with the top card.");
+                if (topCardName !== cardName && topCardValue !== cardValue && !!channel) return channel.say("The card must match the color or the value with the top card.");
                 switch (cardValue) {
                     case '0':
                     case '1':
@@ -277,6 +299,12 @@ class UNO {
                         const drawnPlayerCh = this.unoChannels[this.roles.get(drawnPlayer) - 1];
                         for (let i = 0; i < 2; i++) {
                             const drawnCard = this.CARDS.random();
+                            this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
+                            if (!this.CARDS.length) {
+                                this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(cardName + ' ' + cardValue), 1);
+                                this.CARDS = [...this.DISCARDED_CARDS];
+                                this.DISCARDED_CARDS = [topCardName + ' ' + topCardValue];
+                            }
                             this.players.get(drawnPlayer).push(drawnCard);
                             drawnCards.push(this.format(drawnCard));
                         }
@@ -302,13 +330,12 @@ class UNO {
                         this.channel.say("The turn order was reversed!");
                         break;
                 }
-                this.topCard = card;
                 if (!!player) this.players.get(player).splice(this.players.get(player).indexOf(card), 1);
                 break;
         }
         channel.say(`You have played: ${this.format(card)}`);
-        this.showTurnOrder();
         this.channel.say(`<@${player}> has played ${this.format(card)}.`);
+        this.showTurnOrder();
         if (!this.players.get(player).length) {
             this.winner = player;
             return this.onEnd();
@@ -317,6 +344,9 @@ class UNO {
     }
     disqualify(players) {
         for (const player of players) {
+            for (const card of this.players.get(player)) {
+                this.DISCARDED_CARDS.push(card);
+            }
             this.players.delete(player);
             this.queue.splice(this.queue.indexOf(player), 1);
         }
