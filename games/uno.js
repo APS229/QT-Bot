@@ -1,7 +1,7 @@
 'use strict';
 
 const colors = ['blue', 'green', 'red', 'yellow'];
-global.CARDS = [];
+const CARDS = [];
 const { Permissions } = require('discord.js');
 
 class UNO {
@@ -9,7 +9,6 @@ class UNO {
         this.name = 'UNO';
         this.players = new Map();
         this.roles = new Map();
-        this.CARDS = [];
         this.DISCARDED_CARDS = [];
         this.channel = channel;
         this.server = server;
@@ -20,14 +19,23 @@ class UNO {
         this.winner = null;
         this.queue = [];
         this.topCard = null;
-        if (!this.CARDS.length) {
-            this.loadData();
-        }
+        this.init();
+    }
+    async init() {
+        await this.loadCards();
         this.channel.say("**A new game of UNO has been created! Use the command ``.join`` to join the game.**");
     }
-    loadData() {
+    async loadCards() {
+        if (!CARDS.length) {
+            this.channel.say("Loading cards data since last restart...");
+            await this.loadData();
+            this.channel.say("Cards data loaded.");
+        }
+        this.CARDS = [...CARDS];
+    }
+    async loadData() {
         for (let i = 0; i < colors.length; i++) {
-            this.CARDS.push(colors[i] + ' ' + 0);
+            CARDS.push(colors[i] + ' ' + 0);
             for (let j = 0; j < 2; j++) {
                 for (let k = 1; k <= 9; k++) {
                     CARDS.push(colors[i] + ' ' + k);
@@ -41,7 +49,6 @@ class UNO {
             CARDS.push('wild');
             CARDS.push('wild +4');
         }
-        this.CARDS = [...CARDS];
     }
     async onStart() {
         if (this.players.size < 2) return this.channel.say("There are not enough players to start the game.");
@@ -236,8 +243,6 @@ class UNO {
             if (!card.startsWith('wild +4') && !card.startsWith('wild')) return channel.say("Invalid card.")
             if (thirdValue && !colors.includes(thirdValue)) return channel.say("Invalid color. Format ``.play Wild +4 [color]``");
         }
-        this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
-        this.topCard = card;
         switch (cardName) {
             case 'wild':
                 if (colors.includes(cardValue)) {
@@ -248,6 +253,8 @@ class UNO {
                 }
                 else if (cardValue === '+4') {
                     if (!thirdValue || !colors.includes(thirdValue) && !!channel) return channel.say("You must specify a valid color (format: ``.play wild +4 [color]``");
+                    this.topCard = card;
+                    this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
                     const drawnCards = [];
                     const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
                     const drawnPlayerCh = this.unoChannels[this.roles.get(drawnPlayer) - 1];
@@ -270,15 +277,18 @@ class UNO {
                     this.topCard = thirdValue;
                     this.players.get(player).splice(this.players.get(player).indexOf('wild +4'), 1)
                 }
-                else {
-                    if (channel) return channel.say("You must specify a valid card value.");
+                else if (channel) {
+                    return channel.say("You must specify a valid card value.");
                 }
                 break;
             case 'red':
             case 'yellow':
             case 'blue':
             case 'green':
-                if (topCardName !== cardName && topCardValue !== cardValue && !!channel) return channel.say("The card must match the color or the value with the top card.");
+                if (!cardValue) return channel.say("Usage: ``.play wild +4 [color]``");
+                if (topCardName !== cardName && topCardValue !== cardValue) return channel.say("The card must match the color or the value with the top card.");
+                this.topCard = card;
+                this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
                 switch (cardValue) {
                     case '0':
                     case '1':
