@@ -96,6 +96,37 @@ const commands = {
             channel.say(`Reloaded module: ${module}`)
         }
     },
+    test: {
+        devOnly: true,
+        hidden: true,
+        async execute(target, channel, user, server, client) {
+            const { MessageActionRow, MessageButton, MessageAttachment } = Client.discord;
+            const img = new MessageAttachment('./images/green.png');
+            const embed = new Client.discord.MessageEmbed()
+                .setColor('GREEN')
+                .setTitle('UNO')
+                .setThumbnail('attachment://green.png')
+                .addField('__Top card__', ':green_circle: Green 0')
+                .addField('__Players(3)__', 'WAF(``5``)\nLagertha(``1``)\n**APS(``3``)**')
+                .addField('__Information__', `1) Click the Hand button or use the command \`\`/hand\`\` to check your cards.\n
+                2) Click the UNO button or use the command \`\`/uno\`\` if you have 1 card left.\n
+                3) Bully WAF 24/7.`)
+                .setTimestamp()
+                .setFooter({ text: Config.username, iconURL: Config.avatarURL });
+            const row = new MessageActionRow()
+                .addComponents(
+                    new MessageButton()
+                        .setCustomId('hand')
+                        .setLabel('Hand')
+                        .setStyle('PRIMARY'),
+                    // new MessageButton()
+                    //     .setCustomId('uno')
+                    //     .setLabel('UNO')
+                    //     .setStyle('SUCCESS')
+                );
+            const message = await channel.send({ content: `<@${user.id}>'s turn!`, embeds: [embed], components: [row], files: [img], ephemeral: true });
+        }
+    },
     masskick: {
         devOnly: true,
         hidden: true,

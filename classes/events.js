@@ -107,7 +107,7 @@ class Events {
                             const level = res.rows[0].level;
                             if (level > 1) {
                                 let base = 220;
-                                for (let i = 0; i < level; base += 75 + i * 10, i++){}
+                                for (let i = 0; i < level; base += 75 + i * 10, i++) { }
                                 update += ", toxp=" + base;
                             }
                             else {
@@ -216,7 +216,12 @@ class Events {
             // 	}
             // }
         });
-
+        this.bot.on('interactionCreate', interaction => {
+            if (!interaction.isButton()) return;
+            if ((interaction.customId === 'hand' || interaction.commandName === 'hand') && Client.activeGame?.players?.has(interaction.user.id)) return interaction.reply({ content: Client.activeGame.showHand(interaction.user.id), ephemeral: true });
+            if ((interaction.customId === 'draw' || interaction.commandName === 'draw') && Client.activeGame?.queue[0] === interaction.user.id) return Client.activeGame.draw(interaction);
+            // if ((interaction.customId === 'uno' || interaction.commandName === 'uno') && Client.activeGame?.players?.has(interaction.user.id)) return interaction.reply({ content: `${interaction.user.username} has 1 card left!` });
+        });
         // user Joining/leaving server
         this.bot.on('guildMemberAdd', member => {
 

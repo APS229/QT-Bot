@@ -7,18 +7,18 @@ const commands = {
         mod: true,
         server: true,
         execute(target, channel, user, server, client) {
-            if (channel.game) return channel.say(`There's already a game of ${channel.game.name} going on.`)
+            if (Client.activeGame) return channel.say(`There's already a game of ${Client.activeGame.name} going on.`)
             const UNO = Client.games.get('uno');
-            channel.game = new UNO(channel, server);
+            Client.activeGame = new UNO(channel, server);
         }
     },
     join: {
         desc: 'Makes you join the game of UNO.',
         usage: ['.join'],
         execute(target, channel, user, server, client) {
-            if (!channel.game || channel.game.name !== 'UNO') return;
-            if (channel.game.players.has(user.id)) return;
-            channel.game.players.set(user.id, []);
+            if (!Client.activeGame || Client.activeGame.name !== 'UNO') return;
+            if (Client.activeGame.players.has(user.id)) return;
+            Client.activeGame.players.set(user.id, []);
             user.send("You have joined the game of UNO!").catch(() => {});
         }
     },
@@ -26,9 +26,9 @@ const commands = {
         desc: 'Makes you leave the game of UNO.',
         usage: ['.leave'],
         execute(target, channel, user, server, client) {
-            if (!channel.game || channel.game.name !== 'UNO') return;
-            if (!channel.game.players.has(user.id)) return user.say("You are not in the current game of UNO.");
-            channel.game.disqualify([user.id]);
+            if (!Client.activeGame || Client.activeGame.name !== 'UNO' || !Client.activeGame.started) return;
+            if (!Client.activeGame.players.has(user.id)) return user.say("You are not in the current game of UNO.");
+            Client.activeGame.disqualify([user.id]);
             user.send("You have left the game of UNO!").catch(() => {});
         }
     },
@@ -37,8 +37,8 @@ const commands = {
         usage: ['.end'],
         mod: true,
         execute(target, channel, user, server, client) {
-            if (!channel.game) return;
-            channel.game.onEnd();
+            if (!Client.activeGame) return;
+            Client.activeGame.onEnd();
         }
     },
     start: {
@@ -46,9 +46,9 @@ const commands = {
         usage: ['.start'],
         mod: true,
         execute(target, channel, user, server, client) {
-            if (!channel.game) return;
-            if (channel.game.started) return channel.say("The game has already been started!");
-            channel.game.onStart();
+            if (!Client.activeGame) return;
+            if (Client.activeGame.started) return channel.say("The game has already been started!");
+            Client.activeGame.onStart();
         }
     },
     play: {
@@ -57,29 +57,8 @@ const commands = {
         target: true,
         server: true,
         execute(target, channel, user, server, client) {
-            const ch = server.channels.cache.find(ch => ch.game && ch.game.id === 'uno');
-            if (!ch) return;
-            ch.game.play(user.id, target);
-        }
-    },
-    hand: {
-        desc: 'Shows your hand in UNO.',
-        usage: ['.hand'],
-        server: true,
-        execute(target, channel, user, server, client) {
-            const ch = server.channels.cache.find(ch => ch.game && ch.game.id === 'uno');
-            if (!ch) return;
-            ch.game.showHand(user.id);
-        }
-    },
-    draw: {
-        desc: 'Draws a card in UNO.',
-        usage: ['.draw'],
-        server: true,
-        execute(target, channel, user, server, client) {
-            const ch = server.channels.cache.find(ch => ch.game && ch.game.id === 'uno');
-            if (!ch) return;
-            ch.game.draw(user.id);
+            if (!Client.activeGame) return;
+            Client.activeGame.play(user.id, target);
         }
     },
     players: {
@@ -88,9 +67,8 @@ const commands = {
         aliases: ['pl'],
         server: true,
         execute(target, channel, user, server, client) {
-            const ch = server.channels.cache.find(ch => ch.game && ch.game.id === 'uno');
-            if (!ch) return;
-            ch.game.showPlayers();
+            if (!Client.activeGame) return;
+            Client.activeGame.showPlayers();
         }
     },
     disqualify: {
@@ -100,8 +78,8 @@ const commands = {
         server: true,
         mod: true,
         execute(target, channel, user, server, client) {
-            if (!channel.game || channel.game.name !== 'UNO' || !channel.game.started) return;
-            channel.game.disqualify(Array.from(client.mentions.users.keys()));
+            if (!Client.activeGame || Client.activeGame.name !== 'UNO' || !Client.activeGame.started) return;
+            Client.activeGame.disqualify(Array.from(client.mentions.users.keys()));
         }
     }
 }
