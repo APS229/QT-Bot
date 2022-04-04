@@ -209,36 +209,6 @@ const commands = {
                 channel.send({ files: [dog] });
             });
         }
-    },
-    rebelcount: {
-        usage: ['.rebelcount'],
-        desc: "Displays the number of rebel kills screenshots you posted.",
-        aliases: ['rebels'],
-        execute(target, channel, user, server, client) {
-            if (!Db('rebel-kills-count').has(user.id) || Db('rebel-kills-count').get(user.id, {}).count < 1) return channel.say("You have not posted any rebel hunting screenshot.");
-            const rebelKills = Db('rebel-kills-count').get(user.id, {});
-            channel.say(`You have posted:\n    Total: ${rebelKills.count}\n    Daily: ${rebelKills.daily ? rebelKills.daily : 0}\n    Weekly: ${rebelKills.weekly ? rebelKills.weekly : 0}`);
-        }
-    },
-    dailytimer: {
-        usage: ['.dailytimer'],
-        desc: "",
-        aliases: ['daily'],
-        execute(target, channel, user, server, client) {
-            const lastDailyAnnouncement = parseInt(fs.readFileSync('./database/lastDailyAnnouncement.txt', 'utf8'));
-            const remainingTime = (lastDailyAnnouncement + 1000 * 60) - Date.now();
-            channel.say("Time remaining until next daily rebel hunting announcement: " + Tools.toDurationString(remainingTime));
-        }
-    },
-    weeklytimer: {
-        usage: ['.weeklytimer'],
-        desc: "",
-        aliases: ['weekly'],
-        execute(target, channel, user, server, client) {
-            const lastWeeklyAnnouncement = parseInt(fs.readFileSync('./database/lastWeeklyAnnouncement.txt', 'utf8'));
-            const remainingTime = (lastWeeklyAnnouncement + 1000 * 60 * 60 * 24 * 7) - Date.now();
-            channel.say("Time remaining until next weekly rebel hunting announcement: " + Tools.toDurationString(remainingTime));
-        }
     }
 };
 exports.commands = commands;

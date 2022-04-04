@@ -16,7 +16,7 @@ const commands = {
         desc: 'Makes you join the game of UNO.',
         usage: ['.join'],
         execute(target, channel, user, server, client) {
-            if (!Client.activeGame || Client.activeGame.name !== 'UNO') return;
+            if (!Client.activeGame || Client.activeGame.name !== 'UNO' || Client.activeGame.started) return;
             if (Client.activeGame.players.has(user.id)) return;
             Client.activeGame.players.set(user.id, []);
             user.send("You have joined the game of UNO!").catch(() => {});

@@ -184,7 +184,7 @@ class UNO {
         const thirdValue = card.split(' ')[2];
         const topCardName = this.topCard.split(' ')[0];
         const topCardValue = this.topCard.split(' ')[1];
-        if (currentPlayer !== player) return channel.say("It is currently not your turn!");
+        if (currentPlayer !== player) return this.channel.say("It is currently not your turn!");
         if (!Client.CARDS.includes(card) || !this.players.get(player).includes(card)) {
             if (!card.startsWith('wild +4') && !card.startsWith('wild')) return this.channel.say("Invalid card.")
             if (thirdValue && !colors.includes(thirdValue)) return this.channel.say("Invalid color. Format ``.play Wild +4 [color]``");
@@ -198,11 +198,12 @@ class UNO {
                     this.players.get(player).splice(this.players.get(player).indexOf('wild'), 1)
                 }
                 else if (cardValue === '+4') {
-                    if (!thirdValue || !colors.includes(thirdValue) && !!channel) return channel.say("You must specify a valid color (format: ``.play wild +4 [color]``");
+                    if (!thirdValue || !colors.includes(thirdValue) && !!channel) return this.channel.say("You must specify a valid color (format: ``.play wild +4 [color]``");
                     this.topCard = card;
                     this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
                     const drawnCards = [];
                     const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
+                    this.channel.say(`<@${drawnPlayer}> was forced to draw 4 cards.`);
                     for (let i = 0; i < 4; i++) {
                         const drawnCard = this.CARDS.random();
                         this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
@@ -229,8 +230,8 @@ class UNO {
             case 'yellow':
             case 'blue':
             case 'green':
-                if (!cardValue) return channel.say("Usage: ``.play wild +4 [color]``");
-                if (topCardName !== cardName && topCardValue !== cardValue) return channel.say("The card must match the color or the value with the top card.");
+                if (!cardValue) return this.channel.say("Usage: ``.play wild +4 [color]``");
+                if (topCardName !== cardName && topCardValue !== cardValue) return this.channel.say("The card must match the color or the value with the top card.");
                 this.topCard = card;
                 this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
                 switch (cardValue) {
