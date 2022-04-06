@@ -13,7 +13,8 @@ class UNO {
         this.server = server;
         this.started = false;
         this.firstCard = true;
-        this.winner = null;
+        this.updateStr = "None";
+        this.winners = [];
         this.queue = [];
         this.topCard = null;
         this.init();
@@ -51,6 +52,13 @@ class UNO {
     async onStart() {
         if (this.players.size < 2) return this.channel.say("There are not enough players to start the game.");
         this.started = true;
+        this.timer = setTimeout(() => {
+            const players = [...this.players.entries()];
+            this.CARDS
+            this.channel.say("**(UNO) TIME'S UP!**");
+            this.winners = players.slice(0, players.sort((a, b) => a[1].length - b[1].length).map(v => v[1].length === players[0][1].length).lastIndexOf(true) + 1).map(v => v = v[0]);
+            this.onEnd();
+        }, 10 * 60 * 1000);
         this.channel.say("**The game of UNO is now starting!**");
         this.assignCards();
         let card = this.CARDS.random();
@@ -58,7 +66,7 @@ class UNO {
         this.DISCARDED_CARDS.push(card);
         if (card.startsWith('wild')) card += ' ' + colors.random();
         this.topCard = card;
-        this.channel.say(`The top card is: **${this.format(this.topCard)}**`);
+        this.updateStr = `The top card is: **${this.format(this.topCard)}**\n\n`;
         const cardName = card.split(' ')[0];
         const cardValue = card.split(' ')[1];
         const thirdValue = card.split(' ')[2];
@@ -76,7 +84,7 @@ class UNO {
                         this.players.get(drawnPlayer).push(drawnCard);
                         drawnCards.push(this.format(drawnCard));
                     }
-                    this.channel.say(`<@${drawnPlayer}> was forced to draw 4 cards.`);
+                    this.updateStr += `<@${drawnPlayer}> was forced to draw 4 cards.`;
                     this.queue.shift();
                     this.queue.push(drawnPlayer);
                     this.topCard = thirdValue;
@@ -96,19 +104,19 @@ class UNO {
                             this.players.get(drawnPlayer).push(drawnCard);
                             drawnCards.push(this.format(drawnCard));
                         }
-                        this.channel.say(`<@${drawnPlayer}> was forced to draw 2 cards.`);
+                        this.updateStr += `<@${drawnPlayer}> was forced to draw 2 cards.`;
                         this.queue.shift();
                         this.queue.push(drawnPlayer);
                         break;
                     case 'skip':
                         const skippedPlayer = this.queue[this.firstCard ? 0 : 1];
-                        this.channel.say(`<@${skippedPlayer}>'s turn was skipped!`);
+                        this.updateStr += `<@${skippedPlayer}>'s turn was skipped!`;
                         this.queue.shift();
                         this.queue.push(skippedPlayer);
                         break;
                     case 'reverse':
                         this.queue.reverse();
-                        this.channel.say("The turn order was reversed!");
+                        this.updateStr += "The turn order was reversed!";
                         break;
                 }
                 break;
@@ -161,7 +169,7 @@ class UNO {
     draw(interaction) {
         const currentPlayer = this.queue[0];
         const player = interaction.user.id;
-        if (currentPlayer !== player) return this.channel.say("It is currently not your turn!");
+        if (currentPlayer !== player) return interaction.reply({content: "It is currently not your turn!", ephemeral: true});
         if (!this.CARDS.length) {
             this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(this.topCard.split(' ')[0] + ' ' + this.topCard.split(' ')[1]), 1);
             this.CARDS = [...this.DISCARDED_CARDS];
@@ -173,7 +181,7 @@ class UNO {
         this.queue.shift();
         this.queue.push(currentPlayer);
         interaction.reply({ content: `You have drawn: ${this.format(card)}`, ephemeral: true });
-        this.channel.say(`<@${player}> has drawn a card.`);
+        this.updateStr = `<@${player}> has drawn a card.`;
         this.update();
     }
     play(player, card) {
@@ -203,7 +211,7 @@ class UNO {
                     this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
                     const drawnCards = [];
                     const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
-                    this.channel.say(`<@${drawnPlayer}> was forced to draw 4 cards.`);
+                    this.updateStr = `<@${drawnPlayer}> was forced to draw 4 cards.`;
                     for (let i = 0; i < 4; i++) {
                         const drawnCard = this.CARDS.random();
                         this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
@@ -223,7 +231,7 @@ class UNO {
                     this.players.get(player).splice(this.players.get(player).indexOf('wild +4'), 1)
                 }
                 else {
-                    return this.channel.say(`<@${currentPlayer}>: you must specify a valid card value.`);
+                    return this.channel.say(`<@${currentPlayer}>, you must specify a valid card value.`);
                 }
                 break;
             case 'red':
@@ -262,7 +270,7 @@ class UNO {
                             this.players.get(drawnPlayer).push(drawnCard);
                             drawnCards.push(this.format(drawnCard));
                         }
-                        this.channel.say(`<@${drawnPlayer}> was forced to draw 2 cards.`)
+                        this.updateStr = `<@${drawnPlayer}> was forced to draw 2 cards.`;
                         this.queue.shift();
                         this.queue.push(currentPlayer);
                         this.queue.shift();
@@ -270,7 +278,7 @@ class UNO {
                         break;
                     case 'skip':
                         const skippedPlayer = this.queue[this.firstCard ? 0 : 1];
-                        this.channel.say(`<@${skippedPlayer}>'s turn was skipped!`);
+                        this.updateStr = `<@${skippedPlayer}>'s turn was skipped!`;
                         this.queue.shift();
                         this.queue.push(currentPlayer);
                         this.queue.shift();
@@ -278,15 +286,15 @@ class UNO {
                         break;
                     case 'reverse':
                         this.queue.reverse();
-                        this.channel.say("The turn order was reversed!");
+                        this.updateStr = "The turn order was reversed!";
                         break;
                 }
                 if (!!player) this.players.get(player).splice(this.players.get(player).indexOf(card), 1);
                 break;
         }
-        this.channel.say(`<@${player}> has played ${this.format(card)}.`);
+        this.updateStr = `<@${player}> has played ${this.format(card)}.${this.updateStr ? '\n\n' + this.updateStr : ''}`;
         if (!this.players.get(player).length) {
-            this.winner = player;
+            this.winners = [player];
             return this.onEnd();
         }
         this.update();
@@ -300,7 +308,7 @@ class UNO {
             this.queue.splice(this.queue.indexOf(player), 1);
         }
         if (this.queue.length < 2) {
-            this.winner = this.queue[0];
+            this.winners = [this.queue[0]];
             return this.onEnd();
         }
         this.update();
@@ -319,12 +327,14 @@ class UNO {
             .setTitle('UNO')
             .setThumbnail(`attachment://${topCardColor}.png`)
             .addField('__Top card__', this.format(this.topCard))
-            .addField(`__Players(${this.players.size})__`, Array.from(this.players.keys()).map(u => u = '<@' + u + '>').join('\n'))
+            .addField(`__Players(${this.players.size})__`, Array.from(this.players.keys()).map(u => u = `<@${u}> (${this.players.get(u).length})`).join('\n'))
+            .addField('__Logs__', this.updateStr)
             .addField('__Information__', `1) Click the Hand button or use the command \`\`/hand\`\` to check your cards.\n
             2) Click the UNO button or use the command \`\`/uno\`\` if you have 1 card left.\n
             3) Bully WAF 24/7.`)
             .setTimestamp()
             .setFooter({ text: Config.username, iconURL: Config.avatarURL });
+        this.updateStr = "None";
         const row = new MessageActionRow()
             .addComponents(
                 new MessageButton()
@@ -346,7 +356,8 @@ class UNO {
         const components = this.message.components;
         for (const button of components[0].components) button.disabled = true;
         this.message.edit({ content: '**The game of UNO has ended.**', components: components});
-        if (this.winner) this.channel.say(`**Congratulations to <@${this.winner}> for winning the UNO game!**`);
+        if (this.timer) clearTimeout(this.timer);
+        if (this.winners.length) this.channel.say(`**Congratulations to ${this.winners.map(w => w = '<@' + w + '>').join(', ')} for winning the UNO game!**`);
         delete Client.activeGame;
     }
 }
