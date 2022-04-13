@@ -18,7 +18,7 @@ const commands = {
         execute(target, channel, user, server, client) {
             if (!Client.activeGame || Client.activeGame.name !== 'UNO' || Client.activeGame.started) return;
             if (Client.activeGame.players.has(user.id)) return;
-            Client.activeGame.players.set(user.id, []);
+            Client.activeGame.players.set(user.id, {uno: false, cards: []});
             user.send("You have joined the game of UNO!").catch(() => {});
         }
     },
@@ -38,6 +38,7 @@ const commands = {
         mod: true,
         execute(target, channel, user, server, client) {
             if (!Client.activeGame) return;
+            channel.say("The game of UNO was forcibly ended.");
             Client.activeGame.onEnd();
         }
     },
@@ -49,16 +50,6 @@ const commands = {
             if (!Client.activeGame) return;
             if (Client.activeGame.started) return channel.say("The game has already been started!");
             Client.activeGame.onStart();
-        }
-    },
-    play: {
-        desc: 'Play a card in UNO.',
-        usage: ['.play [card]'],
-        target: true,
-        server: true,
-        execute(target, channel, user, server, client) {
-            if (!Client.activeGame) return;
-            Client.activeGame.play(user.id, target);
         }
     },
     players: {

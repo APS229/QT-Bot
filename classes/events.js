@@ -1,9 +1,6 @@
 'use strict';
 
 const http = require('http');
-const fs = require('fs');
-const DAY = 1000 * 60;
-const WEEK = 1000 * 60 * 2;
 
 class Events {
     constructor(client) {
@@ -20,17 +17,14 @@ class Events {
             if (!servers.length) return;
             info(`Connected to server${servers.length > 1 ? 's' : ''}:\n\t\u00b0 ${servers.sort().join('\n\t\u00b0 ')}`);
             if (Config.activity) this.bot.user.setActivity('use .help for commands', { type: Config.activity });
-
-            // const lastDailyAnnouncement = parseInt(fs.readFileSync('./database/lastDailyAnnouncement.txt', 'utf8'));
-            // const lastWeeklyAnnouncement = parseInt(fs.readFileSync('./database/lastWeeklyAnnouncement.txt', 'utf8'));
-            // if (Date.now() - lastDailyAnnouncement > DAY) {
-            // 	Client.events.countRebelsDaily();
-            // }
-            // else global.dailyTimer = setTimeout(Client.events.countRebelsDaily, (lastDailyAnnouncement + DAY) - Date.now());
-            // if (Date.now() - lastWeeklyAnnouncement > WEEK) {
-            // 	Client.events.countRebelsWeekly();
-            // }
-            // else global.weeklyTimer = setTimeout(Client.events.countRebelsWeekly, (lastWeeklyAnnouncement + WEEK) - Date.now());
+            this.bot.guilds.fetch('777956702741463070').then(g => {
+                g.commands.set([
+                    { name: 'hand', description: 'Show your cards in the UNO game.' },
+                    { name: 'draw', description: 'Draw a card in the UNO game.' },
+                    { name: 'uno', description: 'Use this command when you have 1 card left in UNO.' },
+                    { name: 'play', description: 'Play a card in the UNO game.', options: [{ type: 'STRING', name: 'card', description: 'Card.', required: true }] }
+                ]);
+            });
         });
         this.bot.on('shardError', err => {
             console.error(err);
@@ -40,21 +34,9 @@ class Events {
         });
         this.bot.on('shardReconnecting', () => {
             info("Reconnecting...");
-            clearTimeout(global.dailyTimer);
-            clearTimeout(global.weeklyTimer);
         });
         this.bot.on('shardResume', () => {
             info("Re-connected to client");
-            // const lastDailyAnnouncement = parseInt(fs.readFileSync('./database/lastDailyAnnouncement.txt', 'utf8'));
-            // const lastWeeklyAnnouncement = parseInt(fs.readFileSync('./database/lastWeeklyAnnouncement.txt', 'utf8'));
-            // if (Date.now() - lastDailyAnnouncement > DAY) {
-            // 	Client.events.countRebelsDaily();
-            // }
-            // else global.dailyTimer = setTimeout(Client.events.countRebelsDaily, (lastDailyAnnouncement + DAY) - Date.now());
-            // if (Date.now() - lastWeeklyAnnouncement > WEEK) {
-            // 	Client.events.countRebelsWeekly();
-            // }
-            // else global.weeklyTimer = setTimeout(Client.events.countRebelsDaily, (lastWeeklyAnnouncement + WEEK) - Date.now());
         });
 
         this.bot.on('messageCreate', async function (discord) {
@@ -62,31 +44,13 @@ class Events {
             const user = discord.author;
             const message = discord.content;
             const server = discord.guild;
-            // this.setPrototypes(user, channel);
             user.isDev = () => Config.developers.includes(user.id); // inconsistent
             if (channel.type === 'text' && user.guild && user.id === user.guild.ownerID) user.owner = true;
-            // if (user.id === '270904126974590976' && discord.type === 'REPLY' && discord.mentions.users.first()) {
-            //     const pointsFor = discord.mentions.users.first().id;
-            //     let points = 0;
-            //     if (message.includes("TINY portion")) {
-            //         points = 1;
-            //     } else if (message.includes("small portion")) {
-            //         points = 2;
-            //     } else if (message.includes("decent chunk")) {
-            //         points = 3;
-            //     } else if (message.includes("BASICALLY EVERYTHING")) {
-            //         points = 4;
-            //     }
-            //     if (points) {
-            //         if (Db('dank').has(pointsFor)) points += Db('dank').get(pointsFor);
-            //         Db('dank').set(pointsFor, points);
-            //     }
-            // }
             if (user.bot) return;
-            // if (channel.name === 'hit-or-miss' && message && (!message.startsWith('||') || !message.endsWith('||'))) {
-            // 	channel.say(`${user} please spoiler your messages in this channel.`);
-            // 	return channel.messages.delete(discord.id);
-            // }
+            if (channel.name === 'hit-or-miss' && message && (!message.startsWith('||') || !message.endsWith('||'))) {
+                channel.say(`${user} please spoiler your messages in this channel.`);
+                return channel.messages.delete(discord.id);
+            }
             if (discord.mentions.users.first() && discord.mentions.users.first().id === Config.id && message.startsWith('<@') && message.includes(Config.id)) {
                 const question = message.slice(`<@${Config.id}>`.length + 1);
                 http.get(`http://qmarkai.com/qmai.php?q=${question}`, (res, err) => {
@@ -144,7 +108,7 @@ class Events {
                     if (command.execute) command.execute(target, channel, user, server, discord);
                 }
                 catch (err) {
-                    channel.say("There was an error occured. Developers have been notified.");
+                    channel.say("There was an error occured.");
                     for (const dev of Config.developers) {
                         const user = await Client.bot.users.fetch(dev);
                         if (user) user.say(err.name + ': ' + err.message);
@@ -152,75 +116,21 @@ class Events {
                     console.log(err);
                 }
             }
-            // if (channel.name === 'rebel-kills') {
-            // 	if (!discord.attachments.size) return;
-            // 	if (!Db('rebel-kills-count').has(user.id)) Db('rebel-kills-count').set(user.id, {});
-            // 	const rebelKills = Db('rebel-kills-count').get(user.id, {});
-            // 	if (!rebelKills.count) rebelKills.count = 0;
-            // 	if (!rebelKills.daily) rebelKills.daily = 0;
-            // 	if (!rebelKills.weekly) rebelKills.weekly = 0;
-            // 	rebelKills.count++;
-            // 	rebelKills.daily++;
-            // 	rebelKills.weekly++;
-            // 	Db('rebel-kills-count').set(user.id, rebelKills);
-            // 	const rebelHuntersCh = server.channels.cache.find(ch => ch.name === 'rebel-hunters');
-            // 	const member = await server.members.fetch(user);
-            // 	if (rebelKills.count === 100) {
-            // 		const role = server.roles.cache.find(r => r.name.endsWith('[100]'));
-            // 		member.roles.add(role);
-            // 		const embed = new Client.discord.MessageEmbed()
-            // 		.setDescription(`**:tada: Congratulations to ${member} for passing over __${rebelKills.count}__ rebel hunting screenshots. :tada:**\n\nThey were awarded the role ${role}!`);
-            // 		rebelHuntersCh.send({embed});
-            // 	}
-            // 	else if (rebelKills.count === 200) {
-            // 		const role = server.roles.cache.find(r => r.name.endsWith('[200]'));
-            // 		member.roles.add(role);
-            // 		const embed = new Client.discord.MessageEmbed()
-            // 		.setDescription(`**:tada: Congratulations to ${member} for passing over __${rebelKills.count}__ rebel hunting screenshots. :tada:**\n\nThey were awarded the role ${role}!`);
-            // 		rebelHuntersCh.send({embed});
-            // 	}
-            // 	else if (rebelKills.count === 300) {
-            // 		const role = server.roles.cache.find(r => r.name.endsWith('[300]'));
-            // 		member.roles.add(role);
-            // 		const embed = new Client.discord.MessageEmbed()
-            // 		.setDescription(`**:tada: Congratulations to ${member} for passing over __${rebelKills.count}__ rebel hunting screenshots. :tada:**\n\nThey were awarded the role ${role}!`);
-            // 		rebelHuntersCh.send({embed});
-            // 	}
-            // 	else if (rebelKills.count === 500) {
-            // 		const role = server.roles.cache.find(r => r.name.endsWith('[500]'));
-            // 		member.roles.add(role);
-            // 		const embed = new Client.discord.MessageEmbed()
-            // 		.setDescription(`**:tada: Congratulations to ${member} for passing over __${rebelKills.count}__ rebel hunting screenshots. :tada:**\n\nThey were awarded the role ${role}!`);
-            // 		rebelHuntersCh.send({embed});
-            // 	}
-            // 	else if (rebelKills.count === 1000) {
-            // 		const role = server.roles.cache.find(r => r.name.endsWith('[1000]'));
-            // 		member.roles.add(role);
-            // 		const embed = new Client.discord.MessageEmbed()
-            // 		.setDescription(`**:tada: Congratulations to ${member} for passing over __${rebelKills.count}__ rebel hunting screenshots. :tada:**\n\nThey were awarded the role ${role}!`);
-            // 		rebelHuntersCh.send({embed});
-            // 	}
-            // 	else if (rebelKills.count === 2000) {
-            // 		const role = server.roles.cache.find(r => r.name.endsWith('[2000]'));
-            // 		member.roles.add(role);
-            // 		const embed = new Client.discord.MessageEmbed()
-            // 		.setDescription(`**:tada: Congratulations to ${member} for passing over __${rebelKills.count}__ rebel hunting screenshots. :tada:**\n\nThey were awarded the role ${role}!`);
-            // 		rebelHuntersCh.send({embed});
-            // 	}
-            // 	else if (rebelKills.count === 3000) {
-            // 		const role = server.roles.cache.find(r => r.name.endsWith('[3000]'));
-            // 		member.roles.add(role);
-            // 		const embed = new Client.discord.MessageEmbed()
-            // 		.setDescription(`**:tada: Congratulations to ${member} for passing over __${rebelKills.count}__ rebel hunting screenshots. :tada:**\n\nThey were awarded the role ${role}!`);
-            // 		rebelHuntersCh.send({embed});
-            // 	}
-            // }
         });
         this.bot.on('interactionCreate', interaction => {
-            if (!interaction.isButton()) return;
-            if ((interaction.customId === 'hand' || interaction.commandName === 'hand') && Client.activeGame?.players?.has(interaction.user.id)) return interaction.reply({ content: Client.activeGame.showHand(interaction.user.id), ephemeral: true });
-            if ((interaction.customId === 'draw' || interaction.commandName === 'draw') && Client.activeGame?.queue[0] === interaction.user.id) return Client.activeGame.draw(interaction);
-            // if ((interaction.customId === 'uno' || interaction.commandName === 'uno') && Client.activeGame?.players?.has(interaction.user.id)) return interaction.reply({ content: `${interaction.user.username} has 1 card left!` });
+            try {
+                if ((interaction.customId === 'hand' || interaction.commandName === 'hand') && Client.activeGame?.players?.has(interaction.user.id)) return interaction.reply({ content: Client.activeGame.showHand(interaction.user.id), ephemeral: true });
+                if ((interaction.customId === 'draw' || interaction.commandName === 'draw') && Client.activeGame?.queue[0] === interaction.user.id) return Client.activeGame.draw(interaction);
+                if (interaction.commandName === 'play' && Client.activeGame?.queue[0] === interaction.user.id) return Client.activeGame.play(interaction);
+                if ((interaction.customId === 'uno' || interaction.commandName === 'uno') && Client.activeGame?.players?.get(interaction.user.id).cards.length === 1 && !Client.activeGame?.players?.get(interaction.user.id).uno) {
+                    interaction.reply(`${interaction.member.displayName} has 1 card left!`);
+                    return Client.activeGame.players.get(interaction.user.id).uno = true;
+                }
+            }
+            catch (err) {
+                interaction.reply("There was an error occured.");
+                console.log(err);
+            }
         });
         // user Joining/leaving server
         this.bot.on('guildMemberAdd', member => {
@@ -255,112 +165,7 @@ class Events {
                 Client.nicknames.delete(reaction.message.id);
             }
         });
-
-        // this.bot.on('messageDelete', message => {
-        // 	// logging deleted messages
-        // 	const channel = message.channel.guild.channels.cache.find(ch => ch.name === 'logs');
-        // 	if (channel && message.channel.name !== 'moderation' && message.channel.name !== 'super-moderation' && message.channel.name !== 'pings') {
-        // 		channel.say(`Deleted message in channel #${message.channel.name} by the user ${message.author.username}#${message.author.discriminator}:`);
-        // 		if (message.content) channel.say('> ' + message.content);
-        // 		if (message.attachments.size) {
-        // 			for (const att of message.attachments) {
-        // 				channel.say(att[1].proxyURL);
-        // 			}
-        // 		}
-        // 	}
-        // 	// counting total rebel kills
-        // 	if (message.channel.name === 'rebel-kills' && message.attachments) {
-        // 		if (!Db('rebel-kills-count').has(message.author.id)) Db('rebel-kills-count').set(message.author.id, {count: 0, daily: 0, weekly: 0});
-        // 		const rebelKills = Db('rebel-kills-count').get(message.author.id, {});
-        // 		if (rebelKills.count) rebelKills.count--;
-        // 		if (rebelKills.daily) rebelKills.daily--;
-        // 		if (rebelKills.weekly) rebelKills.weekly--;
-        // 		Db('rebel-kills-count').set(message.author.id, rebelKills);
-        // 	}
-        // });
-        // this.bot.on('messageUpdate', (oldMessage, newMessage) => {
-        // 	if (oldMessage.content === newMessage.content) return;
-        // 	const channel = oldMessage.channel.guild.channels.cache.find(ch => ch.name === 'logs');
-        // 	if (channel && oldMessage.channel.name !== 'moderation' && oldMessage.channel.name !== 'super-moderation' && oldMessage.channel.name !== 'pings') {
-        // 		channel.say(`Edited message in channel #${oldMessage.channel.name} by the user ${oldMessage.author.username}#${oldMessage.author.discriminator}:`);
-        // 		channel.say('> ' + oldMessage.content);
-        // 		channel.say('to');
-        // 		channel.say('> ' + newMessage.content);
-        // 	}
-        // });
     }
-    // async countRebelsDaily() {
-    // 	let highest = 0;
-    // 	const winners = [];
-    // 	const channel = await Client.bot.channels.fetch('838693149413081100'); // server: .. | channel: rebel-hunters
-    // 	const role = channel.guild.roles.cache.find(role => role.name.endsWith('[Day]'));
-    // 	for (const value of Db('rebel-kills-count').values()) {
-    // 		if (value.daily > highest) highest = value.daily;
-    // 	}
-    // 	for (const user of Db('rebel-kills-count').keys()) {
-    // 		const members = await channel.guild.members.fetch();
-    // 		if (!members.has(user)) continue;
-    // 		const member = await channel.guild.members.fetch(user);
-    // 		if (highest && Db('rebel-kills-count').get(user).daily === highest) winners.push(member);
-    // 		const prof = Db('rebel-kills-count').get(user, {});
-    // 		prof.daily = 0;
-    // 		Db('rebel-kills-count').set(user, prof);
-    // 	}
-    // 	const oldWinners = [];
-    // 	for (const member of (await channel.guild.members.fetch()).values()) {
-    // 		if (member.roles.cache.has(role.id)) member.roles.remove(role);
-    // 	}
-    // 	for (const winner of winners) {
-    // 		winner.roles.add(role);
-    // 	}
-    // 	let desc = '';
-    // 	if (winners.length) {
-    // 		desc = `:tada: Congratulations to user${winners.length > 1 ? 's' : ''} ${winners.join(', ')} for hunting **${highest}** rebels today! :tada: \n\nThey were awarded the role ${role}!`;
-    // 	}
-    // 	else desc = "No one has hunted any rebels today!";
-    // 	const embed = new Client.discord.MessageEmbed()
-    // 	.setTitle(":clock12: The day is over. :clock12:")
-    // 	.setDescription(desc);
-    // 	channel.send(embed);
-    // 	global.dailyTimer = setTimeout(Client.events.countRebelsDaily, DAY);
-    // 	fs.writeFileSync('./database/lastDailyAnnouncement.txt', Date.now() + '');
-    // }
-    // async countRebelsWeekly() {
-    // 	let highest = 0;
-    // 	const winners = [];
-    // 	const channel = await Client.bot.channels.fetch('838693149413081100'); // server: .. | channel: rebel-hunters
-    // 	const role = channel.guild.roles.cache.find(role => role.name.endsWith('[Week]'));
-    // 	for (const value of Db('rebel-kills-count').values()) {
-    // 		if (value.weekly > highest) highest = value.weekly;
-    // 	}
-    // 	for (const user of Db('rebel-kills-count').keys()) {
-    // 		const members = await channel.guild.members.fetch();
-    // 		if (!members.has(user)) continue;
-    // 		const member = await channel.guild.members.fetch(user);
-    // 		if (highest && Db('rebel-kills-count').get(user).weekly === highest) winners.push(member);
-    // 		const prof = Db('rebel-kills-count').get(user, {});
-    // 		prof.weekly = 0;
-    // 		Db('rebel-kills-count').set(user, prof);
-    // 	}
-    // 	const oldWinners = [];
-    // 	for (const member of (await channel.guild.members.fetch()).values()) {
-    // 		if (member.roles.cache.has(role.id)) member.roles.remove(role);
-    // 	}
-    // 	for (const winner of winners) {
-    // 		winner.roles.add(role);
-    // 	}
-    // 	let desc = '';
-    // 	if (winners.length) {
-    // 		desc = `:tada: Congratulations to user${winners.length > 1 ? 's' : ''} ${winners.join(', ')} for hunting **${highest}** rebels this week! :tada: \n\nThey were awarded the role ${role}!`;
-    // 	}
-    // 	else desc = "No one has hunted any rebels this week!";
-    // 	const embed = new Client.discord.MessageEmbed()
-    // 	.setTitle(":clock12: The week is over. :clock12:")
-    // 	.setDescription(desc);
-    // 	channel.send(embed);
-    // 	global.weeklyTimer = setTimeout(Client.events.countRebelsWeekly, WEEK);
-    // 	fs.writeFileSync('./database/lastWeeklyAnnouncement.txt', Date.now() + '');
-    // }
 }
 
 module.exports = Events;

@@ -35,6 +35,21 @@ Array.prototype.random = function () {
 Array.prototype.times = function (element) {
     return this.filter(e => e == element).length;
 };
+Array.prototype.shuffle = function () {
+    let currentIndex = this.length, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [this[currentIndex], this[randomIndex]] = [
+            this[randomIndex], this[currentIndex]];
+    }
+}
 
 process.on('uncaughtException', error => {
     console.log(error);

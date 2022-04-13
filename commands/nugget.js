@@ -7,7 +7,7 @@ const commands = {
         aliases: ['nugg'],
         target: true,
         async execute(target, channel, user, server, client) {
-            if (channel.game) return channel.say(`There's already a game of ${channel.game.name} going on in this channel.`);
+            if (channel.game && channel.game.id !== 'nugget') return channel.say(`There's already a game of ${channel.game.name} going on in this channel.`);
             const toUser = client.mentions.users.first();
             if (!toUser) return channel.say("Mention a user, you nugget.");
             if (toUser.id === user.id) return channel.say("Imagine trying to nugget yourself.");
