@@ -312,7 +312,7 @@ class UNO {
                 this.players.get(this.prevPlayer).cards.push(drawnCard);
                 drawnCards.push(this.format(drawnCard));
             }
-            this.updateStr = `<@${prevPlayer}> forgot to click UNO! and was forced to draw 2 cards.\n\n${this.updateStr}`;
+            this.updateStr = `<@${this.prevPlayer}> forgot to click UNO! and was forced to draw 2 cards.\n\n${this.updateStr}`;
         }
         if (!this.players.get(player).cards.length) {
             this.winners = [player];
@@ -349,13 +349,14 @@ class UNO {
             .setTitle('UNO')
             .setThumbnail(`attachment://${topCardColor}.png`)
             .addField('__Top card__', this.format(this.topCard))
-            .addField(`__Players(${this.players.size})__`, this.queue.map(u => u = `<@${u}> (${this.players.get(u).cards.length})`).join('\n'))
+            .addField(`__Players(${this.players.size})__`, this.queue.map(u => u = `<@${u}> (${this.players.get(u).cards.length})`).map(u => {
+                if (this.queue.indexOf(u) === 0) return u = '***** ' + u;
+            }).join('\n'))
             .addField('__Logs__', this.updateStr)
             .addField('__Information__', `- Use the command \`\`/play card: [card]\`\` to play a card.\n
             - Click the Hand button or use the command \`\`/hand\`\` to check your cards.\n
             - Click the Draw button or use the command \`\`/draw\`\` if you don't have a card to play.\n
-            - Click the UNO button or use the command \`\`/uno\`\` if you have 1 card left.\n
-            - Bully WAF 24/7.`)
+            - Click the UNO button or use the command \`\`/uno\`\` if you have 1 card left.`)
             .setTimestamp()
             .setFooter({ text: Config.username, iconURL: Config.avatarURL });
         this.updateStr = "None";
