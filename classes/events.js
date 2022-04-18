@@ -121,7 +121,7 @@ class Events {
             try {
                 if ((interaction.customId === 'hand' || interaction.commandName === 'hand') && Client.activeGame?.players?.has(interaction.user.id)) return interaction.reply({ content: Client.activeGame.showHand(interaction.user.id), ephemeral: true });
                 if ((interaction.customId === 'draw' || interaction.commandName === 'draw') && Client.activeGame?.queue[0] === interaction.user.id) return Client.activeGame.draw(interaction);
-                if (interaction.commandName === 'play' && Client.activeGame?.queue[0] === interaction.user.id) return Client.activeGame.play(interaction);
+                if ((interaction.customId?.startsWith('play') || interaction.commandName === 'play') && Client.activeGame?.queue[0] === interaction.user.id) return Client.activeGame.play(interaction);
                 if ((interaction.customId === 'uno' || interaction.commandName === 'uno') && Client.activeGame?.players?.get(interaction.user.id).cards.length === 1 && !Client.activeGame?.players?.get(interaction.user.id).uno) {
                     interaction.reply(`${interaction.member.displayName} has 1 card left!`);
                     return Client.activeGame.players.get(interaction.user.id).uno = true;

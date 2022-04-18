@@ -1,7 +1,7 @@
 'use strict';
 
 const colors = ['blue', 'green', 'red', 'yellow'];
-const { Permissions, MessageActionRow, MessageButton, MessageAttachment, MessageEmbed } = Client.discord;
+const { Permissions, MessageActionRow, MessageButton, MessageSelectMenu, MessageAttachment, MessageEmbed } = Client.discord;
 
 class UNO {
     constructor(channel, server) {
@@ -151,20 +151,20 @@ class UNO {
     format(card) {
         card = Tools.toTitleCase(card);
         if (card.startsWith('Blue')) {
-            return ':blue_circle: ' + card;
+            return '🔵 ' + card;
         }
         else if (card.startsWith('Green')) {
-            return ':green_circle: ' + card;
+            return '🟢 ' + card;
         }
         else if (card.startsWith('Red')) {
-            return ':red_circle: ' + card;
+            return '🔴 ' + card;
         }
         else if (card.startsWith('Yellow')) {
-            return ':yellow_circle: ' + card;
+            return '🟡 ' + card;
         }
         // wild cards only
         else {
-            return ':black_circle: ' + card;
+            return '⚫ ' + card;
         }
     }
     draw(interaction) {
@@ -188,7 +188,41 @@ class UNO {
         this.update();
     }
     play(interaction) {
-        const card = interaction.options.get('card').value.toLowerCase();
+        let card = '';
+        if (interaction.isButton()) {
+            const menuOptions = [], rows = [], playerCards = this.players.get(interaction.user.id).cards;
+            for (let i = 0; i < playerCards.length; i++) menuOptions.push({ label: this.format(playerCards[i]), value: playerCards[i] + ' ' + i });
+            for (let i = 0; i < menuOptions.length; i += 25) {
+                const to = i + 25 > menuOptions ? menuOptions.length : i + 25;
+                rows.push(
+                    new MessageActionRow()
+                        .addComponents(
+                            new MessageSelectMenu()
+                                .setCustomId('play' + i)
+                                .setPlaceholder('Select a card')
+                                .setOptions(menuOptions.slice(i, to))
+                        )
+                );
+            }
+            return interaction.reply({ components: rows, ephemeral: true });
+        }
+        else if (interaction.isCommand()) card = interaction.options.get('card').value.toLowerCase();
+        else if (interaction.isSelectMenu()) {
+            card = interaction.values[0].split(' ').slice(0, interaction.values[0].split(' ').length - 1).join(' ');
+            if (interaction.customId === 'play_wild') card = interaction.values[0];
+            else if (card.startsWith('wild')) {
+                const menuOptions = [];
+                for (const color of colors) menuOptions.push({ label: this.format(card + ' ' + color), value: card + ' ' + color });
+                const row = new MessageActionRow()
+                    .addComponents(
+                        new MessageSelectMenu()
+                            .setCustomId('play_wild')
+                            .setPlaceholder('Select a color')
+                            .setOptions(menuOptions)
+                    )
+                return interaction.reply({ components: [row], ephemeral: true });
+            }
+        }
         const currentPlayer = this.queue[0];
         const player = interaction.user.id;
         if (currentPlayer !== interaction.user.id) return interaction.reply({ content: "It is currently not your turn!", ephemeral: true });
@@ -199,7 +233,7 @@ class UNO {
         const topCardValue = this.topCard.split(' ')[1];
         if (!Client.CARDS.includes(card) || !this.players.get(player).cards.includes(card)) {
             if (!card.startsWith('wild +4') && !card.startsWith('wild')) return interaction.reply({ content: "Invalid card.", ephemeral: true })
-            if (thirdValue && !colors.includes(thirdValue)) return interaction.reply({ content: "Invalid color. Format ``.play Wild +4 [color]``", ephemeral: true });
+            if (thirdValue && !colors.includes(thirdValue)) return interaction.reply({ content: "Invalid color. Format ``.play Wild [color]`` / ``.play Wild +4 [color]``", ephemeral: true });
         }
         switch (cardName) {
             case 'wild':
@@ -349,11 +383,11 @@ class UNO {
             .setTitle('UNO')
             .setThumbnail(`attachment://${topCardColor}.png`)
             .addField('__Top card__', this.format(this.topCard))
-            .addField(`__Players(${this.players.size})__`, this.queue.map(u => u = `<@${u}> (${this.players.get(u).cards.length})`).map(u => {
-                if (this.queue.indexOf(u) === 0) return u = '***** ' + u;
-            }).join('\n'))
+            .addField(`__Players(${this.players.size})__`, this.queue.map(u => u = `<@${u}> (${this.players.get(u).cards.length})`)/*.map(u => {
+                if (this.queue.indexOf(u) === 0) u = '***** ' + u;
+            })*/.join('\n'))
             .addField('__Logs__', this.updateStr)
-            .addField('__Information__', `- Use the command \`\`/play card: [card]\`\` to play a card.\n
+            .addField('__Information__', `- Click the Play button or use the command \`\`/play card: [card]\`\` to play a card.\n
             - Click the Hand button or use the command \`\`/hand\`\` to check your cards.\n
             - Click the Draw button or use the command \`\`/draw\`\` if you don't have a card to play.\n
             - Click the UNO button or use the command \`\`/uno\`\` if you have 1 card left.`)
@@ -362,6 +396,10 @@ class UNO {
         this.updateStr = "None";
         const row = new MessageActionRow()
             .addComponents(
+                new MessageButton()
+                    .setCustomId('play')
+                    .setLabel('Play')
+                    .setStyle('PRIMARY'),
                 new MessageButton()
                     .setCustomId('hand')
                     .setLabel('Hand')
