@@ -127,7 +127,7 @@ class UNO {
     assignCards() {
         for (const player of this.players.keys()) {
             const cards = [];
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 7; i++) {
                 const card = this.CARDS.random();
                 cards.push(card);
                 this.CARDS.splice(this.CARDS.indexOf(card), 1);
@@ -191,37 +191,69 @@ class UNO {
         let card = '';
         if (interaction.isButton()) {
             const menuOptions = [], rows = [], playerCards = this.players.get(interaction.user.id).cards;
-            for (let i = 0; i < playerCards.length; i++) menuOptions.push({ label: this.format(playerCards[i]), value: playerCards[i] + ' ' + i });
-            for (let i = 0; i < menuOptions.length; i += 25) {
-                const to = i + 25 > menuOptions ? menuOptions.length : i + 25;
-                rows.push(
-                    new MessageActionRow()
-                        .addComponents(
-                            new MessageSelectMenu()
-                                .setCustomId('play' + i)
-                                .setPlaceholder('Select a card')
-                                .setOptions(menuOptions.slice(i, to))
-                        )
-                );
+            for (const card of [...new Set(playerCards)].filter(c => c.startsWith('b'))) menuOptions.push({ label: this.format(card), value: card });
+            if (menuOptions.length) rows.push(
+                new MessageActionRow()
+                    .addComponents(
+                        new MessageSelectMenu()
+                            .setCustomId('play1')
+                            .setPlaceholder('Blue cards')
+                            .setOptions(menuOptions)
+                    )
+            );
+            menuOptions.length = 0;
+            for (const card of [...new Set(playerCards)].filter(c => c.startsWith('g'))) menuOptions.push({ label: this.format(card), value: card });
+            if (menuOptions.length) rows.push(
+                new MessageActionRow()
+                    .addComponents(
+                        new MessageSelectMenu()
+                            .setCustomId('play2')
+                            .setPlaceholder('Green cards')
+                            .setOptions(menuOptions)
+                    )
+            );
+            menuOptions.length = 0;
+            for (const card of [...new Set(playerCards)].filter(c => c.startsWith('r'))) menuOptions.push({ label: this.format(card), value: card });
+            if (menuOptions.length) rows.push(
+                new MessageActionRow()
+                    .addComponents(
+                        new MessageSelectMenu()
+                            .setCustomId('play3')
+                            .setPlaceholder('Red cards')
+                            .setOptions(menuOptions)
+                    )
+            );
+            menuOptions.length = 0;
+            for (const card of [...new Set(playerCards)].filter(c => c.startsWith('y'))) menuOptions.push({ label: this.format(card), value: card });
+            if (menuOptions.length) rows.push(
+                new MessageActionRow()
+                    .addComponents(
+                        new MessageSelectMenu()
+                            .setCustomId('play4')
+                            .setPlaceholder('Yellow cards')
+                            .setOptions(menuOptions)
+                    )
+            );
+            menuOptions.length = 0;
+            for (const card of [...new Set(playerCards)].filter(c => c.startsWith('wild'))) {
+                for (const color of colors) {
+                    menuOptions.push({ label: this.format(card + ' ' + color), value: card + ' ' + color});
+                }
             }
+            if (menuOptions.length) rows.push(
+                new MessageActionRow()
+                    .addComponents(
+                        new MessageSelectMenu()
+                            .setCustomId('play5')
+                            .setPlaceholder('Wild cards')
+                            .setOptions(menuOptions)
+                    )
+            );
             return interaction.reply({ components: rows, ephemeral: true });
         }
         else if (interaction.isCommand()) card = interaction.options.get('card').value.toLowerCase();
         else if (interaction.isSelectMenu()) {
-            card = interaction.values[0].split(' ').slice(0, interaction.values[0].split(' ').length - 1).join(' ');
-            if (interaction.customId === 'play_wild') card = interaction.values[0];
-            else if (card.startsWith('wild')) {
-                const menuOptions = [];
-                for (const color of colors) menuOptions.push({ label: this.format(card + ' ' + color), value: card + ' ' + color });
-                const row = new MessageActionRow()
-                    .addComponents(
-                        new MessageSelectMenu()
-                            .setCustomId('play_wild')
-                            .setPlaceholder('Select a color')
-                            .setOptions(menuOptions)
-                    )
-                return interaction.reply({ components: [row], ephemeral: true });
-            }
+            card = interaction.values[0];
         }
         const currentPlayer = this.queue[0];
         const player = interaction.user.id;
@@ -333,6 +365,7 @@ class UNO {
                 break;
         }
         this.updateStr = `<@${player}> has played ${this.format(card)}.${this.updateStr !== 'None' ? '\n\n' + this.updateStr : ''}`;
+        interaction.update({content: 'You have played: ' + this.format(card), components: []});
         if (this.players.get(this.prevPlayer)?.cards.length === 1 && !this.players.get(this.prevPlayer)?.uno) {
             const drawnCards = [];
             for (let i = 0; i < 2; i++) {

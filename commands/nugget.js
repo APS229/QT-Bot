@@ -15,7 +15,7 @@ const commands = {
             const member = await server.members.fetch(user.id);
             const toMember = await server.members.fetch(toUser.id);
             if (member?.presence?.status === 'dnd' || member?.presence?.status === 'offline') return channel.say("You can't nugget anyone while you're set to DnD or offline.");
-            if (toMember?.presence?.status === 'dnd' || toMember?.presence?.status === 'offline') return channel.say("You can't nugget that user. (DnD/offline)");
+            if ((toMember?.presence?.status === 'dnd' || toMember?.presence?.status === 'offline')  && channel.game?.before.id !== toUser.id) return channel.say("You can't nugget that user. (DnD/offline)");
             if (channel.game?.id === 'nugget') return Client.commands.get('pass').execute(target, channel, user, server, client);
             const Nugget = Client.games.get('nugget');
             channel.game = new Nugget(user, channel, client);
