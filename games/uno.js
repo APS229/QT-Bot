@@ -381,12 +381,12 @@ class UNO {
             }
             this.updateStr = `<@${this.prevPlayer}> forgot to click UNO! and was forced to draw 2 cards.\n\n${this.updateStr}`;
         }
+        this.update();
         if (!this.players.get(player).cards.length) {
             this.winners = [player];
             return this.onEnd();
         }
         this.prevPlayer = player;
-        this.update();
     }
     disqualify(players) {
         for (const player of players) {
