@@ -74,15 +74,8 @@ class UNO {
             case 'wild':
                 if (colors.includes(cardValue)) this.topCard = cardValue;
                 else if (cardValue === '+4') {
-                    const drawnCards = [];
                     const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
-                    for (let i = 0; i < 4; i++) {
-                        const drawnCard = this.CARDS.random();
-                        this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
-                        this.players.get(drawnPlayer).cards.push(drawnCard);
-                        drawnCards.push(this.format(drawnCard));
-                    }
-                    this.players.get(drawnPlayer).uno = false;
+                    this.draw(drawnPlayer, 4);
                     this.updateStr += `<@${drawnPlayer}> was forced to draw 4 cards.`;
                     this.queue.shift();
                     this.queue.push(drawnPlayer);
@@ -95,15 +88,8 @@ class UNO {
             case 'green':
                 switch (cardValue) {
                     case '+2':
-                        const drawnCards = [];
                         const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
-                        for (let i = 0; i < 2; i++) {
-                            const drawnCard = this.CARDS.random();
-                            this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
-                            this.players.get(drawnPlayer).cards.push(drawnCard);
-                            drawnCards.push(this.format(drawnCard));
-                        }
-                        this.players.get(drawnPlayer).uno = false;
+                        this.draw(drawnPlayer, 2);
                         this.updateStr += `<@${drawnPlayer}> was forced to draw 2 cards.`;
                         this.queue.shift();
                         this.queue.push(drawnPlayer);
@@ -133,11 +119,7 @@ class UNO {
                 this.CARDS.splice(this.CARDS.indexOf(card), 1);
             }
             this.players.set(player, { uno: false, cards: cards });
-        }
-        for (const player of this.players.keys()) {
-            const cards = [];
             this.queue.push(player);
-            this.players.get(player).cards.forEach(c => cards.push(this.format(c)));
         }
         this.queue.shuffle();
     }
@@ -167,139 +149,79 @@ class UNO {
             return '⚫ ' + card;
         }
     }
-    draw(interaction) {
-        const currentPlayer = this.queue[0];
+    drawPlayer(interaction) {
         const player = interaction.user.id;
-        if (currentPlayer !== player) return interaction.reply({ content: "It is currently not your turn!", ephemeral: true });
-        if (!this.CARDS.length) {
-            this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(this.topCard.split(' ')[0] + ' ' + this.topCard.split(' ')[1]), 1);
-            this.CARDS = [...this.DISCARDED_CARDS];
-            this.DISCARDED_CARDS = [this.topCard.split(' ')[0] + ' ' + this.topCard.split(' ')[1]];
-        }
-        const card = this.CARDS.random();
-        this.players.get(player).cards.push(card);
-        this.CARDS.splice(this.CARDS.indexOf(card), 1);
+        if (this.queue[0] !== player) return interaction.reply({ content: "It is currently not your turn!", ephemeral: true });
+        const card = this.draw(player, 1)[0];
         this.queue.shift();
-        this.queue.push(currentPlayer);
-        this.players.get(player).uno = false;
-        interaction.reply({ content: `You have drawn: ${this.format(card)}`, ephemeral: true });
+        this.queue.push(player);
+        interaction.reply({ content: `You have drawn: ${card}`, ephemeral: true });
         this.updateStr = `<@${player}> has drawn a card.`;
         this.prevPlayer = player;
         this.update();
     }
     play(interaction) {
+        const currentPlayer = this.queue[0];
+        const player = interaction.user.id;
+        if (currentPlayer !== player) return interaction.reply({ content: "It is currently not your turn!", ephemeral: true });
+        const playerCards = this.players.get(player).cards;
         let card = '';
         if (interaction.isButton()) {
-            const menuOptions = [], rows = [], playerCards = this.players.get(interaction.user.id).cards;
-            for (const card of [...new Set(playerCards)].filter(c => c.startsWith('b'))) menuOptions.push({ label: this.format(card), value: card });
-            if (menuOptions.length) rows.push(
-                new MessageActionRow()
-                    .addComponents(
-                        new MessageSelectMenu()
-                            .setCustomId('play1')
-                            .setPlaceholder('Blue cards')
-                            .setOptions(menuOptions)
-                    )
-            );
-            menuOptions.length = 0;
-            for (const card of [...new Set(playerCards)].filter(c => c.startsWith('g'))) menuOptions.push({ label: this.format(card), value: card });
-            if (menuOptions.length) rows.push(
-                new MessageActionRow()
-                    .addComponents(
-                        new MessageSelectMenu()
-                            .setCustomId('play2')
-                            .setPlaceholder('Green cards')
-                            .setOptions(menuOptions)
-                    )
-            );
-            menuOptions.length = 0;
-            for (const card of [...new Set(playerCards)].filter(c => c.startsWith('r'))) menuOptions.push({ label: this.format(card), value: card });
-            if (menuOptions.length) rows.push(
-                new MessageActionRow()
-                    .addComponents(
-                        new MessageSelectMenu()
-                            .setCustomId('play3')
-                            .setPlaceholder('Red cards')
-                            .setOptions(menuOptions)
-                    )
-            );
-            menuOptions.length = 0;
-            for (const card of [...new Set(playerCards)].filter(c => c.startsWith('y'))) menuOptions.push({ label: this.format(card), value: card });
-            if (menuOptions.length) rows.push(
-                new MessageActionRow()
-                    .addComponents(
-                        new MessageSelectMenu()
-                            .setCustomId('play4')
-                            .setPlaceholder('Yellow cards')
-                            .setOptions(menuOptions)
-                    )
-            );
-            menuOptions.length = 0;
-            for (const card of [...new Set(playerCards)].filter(c => c.startsWith('wild'))) {
-                for (const color of colors) {
-                    menuOptions.push({ label: this.format(card + ' ' + color), value: card + ' ' + color});
+            const menuOptions = [], rows = [], cases = ['blue', 'green', 'red', 'yellow', 'wild'];
+            for (let i = 0; i < 5; i++) {
+                const caseCards = [...new Set(playerCards)].filter(c => c.startsWith(cases[i])).sort();
+                for (const caseCard of caseCards) {
+                    if (cases[i] === 'wild') {
+                        for (const color of colors) {
+                            menuOptions.push({ label: this.format(caseCard + ' ' + color), value: caseCard + ' ' + color });
+                        }
+                    }
+                    else {
+                        menuOptions.push({ label: this.format(caseCard), value: caseCard });
+                    }
+                }
+                if (menuOptions.length) {
+                    rows.push(
+                        new MessageActionRow()
+                            .addComponents(
+                                new MessageSelectMenu()
+                                    .setCustomId('play' + i)
+                                    .setPlaceholder(`${Tools.toTitleCase(cases[i])} Cards`)
+                                    .setOptions(menuOptions)
+                            )
+                    );
+                    menuOptions.length = 0;
                 }
             }
-            if (menuOptions.length) rows.push(
-                new MessageActionRow()
-                    .addComponents(
-                        new MessageSelectMenu()
-                            .setCustomId('play5')
-                            .setPlaceholder('Wild cards')
-                            .setOptions(menuOptions)
-                    )
-            );
             return interaction.reply({ components: rows, ephemeral: true });
         }
         else if (interaction.isCommand()) card = interaction.options.get('card').value.toLowerCase();
-        else if (interaction.isSelectMenu()) {
-            card = interaction.values[0];
-        }
-        const currentPlayer = this.queue[0];
-        const player = interaction.user.id;
-        if (currentPlayer !== interaction.user.id) return interaction.reply({ content: "It is currently not your turn!", ephemeral: true });
-        const cardName = card.split(' ')[0];
-        const cardValue = card.split(' ')[1];
-        const thirdValue = card.split(' ')[2];
-        const topCardName = this.topCard.split(' ')[0];
-        const topCardValue = this.topCard.split(' ')[1];
-        if (!Client.CARDS.includes(card) || !this.players.get(player).cards.includes(card)) {
-            if (!card.startsWith('wild +4') && !card.startsWith('wild')) return interaction.reply({ content: "Invalid card.", ephemeral: true })
-            if (thirdValue && !colors.includes(thirdValue)) return interaction.reply({ content: "Invalid color. Format ``.play Wild [color]`` / ``.play Wild +4 [color]``", ephemeral: true });
-        }
+        else if (interaction.isSelectMenu()) card = interaction.values[0];
+        let cardName, cardValue, thirdValue;
+        const cardSplit = [cardName, cardValue, thirdValue] = card.split(' ');
+        const [topCardName, topCardValue] = this.topCard.split(' ');
+        if (!playerCards.includes(card) && !playerCards.includes(cardSplit.slice(0, cardSplit.length - 1).join(' '))) return interaction.reply({ content: "You don't have such card in your hand.", ephemeral: true });
         switch (cardName) {
             case 'wild':
                 if (colors.includes(cardValue)) {
                     this.topCard = cardValue;
                     this.queue.shift();
                     this.queue.push(currentPlayer);
-                    this.players.get(player).cards.splice(this.players.get(player).cards.indexOf('wild'), 1)
+                    this.DISCARDED_CARDS.push(cardName);
+                    this.players.get(player).cards.splice(playerCards.indexOf('wild'), 1)
                 }
                 else if (cardValue === '+4') {
-                    if (!thirdValue || !colors.includes(thirdValue) && !!channel) return interaction.reply({ content: "You must specify a valid color", ephemeral: true });
-                    this.topCard = card;
-                    this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
-                    const drawnCards = [];
+                    if (!colors.includes(thirdValue)) return interaction.reply({ content: "You must specify a valid color.", ephemeral: true });
+                    this.topCard = thirdValue;
                     const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
+                    this.draw(drawnPlayer, 4, cardName + ' ' + cardValue);
                     this.updateStr = `<@${drawnPlayer}> was forced to draw 4 cards.`;
-                    this.players.get(drawnPlayer).uno = false;
-                    for (let i = 0; i < 4; i++) {
-                        const drawnCard = this.CARDS.random();
-                        this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
-                        if (!this.CARDS.length) {
-                            this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(cardName + ' ' + cardValue), 1);
-                            this.CARDS = [...this.DISCARDED_CARDS];
-                            this.DISCARDED_CARDS = [topCardName + ' ' + topCardValue];
-                        }
-                        this.players.get(drawnPlayer).cards.push(drawnCard);
-                        drawnCards.push(this.format(drawnCard));
-                    }
                     this.queue.shift();
                     this.queue.push(currentPlayer);
                     this.queue.shift();
                     this.queue.push(drawnPlayer);
-                    this.topCard = thirdValue;
-                    this.players.get(player).cards.splice(this.players.get(player).cards.indexOf('wild +4'), 1)
+                    this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
+                    this.players.get(player).cards.splice(playerCards.indexOf('wild +4'), 1);
                 }
                 else {
                     return interaction.reply({ content: "You must specify a valid card value.", ephemeral: true });
@@ -309,10 +231,9 @@ class UNO {
             case 'yellow':
             case 'blue':
             case 'green':
-                if (!cardValue) return interaction.reply({ content: "Invalid card.", ephemeral: true });
                 if (topCardName !== cardName && topCardValue !== cardValue) return interaction.reply({ content: "The card must match the color or the value with the top card.", ephemeral: true });
                 this.topCard = card;
-                this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
+                this.DISCARDED_CARDS.push(card);
                 switch (cardValue) {
                     case '0':
                     case '1':
@@ -328,20 +249,8 @@ class UNO {
                         this.queue.push(currentPlayer);
                         break;
                     case '+2':
-                        const drawnCards = [];
                         const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
-                        for (let i = 0; i < 2; i++) {
-                            const drawnCard = this.CARDS.random();
-                            this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
-                            if (!this.CARDS.length) {
-                                this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(cardName + ' ' + cardValue), 1);
-                                this.CARDS = [...this.DISCARDED_CARDS];
-                                this.DISCARDED_CARDS = [topCardName + ' ' + topCardValue];
-                            }
-                            this.players.get(drawnPlayer).cards.push(drawnCard);
-                            drawnCards.push(this.format(drawnCard));
-                        }
-                        this.players.get(drawnPlayer).uno = false;
+                        this.draw(drawnPlayer, 2, cardName + ' ' + cardValue);
                         this.updateStr = `<@${drawnPlayer}> was forced to draw 2 cards.`;
                         this.queue.shift();
                         this.queue.push(currentPlayer);
@@ -358,29 +267,34 @@ class UNO {
                         break;
                     case 'reverse':
                         this.queue.reverse();
+                        if (this.queue.length === 2) {
+                            const firstPlayer = this.queue[0];
+                            this.queue.shift();
+                            this.queue.push(firstPlayer);
+                        }
                         this.updateStr = "The turn order was reversed!";
                         break;
                 }
-                if (!!player) this.players.get(player).cards.splice(this.players.get(player).cards.indexOf(card), 1);
+                this.players.get(player).cards.splice(playerCards.indexOf(card), 1);
                 break;
         }
         this.updateStr = `<@${player}> has played ${this.format(card)}.${this.updateStr !== 'None' ? '\n\n' + this.updateStr : ''}`;
-        interaction.update({content: 'You have played: ' + this.format(card), components: []});
-        if (this.players.get(this.prevPlayer)?.cards.length === 1 && !this.players.get(this.prevPlayer)?.uno) {
-            const drawnCards = [];
-            for (let i = 0; i < 2; i++) {
-                const drawnCard = this.CARDS.random();
-                this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
-                if (!this.CARDS.length) {
-                    this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(cardName + ' ' + cardValue), 1);
-                    this.CARDS = [...this.DISCARDED_CARDS];
-                    this.DISCARDED_CARDS = [topCardName + ' ' + topCardValue];
-                }
-                this.players.get(this.prevPlayer).cards.push(drawnCard);
-                drawnCards.push(this.format(drawnCard));
-            }
-            this.updateStr = `<@${this.prevPlayer}> forgot to click UNO! and was forced to draw 2 cards.\n\n${this.updateStr}`;
-        }
+        if (interaction.isSelectMenu()) interaction.update({ content: 'You have played: ' + this.format(card), components: [] });
+        // if (this.players.get(this.prevPlayer)?.cards.length === 1 && !this.players.get(this.prevPlayer)?.uno) {
+        //     const drawnCards = [];
+        //     for (let i = 0; i < 2; i++) {
+        //         const drawnCard = this.CARDS.random();
+        //         this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
+        //         if (!this.CARDS.length) {
+        //             this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(cardName + ' ' + cardValue), 1);
+        //             this.CARDS = [...this.DISCARDED_CARDS];
+        //             this.DISCARDED_CARDS = [topCardName + ' ' + topCardValue];
+        //         }
+        //         this.players.get(this.prevPlayer).cards.push(drawnCard);
+        //         drawnCards.push(this.format(drawnCard));
+        //     }
+        //     this.updateStr = `<@${this.prevPlayer}> forgot to click UNO! and was forced to draw 2 cards.\n\n${this.updateStr}`;
+        // }
         this.update();
         if (!this.players.get(player).cards.length) {
             this.winners = [player];
@@ -402,7 +316,25 @@ class UNO {
         }
         this.update();
     }
+    draw(player, amount, card) {
+        if (!card) card = this.topCard;
+        const drawnCards = [];
+        for (let i = 0; i < amount; i++) {
+            const drawnCard = this.CARDS.random();
+            this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
+            if (!this.CARDS.length) {
+                this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(card), 1);
+                this.CARDS = [...this.DISCARDED_CARDS];
+                this.DISCARDED_CARDS = [this.topCard];
+            }
+            this.players.get(player).cards.push(drawnCard);
+            drawnCards.push(this.format(drawnCard));
+        }
+        this.players.get(player).uno = false;
+        return drawnCards;
+    }
     showHand(player) {
+        if (!this.players.has(player)) return;
         const cards = [];
         this.players.get(player).cards.forEach(c => cards.push(this.format(c)));
         return `Your current hand: ${cards.join(', ')}`;
