@@ -282,25 +282,17 @@ class UNO {
         if (interaction.isSelectMenu()) interaction.update({ content: 'You have played: ' + this.format(card), components: [] });
         else interaction.reply({ content: 'You have played: ' + this.format(card), ephemeral: true });
         if (this.players.get(this.prevPlayer)?.cards.length === 1 && !this.players.get(this.prevPlayer)?.uno) {
-            const drawnCards = [];
-            for (let i = 0; i < 2; i++) {
-                const drawnCard = this.CARDS.random();
-                this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
-                if (!this.CARDS.length) {
-                    this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(cardName + ' ' + cardValue), 1);
-                    this.CARDS = [...this.DISCARDED_CARDS];
-                    this.DISCARDED_CARDS = [topCardName + ' ' + topCardValue];
-                }
-                this.players.get(this.prevPlayer).cards.push(drawnCard);
-                drawnCards.push(this.format(drawnCard));
-            }
+            this.draw(this.prevPlayer, 2);
             this.updateStr = `<@${this.prevPlayer}> forgot to click UNO! and was forced to draw 2 cards.\n\n${this.updateStr}`;
         }
-        if (!this.players.get(player).cards.length) {d:
+        if (!this.players.get(player).cards.length) {
             this.winners = [player];
             return this.onEnd();
         }
-        if (player !== this.queue[0]) this.prevPlayer = player;
+        if (player !== this.queue[0]) {
+            this.players.get(this.prevPlayer).uno = false;
+            this.prevPlayer = player;
+        }
         this.update();
     }
     disqualify(players) {
