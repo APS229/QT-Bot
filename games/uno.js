@@ -289,7 +289,7 @@ class UNO {
             this.winners = [player];
             return this.onEnd();
         }
-        if (player !== this.queue[0]) {
+        if (player !== this.queue[0] && this.prevPlayer) {
             this.players.get(this.prevPlayer).uno = false;
             this.prevPlayer = player;
         }
