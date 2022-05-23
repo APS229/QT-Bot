@@ -48,7 +48,8 @@ class Events {
             if (channel.type === 'text' && user.guild && user.id === user.guild.ownerID) user.owner = true;
             if (server.id === '978201529397948466' && user.id === '270904126974590976' && discord.type === 'REPLY') {
                 let points = 0;
-                const id = channel.messages.fetch(discord.reference.messageId).author.id;
+                const userMessage = await channel.messages.fetch(discord.reference.messageId);
+                const id = userMessage.author.id;
                 if (message.includes("TINY portion")) {
                     points = 1;
                 }
