@@ -74,7 +74,7 @@ class Events {
                         }
                     });
                 }
-                return;
+                return console.log("Points added to " + id + ", " + points);
             }
             if (user.bot) return;
             if (channel.name === 'hit-or-miss' && message && (!message.startsWith('||') || !message.endsWith('||'))) {
