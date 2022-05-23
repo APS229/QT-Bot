@@ -1,4 +1,4 @@
-function calc(eq) {
+function DMAS(eq) {
     let answer = 0;
     const subValues = eq.split('-');
     for (let s = 0; s < subValues.length; s++) {
@@ -31,4 +31,22 @@ function calc(eq) {
     }
     return answer;
 }
-console.log(calc('160 * 7 / 1.2 + 17 - 2'));
+function calc(eq) {
+    eq = eq.replaceAll(' ', '');
+    while (eq.includes('(') || eq.includes(')')) {
+        const rightBracket = eq.indexOf(')');
+        let leftBracket = eq.lastIndexOf('(');
+        if (rightBracket < 0) return "You're missing a right bracket.";
+        if (leftBracket < 0) return "You're missing a left bracket.";
+        if (rightBracket < leftBracket) {
+            leftBracket = eq.lastIndexOf('(', rightBracket);
+            if (rightBracket < leftBracket) return "You put the left bracket after the right bracket.";
+            if (eq[rightBracket + 1] === '(') eq = eq.substring(0, rightBracket + 1) + '*' + eq.substring(rightBracket + 1, eq.length);
+        }
+        const solved = DMAS(eq.substring(leftBracket + 1, rightBracket));
+        if (isNaN(solved)) return "Invalid equation.";
+        eq = eq.substring(0, leftBracket) + solved + eq.substring(rightBracket + 1, eq.length);
+    }
+    return DMAS(eq);
+}
+console.log(calc('(((1 + 0)))* ((1 + 0)) /((1 + 0))+1-1'));

@@ -46,6 +46,36 @@ class Events {
             const server = discord.guild;
             user.isDev = () => Config.developers.includes(user.id); // inconsistent
             if (channel.type === 'text' && user.guild && user.id === user.guild.ownerID) user.owner = true;
+            if (server.id === '978201529397948466' && user.id === '270904126974590976' && message.type === 'REPLY') {
+                let points = 0;
+                const id = channel.messages.fetch(message.reference.messageId).author.id;
+                if (message.includes("TINY portion")) {
+                    points = 1;
+                }
+                else if (message.includes("small portion")) {
+                    points = 2;
+                }
+                else if (message.includes("decent chunk")) {
+                    points = 3;
+                }
+                else if (message.includes("BASICALLY EVERYTHING")) {
+                    points = 5;
+                }
+                else {
+                    return;
+                }
+                if (id) {
+                    Database.query(`select * from rob_event where id = '${id}'`).then(res => {
+                        if (res.rows.length) {
+                            Database.query(`update rob_event set points = points + ${points} where id = '${id}'`);
+                        }
+                        else {
+                            Database.query(`insert into rob_event values('${id}', ${points})`);
+                        }
+                    });
+                }
+                return;
+            }
             if (user.bot) return;
             if (channel.name === 'hit-or-miss' && message && (!message.startsWith('||') || !message.endsWith('||'))) {
                 channel.say(`${user} please spoiler your messages in this channel.`);
