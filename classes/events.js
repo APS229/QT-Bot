@@ -46,7 +46,7 @@ class Events {
             const server = discord.guild;
             user.isDev = () => Config.developers.includes(user.id); // inconsistent
             if (channel.type === 'text' && user.guild && user.id === user.guild.ownerID) user.owner = true;
-            if (server.id === '978201529397948466' && user.id === '270904126974590976' && message.type === 'REPLY') {
+            if (server.id === '978201529397948466' && user.id === '270904126974590976' && discord.type === 'REPLY') {
                 let points = 0;
                 const id = channel.messages.fetch(message.reference.messageId).author.id;
                 if (message.includes("TINY portion")) {
@@ -108,14 +108,10 @@ class Events {
                                 update += ", toxp=toxp+75";
                             }
                         }
-                        Database.query(`update profile set xp = ${xp}${update} where id = '${user.id}'`).then(res => {
-                            channel.say(res.rows[0]);
-                        });
+                        Database.query(`update profile set xp = ${xp}${update} where id = '${user.id}'`);
                     }
                     else {
-                        Database.query(`insert into profile values('${user.id}', 1, 0, 220, 0)`).then(res => {
-                            channel.say(res.rows[0]);
-                        });
+                        Database.query(`insert into profile values('${user.id}', 1, 0, 220, 0)`);
                     }
                 });
             }
