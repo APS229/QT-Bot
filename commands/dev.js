@@ -91,6 +91,22 @@ const commands = {
             }
             interaction.reply(`Reloaded module: ${module}`);
         }
+    },
+    setrestart: {
+        devOnly: true,
+        hidden: true,
+        execute(interaction) {
+            Client.restart = true;
+            interaction.reply({ content: "The bot has been set up to restart. No commands will work until the bot restarts or you disable it.", ephemeral: true });
+        }
+    },
+    cancelrestart: {
+        devOnly: true,
+        hidden: true,
+        execute(interaction) {
+            Client.restart = false;
+            interaction.reply({ content: "The restart has been cancelled. Commands will work again.", ephemeral: true });
+        }
     }
 };
 exports.commands = commands;

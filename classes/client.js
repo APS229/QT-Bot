@@ -8,6 +8,7 @@ class Client {
         this.bot = new this.discord.Client({ intents: ['GUILDS', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES'] });
         this.disconnected = false;
         this.disabled = false;
+        this.restarting = false;
         this.games = new Map();
         this.events = null;
         this.data = {};

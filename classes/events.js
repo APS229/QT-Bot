@@ -65,6 +65,7 @@ class Events {
         this.bot.on('interactionCreate', interaction => {
             try {
                 const command = Client.commands.get(interaction.commandName) || Client.commands.get(interaction.customId);
+                if (Client.restart && !command.devOnly) return interaction.reply("The bot is currently set up to restart. You cannot run any commands during the restart.");
                 if (!command || !command.button && interaction.customId) return;
                 if (command.devOnly && !Config.developers.includes(interaction.user.id)) return interaction.reply("This command is only for developers.");
                 if (command.modOnly && !interaction.member.roles.cache.has('899916792447766528') &&

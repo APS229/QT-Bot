@@ -63,5 +63,5 @@ typings/
 # OS files
 desktop.ini
 
-# test
-test.js
+# config
+config.js
