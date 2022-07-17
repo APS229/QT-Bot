@@ -481,7 +481,7 @@ class Monopoly extends Games.Game {
         const propertyOwner = [...this.players].find(player => this.players.get(player[0]).properties.includes(property));
         if (propertyOwner && propertyOwner[0] === this.queue[0]) resolve();
         else if (propertyOwner) {
-            const rent = propertyOwner[1].properties.filter(prop => this.data[prop].emoji === this.data[property].emoji || this.data[prop].type === this.data[property].type).length * this.data[property].price;
+            const rent = propertyOwner[1].properties.filter(prop => this.data[prop].emoji === this.data[property].emoji || this.data[prop].type && this.data[prop].type === this.data[property].type).length * this.data[property].price;
             if (playerDetails.balance < rent) {
                 this.channel.send(`They don't have enough ⏣ to pay the rent (**⏣ ${rent}**) and have been eliminated by <@${propertyOwner[0]}>!`);
                 this.playerEliminated = true;
