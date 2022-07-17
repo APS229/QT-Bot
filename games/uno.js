@@ -22,13 +22,13 @@ class UNO {
     }
     async init() {
         await this.loadCards();
-        this.channel.say("**A new game of UNO has been created! Use the command ``.join`` to join the game.**");
+        this.channel.send("**A new game of UNO has been created! Use the command ``.join`` to join the game.**");
     }
     async loadCards() {
         if (!Client.CARDS) {
-            this.channel.say("Loading cards data since last restart...");
+            this.channel.send("Loading cards data since last restart...");
             await this.loadData();
-            this.channel.say("Cards data loaded.");
+            this.channel.send("Cards data loaded.");
         }
         this.CARDS = [...Client.CARDS];
     }
@@ -51,15 +51,15 @@ class UNO {
         }
     }
     async onStart() {
-        if (this.players.size < 2) return this.channel.say("There are not enough players to start the game.");
+        if (this.players.size < 2) return this.channel.send("There are not enough players to start the game.");
         this.started = true;
         this.timer = setTimeout(() => {
             const players = [...this.players.entries()];
-            this.channel.say("**(UNO) TIME'S UP!**");
+            this.channel.send("**(UNO) TIME'S UP!**");
             this.winners = players.slice(0, players.sort((a, b) => a[1].cards.length - b[1].cards.length).map(v => v[1].cards.length === players[0][1].cards.length).lastIndexOf(true) + 1).map(v => v = v[0]);
             this.onEnd();
         }, 10 * 60 * 1000);
-        this.channel.say("**The game of UNO is now starting!**");
+        this.channel.send("**The game of UNO is now starting!**");
         this.assignCards();
         let card = this.CARDS.random();
         this.CARDS.splice(this.CARDS.indexOf(card), 1);
@@ -121,14 +121,14 @@ class UNO {
             this.players.set(player, { uno: false, cards: cards });
             this.queue.push(player);
         }
-        this.queue.shuffle();
+        this.queue = this.queue.shuffle();
     }
     showPlayers() {
         const players = [];
         for (const player of this.players.keys()) {
             players.push(this.server.members.cache.find(m => m.user.id === player).displayName);
         }
-        this.channel.say(`**Players (${players.length}):** ${players.length ? players.join(', ') : 'none'}`);
+        this.channel.send(`**Players (${players.length}):** ${players.length ? players.join(', ') : 'none'}`);
     }
     format(card) {
         card = Tools.toTitleCase(card);
@@ -380,10 +380,10 @@ class UNO {
             this.message.edit({ content: '**The game of UNO has ended.**', components: components });
         }
         if (this.timer) clearTimeout(this.timer);
-        if (this.winners.length) this.channel.say(`**Congratulations to ${this.winners.map(w => w = '<@' + w + '>').join(', ')} for winning the UNO game!**`);
+        if (this.winners.length) this.channel.send(`**Congratulations to ${this.winners.map(w => w = '<@' + w + '>').join(', ')} for winning the UNO game!**`);
         delete Client.activeGame;
     }
 }
 
-exports.game = UNO;
-exports.id = 'uno';
+// exports.game = UNO;
+// exports.id = 'uno';

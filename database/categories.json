@@ -1,0 +1,933 @@
+{
+    "items": {
+        "Adventure Ticket": {
+            "type": "tool",
+            "rarity": "rare",
+            "description": "Can be found in limited stock in the shop, from voting, or from being a patron! These are used to start an adventure in the adventure command."
+        },
+        "A Plus": {
+            "type": "sellable",
+            "rarity": "Rare",
+            "description": "An A+ you can sell for some profit, woo for cheating! Found from the teacher job."
+        },
+        "Bean": {
+            "type": "sellable",
+            "rarity": "uncommon",
+            "description": "It's just a bean. A simple B E A N."
+        },
+        "Aetheryx Flower": {
+            "type": "collectable",
+            "rarity": "epic",
+            "description": "A no longer vibrant red flower, a wisp of it's former self."
+        },
+        "Alcohol": {
+            "type": "power-up",
+            "rarity": "uncommon",
+            "description": "Drink a bottle of alcohol, and have the potential to gain a small luck boost that will grant you better luck in stealing from others. However, you become more susceptible to being stolen from!"
+        },
+        "Alien Sample": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "A collectible sample of alien tissue"
+        },
+        "Ammo": {
+            "type": "power-up",
+            "rarity": "rare",
+            "description": "While this item is active (1 hour), you will always find an animal while hunting. Found from the Hunter job."
+        },
+        "Anti-Rob Pack": {
+            "type": "item pack",
+            "rarity": "rare",
+            "description": "A pack containing basic items to not get robbed."
+        },
+        "Apple": {
+            "type": "power-up",
+            "rarity": "uncommon",
+            "description": "Eating this once a day makes it so you do not lose any inventory items or active items if you die. The lifesaver takes priority over this effect. (Lasts 24 hours)"
+        },
+        "Armpit Hair": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "It tastes funny!"
+        },
+        "Baby": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "We do NOT sell babies guys. We simply collect them. IN THE GAME, THIS IS A JOKE WTF. Found from the babysitter job."
+        },
+        "Badosz's Card": {
+            "type": "collectable",
+            "rarity": "epic",
+            "description": "A real king in the sleeve."
+        },
+        "Ban Hammer": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "A hammer dropped by a mod after banning someone. Found from the discord moderator job."
+        },
+        "Bank Note": {
+            "type": "power-up",
+            "rarity": "uncommon",
+            "description": "You can either use this note to expand your bank space by 10000-100000 or sell it for some coins. Your choice really. Expanded bank space does not reset on prestige (regular bank space earned via running commands does)"
+        },
+        "Beaker of sus fluid": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "Dear god do NOT drink this. Found from the scientist job."
+        },
+        "Bean Mp3 Player": {
+            "type": "collectable",
+            "rarity": "legendary",
+            "description": "The long lost voice of a bean. This item can only be used once before it explodes from too much B E A N."
+        },
+        "Berries and Cream": {
+            "type": "collectable",
+            "rarity": "epic",
+            "description": "A limited time item from a random event, use this item to send it to someone who loves berries and cream!"
+        },
+        "Binary": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "A rouge piece of binary code spit out of a computer. Found from the developer job."
+        },
+        "Black Hole": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "This item is a shady little lottery. When you have one in your inventory, you have a random chance to have a gained item (from commands ran, not from your inv) to be sucked into the black hole and put into an item lottery. This also enters you to win said item lottery and get a share of ALL the items entered."
+        },
+        "Blob": {
+            "type": "collectable",
+            "rarity": "legendary",
+            "description": "This is just a shell of it's former self, earned for doing basically absolutely nothing during the blob event"
+        },
+        "Blue Phallic Object": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "This is simply a collectable, and NOT for any type of use. ANY type of use guys, please."
+        },
+        "Blue's Plane": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "This top of-the-line aircraft carries only the most prestigious of passengers"
+        },
+        "Boar": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Bolt Cutters": {
+            "type": "collectable",
+            "rarity": "godly",
+            "description": "Originally for developers only, this item instantly breaks all padlocks."
+        },
+        "Bottle of Whiskey": {
+            "type": "power-up",
+            "rarity": "rare",
+            "description": "A superior alcohol, gives you a better chance to steal from someone and has no negative effects (lasts 15 hours). Found from the bartender job."
+        },
+        "Box of Sand": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "Throw a box of sand in someone's eyes to prevent them from robbing anyone for 30 minutes."
+        },
+        "Boxed Chocolates": {
+            "type": "drop item",
+            "rarity": "rare",
+            "description": "A boxy box of boxed chocolates to give to your partner to prove your love! (Level up your marriage by 3 weeks upon eating)"
+        },
+        "Bundle Box": {
+            "type": "loot box",
+            "rarity": "rare",
+            "description": "This has a 50% chance for 1 bread and 50% chance for an empowered fart bottle. If you get bread and are unhappy with this outcome, please email badosz@dankmemer.gg for a personal apology as this was his idea. If his personal apology is not to your liking, please let us know. (No refunds though)"
+        },
+        "Bunny's Apron": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "A handmade pink apron with bunny ears stitched to the pocket, finely crafted for Michelin Star chefs, it is mainly found in the Kitchen."
+        },
+        "Camera": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "A streamer item that helps you with amount of viewers."
+        },
+        "Candy": {
+            "type": "power-up",
+            "rarity": "common",
+            "description": "Consuming this candy will give you a random amount of coins. Yum!"
+        },
+        "Candy Cane": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "A tasty treat"
+        },
+        "Cell Phone": {
+            "type": "tool",
+            "rarity": "common",
+            "description": "Use your cell phone to text your friends via the notifications system, or ring the police in the case of an emergency or robbery. Your phone won't be removed on use, however mis-using it (such as dialing police when there's no emergency) may cost you money."
+        },
+        "Chill Pill": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "Just take a chill pill and relax, sheesh"
+        },
+        "Christmas Tree": {
+            "type": "collectable",
+            "rarity": "epic",
+            "description": "A beautiful Christmas tree, purely for collecting"
+        },
+        "Coin Bomb": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "A bomb that explodes coins for other people to pick up. Dispenses anywhere from ⏣ 2,000 - ⏣ 15,000 for other people on the server to pick up in chat. Basically used to get people active in chat and share some coins!"
+        },
+        "Common Fish": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Cookie": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This doesn't have any special functionality, it is just a cookie."
+        },
+        "Corncob": {
+            "type": "sellable",
+            "rarity": "uncommon",
+            "description": "A cob of corn, you should post it on cornhub!"
+        },
+        "Corndog": {
+            "type": "sellable",
+            "rarity": "uncommon",
+            "description": "A dog of corn, yum!"
+        },
+        "Credit Card": {
+            "type": "power-up",
+            "rarity": "epic",
+            "description": "You can use this card to \"buy\" someone 5 days of premium perks for Dank Memer. (The $2 perk value)"
+        },
+        "Crunchy Taco": {
+            "type": "power-up",
+            "rarity": "rare",
+            "description": "Eating this delicious taco will double your level up rewards for 24 hours. Found from the fast food worker job."
+        },
+        "Yeng Gang": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "A squishy paw that can relieve stress and make you smile. SQUISH! SQUISH! SQUISH!"
+        },
+        "Worm": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This worm is not alive, I think someone shot it? Who shoots a worm wtf. This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Winning Lottery Ticket": {
+            "type": "collectable",
+            "rarity": "epic",
+            "description": "This allows you to brag to your friends or enemies about winning the lottery, and also gives you a 2% higher chance at random events. The ultimate flex."
+        },
+        "Cupid's Big Toe": {
+            "type": "power-up",
+            "rarity": "common",
+            "description": "Applies a multiplier of 69% for 69 seconds. Limited time item for valentines day!"
+        },
+        "Wedding Gift": {
+            "type": "lootbox",
+            "rarity": "rare",
+            "description": "A gift for marrying someone!"
+        },
+        "Vaccine": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "Are we sure this is a vaccine and not some other drug? Found from the doctor job."
+        },
+        "Cursed Pepe": {
+            "type": "drop item",
+            "rarity": "rare",
+            "description": "A pepe that NOT EVEN a mother could love."
+        },
+        "Used Diaper": {
+            "type": "tool",
+            "rarity": "rare",
+            "description": "Throw this used diaper at someone to prevent them from joining or starting a heist for 12 hours. Found from the housewife job."
+        },
+        "Daily Box": {
+            "type": "loot box",
+            "rarity": "uncommon",
+            "description": "A reward for voting for Dank Memer! Using this box also gives you a 10 minute double xp boost."
+        },
+        "Trash": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This is an absolute trash item."
+        },
+        "Snowflake": {
+            "type": "collectable",
+            "rarity": "uncommon",
+            "description": "Every snowflake is unique... but not in this bot"
+        },
+        "Dank Box": {
+            "type": "loot box",
+            "rarity": "rare",
+            "description": "Dank rewards for a dank user"
+        },
+        "Toilet Paper": {
+            "type": "drop item",
+            "rarity": "legendary",
+            "description": "If we learned anything during the pandemic, it's that TP is VALUABLE"
+        },
+        "Tip Jar": {
+            "type": "tool",
+            "rarity": "rare",
+            "description": "You can check this tip jar once every hour! Sometimes you can find some neat stuff... Found from the streamer job."
+        },
+        "Tidepod": {
+            "type": "power-up",
+            "rarity": "uncommon",
+            "description": "Eat a Tidepod, risking your life to have the potential to gain a 50% multiplier for 2 whole hours."
+        },
+        "Deer": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Snowball": {
+            "type": "tool",
+            "rarity": "common",
+            "description": "Throw a snowball at someone else and prevent them from doing anything bad to you for a few minutes, like robbing you, or using negative items on you!"
+        },
+        "The Letter": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "A custom item containing a message from ANANT#5998, NotARSenic#0709 and Dauntless#0711. What's that message? Open it up to find out!"
+        },
+        "Dragon": {
+            "type": "sellable",
+            "rarity": "uncommon",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less. Unless..."
+        },
+        "Sugar Skull": {
+            "type": "drop item",
+            "rarity": "rare",
+            "description": "Día de los Muertos 2021 limited time item"
+        },
+        "Duck": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Sound Card": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "A meta streamer item that helps you get other streamer items"
+        },
+        "Duct Tape": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "This item is purely used in the craft command to bond items together!"
+        },
+        "Streak Freeze": {
+            "type": "power-up",
+            "rarity": "epic",
+            "description": "Using this item will turn it into an active item that lasts 30 days. After it's active, if you run daily after missing 1+ days you will retain your streak. This is automatically destroyed at that point."
+        },
+        "School Urinal": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "The most devious lick"
+        },
+        "Stonk Machine": {
+            "type": "tool",
+            "rarity": "rare",
+            "description": "Use this machine to try and earn some coins from stonk investment. Warning, there is a 10% chance to lose 10% of your wallet from a bad investment! Found from the day trader job."
+        },
+        "Seaweed": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Ectoplasm": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "Some gross ghost left their gunk everywhere, sell it! Found from the ghost job."
+        },
+        "Stickbug": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This stickbug is not alive, I think someone shot it? Is the meme really that annoying? This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Star Fragment": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "A fragment of a shooting star. I wonder what this can be used for?"
+        },
+        "Empowered Fart Bottle": {
+            "type": "tool",
+            "rarity": "rare",
+            "description": "A really POWERFULLY stinky bottle. You should NOT sniff it! (The same as a fart bottle but you cannot fail)"
+        },
+        "Stack of Cash": {
+            "type": "tradeable",
+            "rarity": "rare",
+            "description": "A tradeable item with the bot. Use it to trade for banknotes or pizzas. Found from the politician job."
+        },
+        "Spider": {
+            "type": "sellable",
+            "rarity": "uncommon",
+            "description": "This spider is not alive, I think someone shot it? Yeah that checks out, spiders suck. This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Enchanted Badosz's Card": {
+            "type": "drop item",
+            "rarity": "godly",
+            "description": "Perfectly balanced, as all things should be. Change your pet to any other type and keep their stats, consumed on use."
+        },
+        "Energy Drink": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "A delicious energy drink. Found from the pro gamer job."
+        },
+        "Santa's Bag": {
+            "type": "loot box",
+            "rarity": "legendary",
+            "description": "Santa has a bag full of goodies. Some pretty rares goodies too. Found from santa job."
+        },
+        "Engagement Ring": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "Propose to someone! Marriage has a lot of benefits and downsides, be careful!"
+        },
+        "Skunk": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Exotic Fish": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Patreon Pack": {
+            "type": "item pack",
+            "rarity": "rare",
+            "description": "A pack you get once per week for being a patron!"
+        },
+        "Santa's Hat": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "Equip santa's hat and turn all embed colors into Christmas themed colors!"
+        },
+        "Fake Id": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "Disguise your identity from robbers using a wishlist!"
+        },
+        "Shredded Cheese": {
+            "type": "power-up",
+            "rarity": "uncommon",
+            "description": "Dump an entire bag of shredded cheese into your face hole. For every bag of shredded cheese consumed, you get a stacking EXP multiplier, capping at 85% (30 bags of cheese consumed)."
+        },
+        "Shovel": {
+            "type": "tool",
+            "rarity": "common",
+            "description": "This shovel allows you to use the dig command, which can give you lots of different types of items!"
+        },
+        "Rare Pepe": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "The rare pepe is only used for collecting or flexing on normies who cannot afford one. Although basically anyone can afford one these days..."
+        },
+        "Fart In a Bottle": {
+            "type": "drop item",
+            "rarity": "uncommon",
+            "description": "A really stinky bottle. Should you sniff it? \"You're either a smart fella, or a fart smella.\" -TheLazyTownie"
+        },
+        "Shop Coupon": {
+            "type": "power-up",
+            "rarity": "rare",
+            "description": "You will have the option to use this at a shop checkout. You can get 5% off any purchase from the shop. Found from the shopkeeper job."
+        },
+        "Shooting Star": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "Make a wish! Or don't, I can't force you."
+        },
+        "Rare Fish": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Fidget Spinner": {
+            "type": "power-up",
+            "rarity": "uncommon",
+            "description": "Spin your fidget spinner, and gain anywhere from a 5% to a 40% multiplier boost for 10 minutes depending on how long your fidget spinner spins for."
+        },
+        "Royal Scepter": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "A royal scepter such as this is worth close to 50k gold carats, dang! You can either use this item to obtain royalty embedded colours or keep it in your collection."
+        },
+        "Fishing Bait": {
+            "type": "power-up",
+            "rarity": "rare",
+            "description": "While this item is active (1 hour), you will always find something while fishing. Found from the Fisherman job."
+        },
+        "Ornament": {
+            "type": "collectable",
+            "rarity": "uncommon",
+            "description": "qt little ornament for christmas"
+        },
+        "Robbers Wishlist": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "This item when used gives a list of users that aren't passive and do not have a fake ID on. Basically, anyone who is robbable :D"
+        },
+        "Patreon Box": {
+            "type": "loot box",
+            "rarity": "legendary",
+            "description": "This box is only for our loyal patrons! (Unless of course they choose to trade it)"
+        },
+        "Prestige Coin": {
+            "type": "power-up",
+            "rarity": "rare",
+            "description": "Earned from prestiging, use this coin to activate your post-prestige bonus multi. It gives you 6 hours worth of 350% multiplier."
+        },
+        "Robbers Mask": {
+            "type": "power-up",
+            "rarity": "rare",
+            "description": "Your name will not show up on steal or bankrob notifs sent to the victim for 12 hours after using. Found from the robber job."
+        },
+        "Fishing Pole": {
+            "type": "tool",
+            "rarity": "common",
+            "description": "This fishing pole allows you to use the fish command, which can give you lots of different types of items!"
+        },
+        "Ring Light": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "A streamer item that lowers your min time between stream interactions."
+        },
+        "Prestige Pack": {
+            "type": "item pack",
+            "rarity": "epic",
+            "description": "A pack to get you back on your feet after prestiging."
+        },
+        "Reversal Card": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "Reversal cards used to reverse a steal that someone performed on you. Due to being SUPER buggy and causing multiple exploits, they were removed. They are now back for those who already had them in their inventories, but not functional and just for collecting."
+        },
+        "Fool's Notif": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "Using this on a user will give them a fake notification that is ALMOST real, but can be told apart from the real thing if they look close enough..."
+        },
+        "Rabbit": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Purple Phallic Object": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "This is simply a collectable, and NOT for any type of use. ANY type of use guys, please."
+        },
+        "Fossil": {
+            "type": "sellable",
+            "rarity": "uncommon",
+            "description": "This fossil is obviously not alive. You should sell it and nothing else. Right?"
+        },
+        "Pet Collar": {
+            "type": "power-up",
+            "rarity": "rare",
+            "description": "Owning this item gives you double xp for pets! Found from the vet job."
+        },
+        "Fresh Bread": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "The best bread from our meme bakery"
+        },
+        "Literally a Karen": {
+            "type": "collectable",
+            "rarity": "karen",
+            "description": "The karens on this bot are really annoying. You know who they are."
+        },
+        "Literally a Tree": {
+            "type": "selling",
+            "rarity": "uncommon",
+            "description": "This is just a plain tree"
+        },
+        "Friend's Gift": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "This item is not able to be opened, only sent. Once you use it with pls use friend, the person who receives it will be able to open a Gift Box (Holiday lootbox)."
+        },
+        "Odd Eye": {
+            "type": "collectable",
+            "rarity": "godly",
+            "description": "This eye is odd, and fairly creepy. It has probably close to 20k veins, ew."
+        },
+        "Like Button": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "Like any other YouTuber, you should beg and collect these likes as much as you can. They are IMPORTANT TO BEING A GREAT YOUTUBER!!"
+        },
+        "Police Badge": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "A shunt police badge, found in the police station on the ground. Found from the police job."
+        },
+        "Pepe Trophy": {
+            "type": "collectable",
+            "rarity": "legendary",
+            "description": "Having this trophy gives you a 5% multiplier, an extra 10% steal shields, and an extra 5% chance at random events spawning (does not stack). Otherwise, it is used to flex on normies who cannot afford one!"
+        },
+        "Pepe Coin": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "This coin is primarily for flexing on normies who cannot afford one. Once upon a time it was the most expensive item on the bot!"
+        },
+        "Meteorite": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "A chunk of space rock with some interesting signs of life on it"
+        },
+        "Garbage": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This is an absolute garbage item."
+        },
+        "Pepe Sus": {
+            "type": "drop item",
+            "rarity": "legendary",
+            "description": "Pepe is looking a little SUS today."
+        },
+        "Pepe Crown": {
+            "type": "collectable",
+            "rarity": "godly",
+            "description": "Having this crown raises the max wallet to gamble to 100 million. This does not stack. This item doesn't have as much function as some other collectables, but has double the style."
+        },
+        "Gift Box": {
+            "type": "loot box",
+            "rarity": "rare",
+            "description": "A gift from a good friend"
+        },
+        "Pepe Medal": {
+            "type": "collectable",
+            "rarity": "epic",
+            "description": "Owning this medal gives you an extra 5% steal shields (does not stack). Otherwise, it is used to flex on normies who cannot afford one!"
+        },
+        "God Box": {
+            "type": "loot box",
+            "rarity": "epic",
+            "description": "What the hell this is op god tier box."
+        },
+        "Pepe Ribbon": {
+            "type": "drop-item",
+            "rarity": "epic",
+            "description": "A true flex to carry."
+        },
+        "Golden Corndog": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "A corndog... BUT ITS GOLDEN!"
+        },
+        "Pepe Statue": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "A neat collectable statue, looks very similar to a coin you can buy."
+        },
+        "Golden Phallic Object": {
+            "type": "collectable",
+            "rarity": "uncommon",
+            "description": "This is simply a collectable, and NOT for any type of use. ANY type of use guys, please."
+        },
+        "Green Screen": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "A streamer item that increases your revenue."
+        },
+        "Grind Pack": {
+            "type": "item pack",
+            "rarity": "rare",
+            "description": "A pack containing items to start your adventure with grinding."
+        },
+        "Lucky Horseshoe": {
+            "type": "power-up",
+            "rarity": "uncommon",
+            "description": "No one is sure exactly how much this increased your luck by, but it's different for each command! This affects hunt, fish, beg, search, crime, postmemes, steal, dig, and gamble!"
+        },
+        "Headphones": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "A streamer item that increases your max idle time."
+        },
+        "Legendary Fish": {
+            "type": "sellable",
+            "rarity": "uncommon",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Jellyfish": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Motivational Poster": {
+            "type": "power-up",
+            "rarity": "rare",
+            "description": "Provides a 5% work payout bonus, stacking up to 50%. Found from the manager job."
+        },
+        "Life Saver": {
+            "type": "power-up",
+            "rarity": "uncommon",
+            "description": "Having one in your inventory prevents death and uses one when you almost die. This is used BEFORE the apple's effects."
+        },
+        "Holiday Stocking": {
+            "type": "drop item",
+            "rarity": "rare",
+            "description": "A holiday 2021 limited time item from drop sales only"
+        },
+        "Law Degree": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "Anyone can be a lawyer these days, just sell them this! Found from the lawyer job."
+        },
+        "Hunting Rifle": {
+            "type": "tool",
+            "rarity": "common",
+            "description": "This hunting rifle allows you to use the hunt command, which can give you lots of different types of items!"
+        },
+        "Laptop": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "A collectible item that used to allow you access the postmemes command. A relic of the past."
+        },
+        "Kraken": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "This item’s purpose is to be collected or sold. Nothing more, nothing less..?"
+        },
+        "Jacky o' Lanty": {
+            "type": "collectable",
+            "rarity": "epic",
+            "description": "Equip this and turn all embed colors (the color on the side of embeds) into spooky season colors."
+        },
+        "Meme Box": {
+            "type": "loot box",
+            "rarity": "rare",
+            "description": "Something actually worth opening"
+        },
+        "Potato": {
+            "type": "sellable",
+            "rarity": "uncommon",
+            "description": "A good communist potato"
+        },
+        "Jar of Singularity": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "This could be important in the future..."
+        },
+        "Pizza Slice": {
+            "type": "power-up",
+            "rarity": "rare",
+            "description": "Eating this perfect pizza slice will give you +250% xp gains for an hour."
+        },
+        "Pink Phallic Object": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "Send people the gift of pink phallic shaped items. Using this will send it to the person of your choice's inventory for them to find later."
+        },
+        "Meme pills": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "Pills that have literally no function besides selling. Found from the pharmacist job."
+        },
+        "Junk": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This is an absolute junk item."
+        },
+        "Padlock": {
+            "type": "tool",
+            "rarity": "common",
+            "description": "Lock a padlock on your wallet to prevent people from robbing you. This is a one-time use item; once the lock is broken or removed, it won't come back or do anything unless you buy another one. It will not ALWAYS break, but it has a chance to break when someone tries to steal from you."
+        },
+        "Normie Box": {
+            "type": "loot box",
+            "rarity": "rare",
+            "description": "Can't get more basic than this"
+        },
+        "Keyboard": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "A basic streaming item!"
+        },
+        "Orange Phallic Object": {
+            "type": "collectable",
+            "rarity": "common",
+            "description": "This is simply a collectable, and NOT for any type of use. ANY type of use guys, please."
+        },
+        "New Player Pack": {
+            "type": "item pack",
+            "rarity": "rare",
+            "description": "A pack to get you started with Dank Memer."
+        },
+        "Melmsie's Beard": {
+            "type": "collectable",
+            "rarity": "epic",
+            "description": "Who shaved this off their face, that seems gross."
+        },
+        "Musical Note": {
+            "type": "sellable",
+            "rarity": "rare",
+            "description": "The record label did not want your music, so sell it to Dank Memer. Found from the musician job."
+        },
+        "Ladybug": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This ladybug is not alive, I think someone shot it? This smells stale as crap. This item's purpose is to be collected or sold. Nothing more, nothing less."
+        },
+        "Multi Colored Phallic Object": {
+            "type": "collectable",
+            "rarity": "rare",
+            "description": "This is simply a collectable, and NOT for any type of use. ANY type of use guys, please."
+        },
+        "Mouse": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "A basic streaming item!"
+        },
+        "Landmine": {
+            "type": "tool",
+            "rarity": "common",
+            "description": "If someone tries to steal from you there's a 50% chance they will die from blowing up. Lasts 24 hours."
+        },
+        "Microphone": {
+            "type": "tool",
+            "rarity": "uncommon",
+            "description": "A streamer item that helps you with stability of your stream."
+        },
+        "Ant": {
+            "type": "sellable",
+            "rarity": "common",
+            "description": "This ant is not alive, I think someone shot it? Who shoots an ant wtf. This item's purpose is to be collected or sold. Nothing more, nothing less."
+        }
+    },
+    "animals": [
+        "Dog",
+        "Cat",
+        "Elephant",
+        "Goat",
+        "Sheep",
+        "Giraffe",
+        "Zebra",
+        "Cow",
+        "Rat",
+        "Mouse",
+        "Donkey",
+        "Lion",
+        "Leopard",
+        "Chicken",
+        "Panda",
+        "Bear",
+        "Penguin",
+        "Frog",
+        "Turtle",
+        "Crocodile",
+        "Alligator",
+        "Monkey",
+        "Camel",
+        "Pig",
+        "Snail",
+        "Seal",
+        "Raccoon",
+        "Duck",
+        "Crab",
+        "Fox",
+        "Rabbit",
+        "Octopus",
+        "Whale",
+        "Caterpillar",
+        "Flamingo",
+        "Shark",
+        "Kangaroo",
+        "Buffalo",
+        "Hamster",
+        "Deer",
+        "Gorilla",
+        "Chimpanzee",
+        "Wolf",
+        "Hyena",
+        "Vulture",
+        "Rhinoceros",
+        "Ostrich",
+        "Hippopotamus",
+        "Human",
+        "Centipede",
+        "Dolphin",
+        "Platypus",
+        "Beaver",
+        "Crow",
+        "Lizard",
+        "Parrot",
+        "Cockroach",
+        "Cobra",
+        "Badger",
+        "Wolverine",
+        "Wasp",
+        "Bee",
+        "Moth",
+        "Tick",
+        "Dragonfly",
+        "Eel",
+        "Armadillo",
+        "Hedgehog",
+        "Guinea Pig",
+        "Ferret",
+        "Iguana",
+        "Jellyfish",
+        "Lionfish",
+        "Angelfish",
+        "Boa",
+        "Emu",
+        "Narwhal",
+        "Ant",
+        "Axolotl",
+        "Baboon",
+        "Swan",
+        "Eagle",
+        "Owl",
+        "Spider",
+        "Squid",
+        "Bat",
+        "Mussel",
+        "Clam",
+        "Butterfly",
+        "Lynx",
+        "Capybara",
+        "Chameleon",
+        "Gecko",
+        "Koala",
+        "Sloth",
+        "Coyote",
+        "Piranha",
+        "Jackal",
+        "Dingo",
+        "Dodo",
+        "Antelope",
+        "Mongoose",
+        "Kiwi",
+        "Horse",
+        "Meerkat",
+        "Leech",
+        "Maggot",
+        "Porcupine",
+        "Pigeon",
+        "Otter",
+        "Earthworm",
+        "Tapeworm",
+        "Ascaris",
+        "Starfish",
+        "Goose",
+        "Skunk",
+        "Mole"
+    ]
+}

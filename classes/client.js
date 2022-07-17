@@ -10,30 +10,7 @@ class Client {
         this.disabled = false;
         this.games = new Map();
         this.events = null;
-        this.nicknames = new Map();
-        this.setPrototypes();
-    }
-    setPrototypes() {
-        this.discord.DMChannel.prototype.say = async function (message) {
-            if (!message) return;
-            if (typeof message !== 'string') message = message.toString();
-            if (message.length > 2000) return this.send("Message is too big to send!");
-            await this.send(message);
-        };
-        this.discord.TextChannel.prototype.say = async function (message) {
-            if (!message) return;
-            if (typeof message !== 'string') message = message.toString();
-            if (message.length > 2000) return this.send("Message is too big to send!");
-            await this.send(message);
-        };
-        this.discord.User.prototype.say = async function (message) {
-            if (!message) return;
-            if (typeof message !== 'string') message = message.toString();
-            if (message.length > 2000) return this.send("Message is too big to send!");
-            await this.send(message);
-        };
-        this.discord.User.prototype.owner = false;
-        // this.discord.User.prototype.guild = this.discord.User.prototype.lastMessage && this.discord.User.prototype.lastMessage.member ? this.discord.User.prototype.lastMessage.member.guild : this.discord.User;
+        this.data = {};
     }
     connect() {
         try {
@@ -69,8 +46,6 @@ class Client {
             if (file.commands) {
                 for (const cmd in file.commands) {
                     if (!file.commands[cmd].desc) file.commands[cmd].desc = 'No description';
-                    if (!file.commands[cmd].aliases || (file.commands[cmd].aliases && !file.commands[cmd].aliases.length)) file.commands[cmd].aliases = ['No aliases'];
-                    if (!file.commands[cmd].hidden && (!file.commands[cmd].usage || !Array.isArray(file.commands[cmd].usage) || !file.commands[cmd].usage.length)) file.commands[cmd].usage = ['No usage set for this command.'];
                     this.commands.set(cmd, file.commands[cmd]);
                 }
             }
@@ -79,13 +54,14 @@ class Client {
     loadGames() {
         const gameFiles = fs.readdirSync('./games');
         for (const gameFile of gameFiles) {
-            if (!gameFile.endsWith('.js')) continue;
+            if (!gameFile.endsWith('.js') || gameFile === 'games.js') continue;
             const game = require('../games/' + gameFile);
             if (game.game) {
                 game.game.prototype.id = Tools.toId(game.game.name);
                 this.games.set(game.id, game.game);
             }
         }
+        global.Games = require('../games/games.js');
     }
 }
 module.exports = new Client();

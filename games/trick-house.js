@@ -1,0 +1,96 @@
+'use strict';
+
+const { MessageEmbed, MessageAttachment } = Client.discord;
+const fs = require('fs');
+
+class TrickHouse extends Games.Game {
+    constructor(interaction) {
+        super(interaction);
+        this.name = "Trick House";
+        this.description = `- Use the \`/choosedoor\` command to pick a door during the round.\n
+        - There will be a trap door chosen out of the 3 doors every time.\n
+        - If you've picked the trap door or no door, you will get eliminated.\n
+        - If only two players are left, there will only be 2 doors to pick from where both players must pick a unique door.\n
+        - It is possible everyone gets eliminated by picking the trap door and no one wins.`;
+        this.roundTime = 45;
+        this.roundTimer = null;
+        this.doors = [];
+        this.doorsId = [];
+        this.trap = '';
+        this.data = {};
+        this.init();
+    }
+    async loadData() {
+        this.data = JSON.parse(fs.readFileSync('./database/categories.json'));
+    }
+    onStart() {
+        super.onStart();
+        this.onNextRound();
+    }
+    onNextRound() {
+        const category = Object.keys(this.data).random();
+        if (!Array.isArray(this.data[category])) this.data[category] = Object.keys(this.data[category]);
+        this.data[category] = this.data[category].shuffle();
+        this.doors = this.data[category].slice(0, this.players.size === 2 ? 2 : 3);
+        this.doorsId = this.doors.map(Tools.toId);
+        this.update();
+        for (const player of this.players.keys()) {
+            this.players.set(player, 0);
+        }
+        this.canGuess = true;
+        this.roundTimer = setTimeout(async () => {
+            this.canGuess = false;
+            this.trap = this.doors.random();
+            const trap = new MessageAttachment('./images/trickhouse/trap.jpg');
+            const embed = new MessageEmbed()
+                .setTitle(`The trap door was... __${this.trap}__!`)
+                .setImage('attachment://trap.jpg')
+                .setTimestamp();
+            await this.channel.send({ embeds: [embed], files: [trap]});
+            for (const player of this.players) {
+                if (!this.doorsId.includes(player[1])) {
+                    this.onLeave(player[0]);
+                    this.channel.send(`<@${player[0]}> didn't pick a door and has been eliminated!`);
+                    continue;
+                }
+                if (player[1] === Tools.toId(this.trap)) {
+                    this.onLeave(player[0]);
+                    this.channel.send(`<@${player[0]}> fell into the trap door and has been eliminated!`);
+                }
+            }
+            if (this.players.size < 2) {
+                if (this.players.size) this.winner = this.players.keys().next().value;
+                return this.onEnd();
+            }
+            this.onNextRound();
+        }, this.roundTime * 1000);
+    }
+    onGuess(interaction) {
+        const choice = Tools.toId(interaction.options._hoistedOptions[0].value);
+        if (!this.doorsId.includes(choice)) return interaction.reply({ content: `Invalid choice! Current doors are: ${Tools.joinList(this.doors)}`, ephemeral: true });
+        if (this.players.get(interaction.user.id)) return interaction.reply({ content: "You have already picked a door!", ephemeral: true });
+        if (this.players.size === 2 && [...this.players.values()].filter(d => d !== 0)[0] === choice) return interaction.reply({ content: "Someone else has already picked that door! Please choose another.", ephemeral: true });
+        this.players.set(interaction.user.id, choice);
+        interaction.reply({ content: `You have chosen the door: ${this.doors[this.doorsId.indexOf(choice)]}`, ephemeral: true});
+    }
+    update() {
+        let players = [];
+        for (const player of this.players.keys()) {
+            players.push(`<@${player}>`);
+        }
+        const img = new MessageAttachment('./images/trickhouse/image.png');
+        const embed = new MessageEmbed()
+            .setTitle("Trick House")
+            .addField("Doors", Tools.joinList(this.doors))
+            .setImage('attachment://image.png')
+            .setTimestamp();
+        this.channel.send({ content: Tools.joinList(players), embeds: [embed], files: [img] });
+    }
+    onEnd() {
+        if (this.roundTimer) clearTimeout(this.roundTime);
+        super.onEnd();
+    }
+}
+
+exports.game = TrickHouse;
+exports.id = 'trickhouse';

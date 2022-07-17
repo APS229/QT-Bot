@@ -2,7 +2,7 @@
 
 class Tools {
 	constructor() {
-		// constants used in multiple functions
+		this.LETTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 	}
 	toId(text) {
 		if (!text) return '';
@@ -86,6 +86,14 @@ class Tools {
 			return preFormatting + list.slice(0, len).join(postFormatting + ", " + preFormatting) + postFormatting + ", " + conjunction +
 				" " + preFormatting + list[len] + postFormatting;
 		}
+	}
+    toNumberOrderString(input) {
+		const numberString = "" + input;
+		if (numberString.endsWith('11') || numberString.endsWith('12') || numberString.endsWith('13')) return numberString + "th";
+		if (numberString.endsWith('1')) return numberString + "st";
+		if (numberString.endsWith('2')) return numberString + "nd";
+		if (numberString.endsWith('3')) return numberString + "rd";
+		return numberString + "th";
 	}
 }
 module.exports = new Tools();

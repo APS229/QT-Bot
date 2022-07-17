@@ -1,0 +1,149 @@
+{
+    "Action": {
+        "emoji": "🎬",
+        "price": 0,
+        "position": -1
+    },
+    "Start": {
+        "emoji": "➡️",
+        "price": 0,
+        "position": 0
+    },
+    "Jail": {
+        "emoji": "⛓️",
+        "price": 0,
+        "position": 9
+    },
+    "Hotel": {
+        "emoji": "🏨",
+        "price": 0,
+        "position": 18
+    },
+    "Bank": {
+        "emoji": "🏦",
+        "price": 0,
+        "position": 27
+    },
+    "DR Headquarters": {
+        "emoji": "🏛️",
+        "price": 100,
+        "position": 1
+    },
+    "SPA Bot Factory": {
+        "emoji": "🏛️",
+        "price": 100,
+        "position": 2
+    },
+    "Ur Mom's House": {
+        "emoji": "🏛️",
+        "price": 100,
+        "position": 4
+    },
+    "Mt. Everest": {
+        "emoji": "⛰️",
+        "price": 200,
+        "position": 5
+    },
+    "Mt. Fuji": {
+        "emoji": "⛰️",
+        "price": 200,
+        "position": 14
+    },
+    "Mt. Kilimanjaro": {
+        "emoji": "⛰️",
+        "price": 200,
+        "position": 23
+    },
+    "Mt. Olympus": {
+        "emoji": "⛰️",
+        "price": 200,
+        "position": 32
+    },
+    "Blue Grotto": {
+        "emoji": "🕳️",
+        "price": 150,
+        "position": 7
+    },
+    "Fingal's Cave": {
+        "emoji": "🕳️",
+        "price": 150,
+        "position": 8
+    },
+    "Niagara Falls": {
+        "emoji": "💦",
+        "price": 200,
+        "position": 10
+    },
+    "Victoria Falls": {
+        "emoji": "💦",
+        "price": 200,
+        "position": 11
+    },
+    "Angel Falls": {
+        "emoji": "💦",
+        "price": 200,
+        "position": 13
+    },
+    "Nile River": {
+        "emoji": "🏊",
+        "price": 250,
+        "position": 16
+    },
+    "Mississippi River": {
+        "emoji": "🏊",
+        "price": 250,
+        "position": 17
+    },
+    "Amazon Rainforest": {
+        "emoji": "🌲",
+        "price": 300,
+        "position": 19
+    },
+    "Black Forest": {
+        "emoji": "🌲",
+        "price": 300,
+        "position": 20
+    },
+    "Wistman's Wood": {
+        "emoji": "🌲",
+        "price": 300,
+        "position": 22
+    },
+    "Maldives Island": {
+        "emoji": "🏝️",
+        "price": 350,
+        "position": 25
+    },
+    "Santorini Island": {
+        "emoji": "🏝️",
+        "price": 350,
+        "position": 26
+    },
+    "Sahara Desert": {
+        "emoji": "🏜️",
+        "price": 400,
+        "position": 28
+    },
+    "Mojave Desert": {
+        "emoji": "🏜️",
+        "price": 400,
+        "position": 29
+    },
+    "Gobi Desert": {
+        "emoji": "🏜️",
+        "price": 400,
+        "position": 31
+    },
+    "Eiffel Tower": {
+        "emoji": "🗼",
+        "price": 500,
+        "position": 34,
+        "type": "wonder"
+    },
+    "Taj Mahal": {
+        "emoji": "🕌",
+        "price": 500,
+        "position": 35,
+        "type": "wonder"
+    }
+}

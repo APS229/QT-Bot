@@ -8,6 +8,8 @@ global.Events = require('./classes/events.js');
 
 global.Config = require('./config.js');
 
+global.Games = require('./games/games.js');
+
 global.Request = require('request');
 
 const PG = require('pg').Client;
@@ -36,6 +38,7 @@ Array.prototype.times = function (element) {
     return this.filter(e => e == element).length;
 };
 Array.prototype.shuffle = function () {
+    const array = this;
     let currentIndex = this.length, randomIndex;
 
     // While there remain elements to shuffle...
@@ -46,9 +49,10 @@ Array.prototype.shuffle = function () {
         currentIndex--;
 
         // And swap it with the current element.
-        [this[currentIndex], this[randomIndex]] = [
-            this[randomIndex], this[currentIndex]];
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
     }
+    return array;
 }
 
 process.on('uncaughtException', error => {
@@ -57,13 +61,12 @@ process.on('uncaughtException', error => {
 
 try {
     require('colors');
-    require.resolve('youtube-api');
 }
 catch (e) {
     console.log("Dependencies are not installed, run `npm install` to install.");
     process.exit();
 }
-if (!Config.token || !Config.cmdchar) {
+if (!Config.token) {
     console.log("You need to fill out the config.js file.");
     process.exit(-1);
 }
