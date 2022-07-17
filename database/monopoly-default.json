@@ -2,137 +2,164 @@
     "Action": {
         "emoji": "🎬",
         "price": 0,
-        "position": -1
+        "position": -1,
+        "type": "action"
     },
     "Start": {
         "emoji": "➡️",
         "price": 0,
-        "position": 0
+        "position": 0,
+        "type": "corner"
     },
     "Jail": {
         "emoji": "⛓️",
         "price": 0,
-        "position": 9
+        "position": 9,
+        "type": "corner"
     },
     "Hotel": {
         "emoji": "🏨",
         "price": 0,
-        "position": 18
+        "position": 18,
+        "type": "corner"
     },
     "Bank": {
         "emoji": "🏦",
         "price": 0,
-        "position": 27
+        "position": 27,
+        "type": "corner"
     },
     "DR Headquarters": {
         "emoji": "🏛️",
         "price": 100,
-        "position": 1
+        "position": 1,
+        "type": "casual"
     },
     "SPA Bot Factory": {
         "emoji": "🏛️",
         "price": 100,
-        "position": 2
+        "position": 2,
+        "type": "casual"
     },
     "Ur Mom's House": {
         "emoji": "🏛️",
         "price": 100,
-        "position": 4
+        "position": 4,
+        "type": "casual"
     },
     "Mt. Everest": {
         "emoji": "⛰️",
         "price": 200,
-        "position": 5
+        "position": 5,
+        "type": "mountain"
     },
     "Mt. Fuji": {
         "emoji": "⛰️",
         "price": 200,
-        "position": 14
+        "position": 14,
+        "type": "mountain"
     },
     "Mt. Kilimanjaro": {
         "emoji": "⛰️",
         "price": 200,
-        "position": 23
+        "position": 23,
+        "type": "mountain"
     },
     "Mt. Olympus": {
         "emoji": "⛰️",
         "price": 200,
-        "position": 32
+        "position": 32,
+        "type": "mountain"
     },
     "Blue Grotto": {
         "emoji": "🕳️",
         "price": 150,
-        "position": 7
+        "position": 7,
+        "type": "cave"
     },
     "Fingal's Cave": {
         "emoji": "🕳️",
         "price": 150,
-        "position": 8
+        "position": 8,
+        "type": "cave"
     },
     "Niagara Falls": {
         "emoji": "💦",
         "price": 200,
-        "position": 10
+        "position": 10,
+        "type": "waterfall"
     },
     "Victoria Falls": {
         "emoji": "💦",
         "price": 200,
-        "position": 11
+        "position": 11,
+        "type": "waterfall"
     },
     "Angel Falls": {
         "emoji": "💦",
         "price": 200,
-        "position": 13
+        "position": 13,
+        "type": "waterfall"
     },
     "Nile River": {
         "emoji": "🏊",
         "price": 250,
-        "position": 16
+        "position": 16,
+        "type": "river"
     },
     "Mississippi River": {
         "emoji": "🏊",
         "price": 250,
-        "position": 17
+        "position": 17,
+        "type": "river"
     },
     "Amazon Rainforest": {
         "emoji": "🌲",
         "price": 300,
-        "position": 19
+        "position": 19,
+        "type": "forest"
     },
     "Black Forest": {
         "emoji": "🌲",
         "price": 300,
-        "position": 20
+        "position": 20,
+        "type": "forest"
     },
     "Wistman's Wood": {
         "emoji": "🌲",
         "price": 300,
-        "position": 22
+        "position": 22,
+        "type": "forest"
     },
     "Maldives Island": {
         "emoji": "🏝️",
         "price": 350,
-        "position": 25
+        "position": 25,
+        "type": "island"
     },
     "Santorini Island": {
         "emoji": "🏝️",
         "price": 350,
-        "position": 26
+        "position": 26,
+        "type": "island"
     },
     "Sahara Desert": {
         "emoji": "🏜️",
         "price": 400,
-        "position": 28
+        "position": 28,
+        "type": "desert"
     },
     "Mojave Desert": {
         "emoji": "🏜️",
         "price": 400,
-        "position": 29
+        "position": 29,
+        "type": "desert"
     },
     "Gobi Desert": {
         "emoji": "🏜️",
         "price": 400,
-        "position": 31
+        "position": 31,
+        "type": "desert"
     },
     "Eiffel Tower": {
         "emoji": "🗼",
