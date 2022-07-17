@@ -92,5 +92,5 @@ class RussianRoulette extends Games.Game {
     }
 }
 
-exports.game = RussianRoulette;
-exports.id = 'russianroulette';
+// exports.game = RussianRoulette;
+// exports.id = 'russianroulette';
