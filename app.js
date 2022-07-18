@@ -6,7 +6,7 @@ global.Client = require('./classes/client.js');
 
 global.Events = require('./classes/events.js');
 
-global.Config = require('./config.js');
+global.Config = require('./config/config.js');
 
 global.Games = require('./games/games.js');
 
