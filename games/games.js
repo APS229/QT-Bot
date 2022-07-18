@@ -50,7 +50,7 @@ class Game {
                 )
             );
         }
-        else {
+        if (this.points) {
             startMessage.embeds[0].addField("__Points required to win__", `${this.points}`);
         }
         this.startMessage = await this.channel.send(startMessage);

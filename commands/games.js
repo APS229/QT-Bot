@@ -11,16 +11,23 @@ const commands = {
                 name: 'game',
                 description: "The game that you want to create.",
                 required: true
+            },
+            {
+                type: 'INTEGER',
+                name: 'points',
+                description: "Points required to win.",
             }
         ],
         modOnly: true,
         desc: "Starts a new game of the specified game.",
         execute(interaction) {
-            if (Client.activeGame) return interaction.reply(`There's already a game of ${Client.activeGame.name} going on in ${Client.activeGame.channel.name}.`);
+            if (Client.activeGame) return interaction.reply({ content: `There's already a game of ${Client.activeGame.name} going on in <#${Client.activeGame.channel.id}>.`, ephemeral: true });
             const target = Tools.toId(interaction.options._hoistedOptions[0].value);
-            if (!Client.games.has(target)) return interaction.reply(`${target} is not a valid game.\nAvailable games: ${[...Client.games.keys()].join(', ')}`);
+            const points = interaction.options._hoistedOptions[1].value;
+            if (!Client.games.has(target)) return interaction.reply({ content: `${target} is not a valid game.\nAvailable games: ${[...Client.games.keys()].join(', ')}`, ephemeral: true });
+            if (points > 15 || points < 5) return interaction.reply({ content: "Points must be between 5 - 15.", ephemeral: true });
             const game = Client.games.get(target);
-            Client.activeGame = new game(interaction);
+            Client.activeGame = new game(interaction, points);
             interaction.reply({ content: `Successfully created a new game of ${Client.activeGame.name}!`, ephemeral: true });
         }
     },
