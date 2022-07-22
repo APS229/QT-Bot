@@ -22,7 +22,7 @@ class Events {
                 commands.push({ name: command[0], description: command[1].desc, options: command[1].options });
             }
             this.bot.guilds.fetch('777956702741463070').then(guild => {
-                guild.commands.set(commands.splice(commands.indexOf(commands.find(c => c.name === 'nickname')), 1));
+                guild.commands.set(commands);
             });
             this.bot.guilds.fetch('895344237204369458').then(guild => {
                 guild.commands.set(commands);
