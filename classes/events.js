@@ -24,6 +24,9 @@ class Events {
             this.bot.guilds.fetch('777956702741463070').then(guild => {
                 guild.commands.set(commands);
             });
+            this.bot.guilds.fetch('895344237204369458').then(guild => {
+                guild.commands.set(commands);
+            });
         });
         this.bot.on('shardError', err => {
             console.error(err);
