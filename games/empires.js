@@ -67,7 +67,7 @@ class Empires extends Games.Game {
     }
     async onGuess(interaction) {
         if (this.turn !== interaction.user.id) return interaction.reply({ content: "It's not your turn.", ephemeral: true });
-        const userid = interaction.options._hoistedOptions[0].user.id, alias = interaction.options._hoistedOptions[1].value;
+        const userid = interaction.options._hoistedOptions[0].user.id, alias = Tools.toId(interaction.options._hoistedOptions[1].value);
         if (userid === interaction.user.id) return interaction.reply("You cannot guess your own self...");
         if (![...this.aliases.values()].includes(alias)) return interaction.reply("Not an alias.");
         if (!this.players.has(userid)) return interaction.reply("User not in game.");

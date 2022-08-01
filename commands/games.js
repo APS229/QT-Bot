@@ -125,7 +125,7 @@ const commands = {
             if (!Client.activeGame.started) return interaction.reply({ content: "The game must start before choosing aliases.", ephemeral: true });
             if (!Client.activeGame.players.has(interaction.user.id)) return interaction.reply({ content: "You are not in the current game of Empires.", ephemeral: true });
             if (Client.activeGame.setAliases) return interaction.reply({ content: "You cannot change your alias now.", ephemeral: true });
-            const alias = interaction.options._hoistedOptions[0].value;
+            const alias = Tools.toId(interaction.options._hoistedOptions[0].value);
             if ([...Client.activeGame.aliases.values()].includes(alias)) return interaction.reply({ content: "Somebody else has already picked that alias, please choose another.", ephemeral: true });
             if (alias.length > 16 || alias.length < 3) return interaction.reply({ content: "Alias too big or too short.", ephemeral: true });
             Client.activeGame.setAlias(interaction.user.id, alias);
