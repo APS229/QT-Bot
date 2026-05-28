@@ -33,7 +33,7 @@ class Empires extends Games.Game {
                     this.onLeave(player);
                 }
             }
-            if (!this.players.size) {
+            if (this.players.size < 2) {
                 return this.onEnd();
             }
             this.turn = [...this.players.keys()].random();
@@ -96,12 +96,12 @@ class Empires extends Games.Game {
         }
 
         clearTimeout(this.playerTimer);
-        if (this.aliases.get(userId) === alias) {
-            await interaction.reply(`Correct! <@${userId}> (${alias}) has been eliminated.`);
+        if (this.aliases.get(this.guess.userId) === this.guess.alias) {
+            await interaction.reply(`Correct! <@${this.guess.userId}> (${this.guess.alias}) has been eliminated.`);
             if (!this.started) return;
             clearTimeout(this.playerTimer);
-            this.players.delete(userId);
-            this.aliases.delete(userId);
+            this.players.delete(this.guess.userId);
+            this.aliases.delete(this.guess.userId);
             if (this.players.size < 2) {
                 this.winner = interaction.member.id;
                 return this.onEnd();
@@ -112,7 +112,7 @@ class Empires extends Games.Game {
             await interaction.reply("Incorrect...");
             if (!this.started) return;
             clearTimeout(this.playerTimer);
-            this.turn = userId;
+            this.turn = this.guess.userId;
             this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
         }
         this.guess = {};
@@ -145,10 +145,6 @@ class Empires extends Games.Game {
                 .setValue(playerId)
             );
         }
-        playerOptions.push(new StringSelectMenuOptionBuilder()
-            .setLabel('ccc')
-            .setValue('838501697299021825')
-        );
         const guessPlayerMenu = new StringSelectMenuBuilder()
             .setCustomId('selectplayer')
             .setPlaceholder("Select a player")
@@ -161,14 +157,6 @@ class Empires extends Games.Game {
                 .setValue(alias)
             );
         }
-        aliasOptions.push(new StringSelectMenuOptionBuilder()
-            .setLabel('bbb')
-            .setValue('bbb')
-        );
-        aliasOptions.push(new StringSelectMenuOptionBuilder()
-            .setLabel('ccc')
-            .setValue('ccc')
-        );
         const guessAliasMenu = new StringSelectMenuBuilder()
             .setCustomId('selectalias')
             .setPlaceholder("Select an alias")

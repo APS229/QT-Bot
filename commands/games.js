@@ -131,7 +131,7 @@ const commands = {
             {
                 type: OptionTypes.STRING,
                 name: 'alias',
-                description: "Alias for the game of Empires. (max length 10 characters)",
+                description: "Alias for the game of Empires. (3 to 15 characters)",
                 required: true
             }
         ],
@@ -145,7 +145,7 @@ const commands = {
             if (!pickedAlias) return interaction.reply("Your alias must be anonymous, please use the slash command.");
             const alias = Tools.toId(pickedAlias);
             if ([...Client.activeGame.aliases.values()].includes(alias)) return interaction.reply({ content: "Somebody else has already picked that alias, please choose another.", flags: 'Ephemeral' });
-            if (alias.length > 16 || alias.length < 3) return interaction.reply({ content: "Alias too big or too short.", flags: 'Ephemeral' });
+            if (alias.length > 16 || alias.length < 3) return interaction.reply({ content: "Alias must be longer than 2 characters and shorter than 16 characters.", flags: 'Ephemeral' });
             Client.activeGame.setAlias(interaction.member.id, alias);
             interaction.reply({ content: `Your alias has been set to: ${alias}`, flags: 'Ephemeral' });
         }
