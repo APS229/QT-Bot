@@ -137,7 +137,11 @@ class Empires extends Games.Game {
             .setTitle("Empires")
             .addFields({ name: "__Players__", value: players, inline: true })
             .addFields({ name: "__Aliases__", value: aliases, inline: true })
-            .setTimestamp();
+            .setTimestamp()
+            .setFooter({
+                text: `${Config.username}`,
+                iconURL: Config.avatarURL
+            });
 
         const playerOptions = [];
         for (const [playerId, playerTag] of this.players.entries()) {

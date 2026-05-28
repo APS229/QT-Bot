@@ -63,15 +63,16 @@ class Edges extends Games.PuzzleGame {
         }
     }
     update() {
-        let players = "";
-        for (const player of this.players.entries()) {
-            players += `<@${player[0]}>: ${player[1]}\n`;
-        }
+        const players = [...this.players.entries()].map(([player, playerPoints]) => `<@${player}>: ${playerPoints}`).join('\n');
         const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
             .setTitle(this.puzzle)
             .setDescription(`**Category:** ${this.category}`)
-            .setTimestamp();
+            .setTimestamp()
+            .setFooter({
+                text: `${Config.username}`,
+                iconURL: Config.avatarURL
+            });
         if (players) embed.addFields({ name: "Players", value: players });
         this.channel.send({ embeds: [embed] });
     }

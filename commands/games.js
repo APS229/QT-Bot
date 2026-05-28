@@ -93,7 +93,7 @@ const commands = {
         desc: "Lists all players in the current game.",
         execute(interaction) {
             if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
-            const players = [...Client.activeGame.players.keys()].map(player => player = `<@${player}>`).join('\n');
+            const players = [...Client.activeGame.players.keys()].map(player => `<@${player}>`).join('\n');
             const embed = new EmbedBuilder()
                 .setTitle(`Players (${Client.activeGame.players.size})`)
                 .setDescription(players || "None")
@@ -110,8 +110,13 @@ const commands = {
         desc: "Starts the current game.",
         execute(interaction) {
             if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
+            if (Client.activeGame.freejoin) return interaction.reply({ content: "This game is free to play, you don't have to start it.", flags: 'Ephemeral' });
             if (Client.activeGame.started) return interaction.reply({ content: "The game has already been started.", flags: 'Ephemeral' });
-            if (Client.activeGame.players.size < Client.activeGame.requiredPlayers) return interaction.reply({ content: `The game needs at least ${Client.activeGame.requiredPlayers} players to start!`, flags: 'Ephemeral' });
+            if (Client.activeGame.players.size < Client.activeGame.requiredPlayers) return interaction.reply(
+                {
+                    content: `The game needs at least ${Client.activeGame.requiredPlayers} players to start!`,
+                    flags: 'Ephemeral'
+                });
             interaction.reply(`<@${interaction.member.id}> has started the game of ${Client.activeGame.name}.`);
             Client.activeGame.onStart();
         }

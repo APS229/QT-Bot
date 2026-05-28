@@ -45,19 +45,23 @@ class TrickHouse extends Games.Game {
             const embed = new EmbedBuilder()
                 .setTitle(`The trap door was... __${this.trap}__!`)
                 .setImage('attachment://trap.jpg')
-                .setTimestamp();
+                .setTimestamp()
+                .setFooter({
+                    text: `${Config.username}`,
+                    iconURL: Config.avatarURL
+                });
             await this.channel.send({ embeds: [embed], files: [trap] });
             if (!this.started) return;
 
-            for (const player of this.players) {
-                if (!this.doorsId.includes(player[1])) {
-                    this.onLeave(player[0]);
-                    this.channel.send(`<@${player[0]}> didn't pick a door and has been eliminated!`);
+            for (const [playerId, playerChoice] of this.players.entries()) {
+                if (!this.doorsId.includes(playerChoice)) {
+                    this.onLeave(playerId);
+                    this.channel.send(`<@${playerId}> didn't pick a door and has been eliminated!`);
                     continue;
                 }
-                if (player[1] === Tools.toId(this.trap)) {
-                    this.onLeave(player[0]);
-                    this.channel.send(`<@${player[0]}> fell into the trap door and has been eliminated!`);
+                if (playerChoice === Tools.toId(this.trap)) {
+                    this.onLeave(playerId);
+                    this.channel.send(`<@${playerId}> fell into the trap door and has been eliminated!`);
                 }
             }
             if (this.players.size < 2) {
@@ -76,16 +80,17 @@ class TrickHouse extends Games.Game {
         interaction.reply({ content: `You have chosen the door: ${this.doors[this.doorsId.indexOf(choice)]}`, flags: 'Ephemeral' });
     }
     update() {
-        let players = [];
-        for (const player of this.players.keys()) {
-            players.push(`<@${player}>`);
-        }
+        const players = [...this.players.keys()].map(player => `<@${player}>`);
         const img = new AttachmentBuilder('./images/trickhouse/image.png');
         const embed = new EmbedBuilder()
             .setTitle("Trick House")
             .addFields({ name: "Doors", value: Tools.joinList(this.doors) })
             .setImage('attachment://image.png')
-            .setTimestamp();
+            .setTimestamp()
+            .setFooter({
+                text: `${Config.username}`,
+                iconURL: Config.avatarURL
+            });
         this.channel.send({ content: Tools.joinList(players), embeds: [embed], files: [img] });
     }
 }

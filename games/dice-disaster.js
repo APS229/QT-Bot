@@ -55,8 +55,8 @@ class DiceDisaster extends Games.Game {
         }, this.roundTime * 1000);
     }
     onGuess(interaction) {
-        const bid = interaction.options._hoistedOptions[0].value;
-        if (bid > 100 || bid < 1) return interaction.reply({ content: "Your bid must be a number between 1 - 100.", flags: 'Ephemeral' });
+        const bid = interaction.options ? interaction.options._hoistedOptions[0].value : parseInt(interaction.content.split(' ')[1]);
+        if (!bid || bid > 100 || bid < 1) return interaction.reply({ content: "Your bid must be a number from 1 - 100.", flags: 'Ephemeral' });
         if (this.bidder.bid >= bid) return interaction.reply({ content: `<@${this.bidder.id}> has a higher bid with ${this.bidder.bid}!`, flags: 'Ephemeral' });
         this.bidder.id = interaction.member.id;
         this.bidder.bid = bid;
@@ -83,13 +83,17 @@ class DiceDisaster extends Games.Game {
         const embed = new EmbedBuilder()
             .setTitle("Dice Disaster")
             .setDescription("Bid a number 1 - 100")
-            .setTimestamp();
-        this.channel.send({ content: Tools.joinList([...this.players.keys()].map(p => '<@' + p + '>')), embeds: [embed] });
+            .setTimestamp()
+            .setFooter({
+                text: `${Config.username}`,
+                iconURL: Config.avatarURL
+            });
+        this.channel.send({ content: Tools.joinList([...this.players.keys()].map(p => `<@${p}>`)), embeds: [embed] });
     }
     onLeave(userId) {
         super.onLeave(userId);
-        if (this.players.size === 1) {
-            this.winner = this.players.keys().next().value;
+        if (this.players.size < 2) {
+            this.winner = this.players.keys().next()?.value;
             this.onEnd();
         }
     }
