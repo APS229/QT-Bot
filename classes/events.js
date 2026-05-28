@@ -56,24 +56,24 @@ class Events {
                     res.on('end', () => message.reply(data));
                 });
             }
-            const command = Client.commands.get(messageContent.split(' ')[0].slice(1).toLowerCase());
-            if (messageContent.startsWith(Config.cmdchar) && command) {
-                if (Client.restart && !command.devOnly) return message.reply("The bot is currently set up to restart. You cannot run any commands during the restart.");
-                if (command.devOnly && !Config.developers.includes(message.member.id)) return message.reply("This command is only for developers.");
-                if (command.modOnly && !message.member.permissions.toArray().includes('ManageRoles') && !Config.developers.includes(message.member.id)) {
-                    return message.reply("You don't have permission to use this command.");
-                }
-                if (command.execute) command.execute(message);
-            }
-            if (!Client.activeGame?.canGuess || !message.content.toLowerCase().startsWith('guess ') || Client.activeGame.channel.id !== message.channel.id) return;
-            if (Client.activeGame?.type !== 'puzzle' && Client.activeGame?.id !== 'russianroulette') return;
             try {
+                const command = Client.commands.get(messageContent.split(' ')[0].slice(1).toLowerCase());
+                if (messageContent.startsWith(Config.cmdchar) && command) {
+                    if (Client.restart && !command.devOnly) return message.reply("The bot is currently set up to restart. You cannot run any commands during the restart.");
+                    if (command.devOnly && !Config.developers.includes(message.member.id)) return message.reply("This command is only for developers.");
+                    if (command.modOnly && !message.member.permissions.toArray().includes('ManageRoles') && !Config.developers.includes(message.member.id)) {
+                        return message.reply("You don't have permission to use this command.");
+                    }
+                    if (command.execute) command.execute(message);
+                }
+                if (!Client.activeGame?.canGuess || !messageContent.toLowerCase().startsWith('guess ') || Client.activeGame.channel.id !== message.channel.id) return;
+                if (Client.activeGame?.type !== 'puzzle' && Client.activeGame?.id !== 'russianroulette') return;
                 Client.activeGame.onGuess(message.member.id, Tools.toId(messageContent.slice(6)));
             }
             catch (err) {
                 message.channel.send(`There was an error occured.`);
                 if (Client.activeGame) Client.activeGame.onEnd();
-                console.log(err);
+                console.error(err);
             }
         });
         this.bot.on(DiscordEvents.InteractionCreate, interaction => {
@@ -96,7 +96,7 @@ class Events {
             catch (err) {
                 interaction.reply(`There was an error occured.`);
                 if (Client.activeGame) Client.activeGame.onEnd();
-                console.log(err);
+                console.error(err);
             }
         });
 

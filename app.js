@@ -40,7 +40,11 @@ Array.prototype.shuffle = function () {
 }
 
 process.on('uncaughtException', error => {
-    console.log(error);
+    console.error(error);
+});
+
+process.on('unhandledRejection', reason => {
+    console.error(reason);
 });
 
 try {
