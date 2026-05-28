@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, MessageAttachment } = Client.discord;
+const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const fs = require('fs');
 
 class TrickHouse extends Games.Game {
@@ -41,12 +41,14 @@ class TrickHouse extends Games.Game {
         this.roundTimer = setTimeout(async () => {
             this.canGuess = false;
             this.trap = this.doors.random();
-            const trap = new MessageAttachment('./images/trickhouse/trap.jpg');
-            const embed = new MessageEmbed()
+            const trap = new AttachmentBuilder('./images/trickhouse/trap.jpg');
+            const embed = new EmbedBuilder()
                 .setTitle(`The trap door was... __${this.trap}__!`)
                 .setImage('attachment://trap.jpg')
                 .setTimestamp();
-            await this.channel.send({ embeds: [embed], files: [trap]});
+            await this.channel.send({ embeds: [embed], files: [trap] });
+            if (!this.started) return;
+
             for (const player of this.players) {
                 if (!this.doorsId.includes(player[1])) {
                     this.onLeave(player[0]);
@@ -66,29 +68,25 @@ class TrickHouse extends Games.Game {
         }, this.roundTime * 1000);
     }
     onGuess(interaction) {
-        const choice = Tools.toId(interaction.options._hoistedOptions[0].value);
-        if (!this.doorsId.includes(choice)) return interaction.reply({ content: `Invalid choice! Current doors are: ${Tools.joinList(this.doors)}`, ephemeral: true });
-        if (this.players.get(interaction.user.id)) return interaction.reply({ content: "You have already picked a door!", ephemeral: true });
-        if (this.players.size === 2 && [...this.players.values()].filter(d => d !== 0)[0] === choice) return interaction.reply({ content: "Someone else has already picked that door! Please choose another.", ephemeral: true });
-        this.players.set(interaction.user.id, choice);
-        interaction.reply({ content: `You have chosen the door: ${this.doors[this.doorsId.indexOf(choice)]}`, ephemeral: true});
+        const choice = Tools.toId(interaction.options?._hoistedOptions[0].value || interaction.content.split(' ')[1]);
+        if (!this.doorsId.includes(choice)) return interaction.reply({ content: `Invalid choice! Current doors are: ${Tools.joinList(this.doors)}`, flags: 'Ephemeral' });
+        if (this.players.get(interaction.member.id)) return interaction.reply({ content: "You have already picked a door!", flags: 'Ephemeral' });
+        if (this.players.size === 2 && [...this.players.values()].filter(d => d !== 0)[0] === choice) return interaction.reply({ content: "Someone else has already picked that door! Please choose another.", flags: 'Ephemeral' });
+        this.players.set(interaction.member.id, choice);
+        interaction.reply({ content: `You have chosen the door: ${this.doors[this.doorsId.indexOf(choice)]}`, flags: 'Ephemeral' });
     }
     update() {
         let players = [];
         for (const player of this.players.keys()) {
             players.push(`<@${player}>`);
         }
-        const img = new MessageAttachment('./images/trickhouse/image.png');
-        const embed = new MessageEmbed()
+        const img = new AttachmentBuilder('./images/trickhouse/image.png');
+        const embed = new EmbedBuilder()
             .setTitle("Trick House")
-            .addField("Doors", Tools.joinList(this.doors))
+            .addFields({ name: "Doors", value: Tools.joinList(this.doors) })
             .setImage('attachment://image.png')
             .setTimestamp();
         this.channel.send({ content: Tools.joinList(players), embeds: [embed], files: [img] });
-    }
-    onEnd() {
-        if (this.roundTimer) clearTimeout(this.roundTime);
-        super.onEnd();
     }
 }
 

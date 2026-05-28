@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageActionRow, MessageAttachment, MessageButton, MessageEmbed } = Client.discord;
+const { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 
 class Game {
@@ -12,10 +12,11 @@ class Game {
         this.players = new Map();
         this.freejoin = false;
         this.winner = null;
-        this.requiredPlayers = 2;
+        this.requiredPlayers = 1;
         this.maxPlayers = 20;
-        this.host = { id: interaction.user.id, icon: interaction.user.avatarURL() };
-        this.channel = interaction.member.guild.channels.cache.get(interaction.channelId);
+        const hostUser = interaction.user || interaction.author;
+        this.host = { tag: hostUser.tag, id: hostUser.id, icon: hostUser.avatarURL() };
+        this.channel = interaction.channel;
     }
     async init() {
         if (!Object.keys(Client.data)?.length) {
@@ -24,34 +25,34 @@ class Game {
             message.edit("Game data successfully loaded!");
         }
         if (this.loadData) await this.loadData();
-        const img = new MessageAttachment(`./images/${this.id}/image.png`);
-        const thumbnail = new MessageAttachment(`./images/${this.id}/thumbnail.png`);
+        const img = new AttachmentBuilder(`./images/${this.id}/image.png`);
+        const thumbnail = new AttachmentBuilder(`./images/${this.id}/thumbnail.png`);
         const startMessage = { embeds: [], files: [img, thumbnail], components: [] };
-        startMessage.embeds.push(new MessageEmbed()
+        startMessage.embeds.push(new EmbedBuilder()
             .setColor('#FFFFFF')
             .setTitle(this.name)
             .setDescription("**__Tips__**\n\n" + this.description)
             .setImage('attachment://image.png')
             .setThumbnail('attachment://thumbnail.png')
             .setTimestamp()
-            .setFooter({ text: `Started by ${this.host.id}`, iconURL: this.host.icon })
+            .setFooter({ text: `Started by ${this.host.tag}`, iconURL: this.host.icon })
         );
         if (!this.freejoin) {
-            startMessage.components.push(new MessageActionRow()
+            startMessage.components.push(new ActionRowBuilder()
                 .addComponents(
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId('joingame')
                         .setLabel('Join')
-                        .setStyle('SUCCESS'),
-                    new MessageButton()
+                        .setStyle('Success'),
+                    new ButtonBuilder()
                         .setCustomId('leavegame')
                         .setLabel('Leave')
-                        .setStyle('DANGER')
+                        .setStyle('Danger')
                 )
             );
         }
         if (this.points) {
-            startMessage.embeds[0].addField("__Points required to win__", `${this.points}`);
+            startMessage.embeds[0].addFields({ name: "__Points required to win__", value: `${this.points}` });
         }
         this.startMessage = await this.channel.send(startMessage);
         if (this.freejoin) this.cooldownTimer = setTimeout(() => this.onStart(), 5000);
@@ -63,21 +64,22 @@ class Game {
         this.started = true;
         if (!this.freejoin) {
             const components = this.startMessage.components;
+            const newComponents = new ActionRowBuilder();
             for (const component of components[0].components) {
-                component.disabled = true;
+                newComponents.addComponents(ButtonBuilder.from(component).setDisabled(true));
             }
-            this.startMessage.edit({ components: components });
+            this.startMessage.edit({ components: [newComponents] });
             this.startMessage = null;
         }
     }
-    onJoin(userid) {
-        this.players.set(userid, 0);
-        if (this.players.size === this.maxPlayers) this.channel.send("The game has reached max amount of players!");
+    onJoin(userId, userTag) {
+        this.players.set(userId, userTag);
+        if (this.players.size === this.maxPlayers) this.channel.send("The game has reached the max amount of players!");
     }
-    async onLeave(userid) {
-        this.players.delete(userid);
+    onLeave(userId) {
+        this.players.delete(userId);
         if (this.started && this.skipPlayer) {
-            const index = this.queue.indexOf(userid);
+            const index = this.queue.indexOf(userId);
             this.queue.splice(index, 1);
             if (index === 0) {
                 if (this.playerTimer) clearTimeout(this.playerTimer);
@@ -92,6 +94,7 @@ class Game {
         }
     }
     onEnd() {
+        this.started = false;
         if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
         if (this.roundTimer) clearTimeout(this.roundTimer);
         if (this.playerTimer) clearTimeout(this.playerTimer);

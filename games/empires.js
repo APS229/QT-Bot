@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed } = Client.discord;
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
 
 class Empires extends Games.Game {
     constructor(interaction) {
@@ -10,35 +10,33 @@ class Empires extends Games.Game {
         - You will have 60 seconds to choose your alias using the \`/alias\` command before the game starts.\n
         - **On your turn only**, use \`/guessalias\` command to guess someone with an alias.\n
         - If correct, you will get to guess one more person.\n
-        - If incorrect, the person you tried to guess will get a turn.
+        - If incorrect, the person you tried to guess will get a turn.\n
         - The one to survive until the end will be the winner.`;
         this.aliases = new Map();
         this.turn = null;
-        this.requiredPlayers = 5;
+        this.requiredPlayers = 4;
         this.playerTime = 45;
         this.roundTime = 60;
         this.cooldownTime = 5;
         this.setAliases = false;
+        this.guess = { userId: null, alias: null };
+        this.selectMenusMessage = null;
         this.init();
     }
     async onStart() {
-        await super.onStart();
-        this.channel.send("Everyone go ahead and choose your alias with `/alias` command, you have 60 seconds left.")
-        this.roundTimer = setTimeout(async () => {
+        super.onStart();
+        await this.channel.send("Everyone go ahead and choose your alias with the `/alias` command, you have 60 seconds left.");
+        this.roundTimer = setTimeout(() => {
             for (const player of this.players.keys()) {
                 if (!this.aliases.has(player)) {
                     this.channel.send(`<@${player}> didn't choose an alias in time and has been eliminated.`);
-                    await this.onLeave(player);
+                    this.onLeave(player);
                 }
             }
-            if (this.players.size === 0) {
+            if (!this.players.size) {
                 return this.onEnd();
             }
             this.turn = [...this.players.keys()].random();
-            if (this.players.size === 1) {
-                this.winner = this.turn;
-                return this.onEnd();
-            }
             let randomized = [...this.aliases].shuffle();
             this.aliases = new Map(randomized);
             randomized = [...this.players].shuffle();
@@ -47,74 +45,151 @@ class Empires extends Games.Game {
             this.onNextRound();
         }, this.roundTime * 1000);
     }
-    setAlias(userid, alias) {
-        this.aliases.set(userid, alias);
+    setAlias(userId, alias) {
+        this.aliases.set(userId, alias);
     }
-    onNextRound() {
+    async onNextRound() {
         if (this.playerTimer) clearTimeout(this.playerTimer);
-        this.update();
+        this.selectMenusMessage = await this.update();
+        if (!this.started) return;
         this.playerTimer = setTimeout(async () => {
-            this.players.delete(this.turn);
             await this.channel.send(`<@${this.turn}> didn't respond in time and has been eliminated! Their alias was: ${this.aliases.get(this.turn)}`);
+            if (!this.started) return;
+            this.players.delete(this.turn);
             this.aliases.delete(this.turn);
             this.turn = [...this.players.keys()].random();
-            if (this.players.size === 1) {
+            if (this.players.size < 2) {
                 this.winner = this.turn;
                 return this.onEnd();
             }
-            this.onNextRound()
+            this.onNextRound();
         }, this.playerTime * 1000);
     }
     async onGuess(interaction) {
-        if (this.turn !== interaction.user.id) return interaction.reply({ content: "It's not your turn.", ephemeral: true });
-        const userid = interaction.options._hoistedOptions[0].user.id, alias = Tools.toId(interaction.options._hoistedOptions[1].value);
-        if (userid === interaction.user.id) return interaction.reply("You cannot guess your own self...");
-        if (![...this.aliases.values()].includes(alias)) return interaction.reply("Not an alias.");
-        if (!this.players.has(userid)) return interaction.reply("User not in game.");
+        if (this.turn !== interaction.member.id) return interaction.reply({ content: "It's not your turn.", flags: 'Ephemeral' });
+        let userId = null, alias = null;
+        if (interaction.values && interaction.isStringSelectMenu()) {
+            // Expired menu
+            if (interaction.message.id !== this.selectMenusMessage?.id) return interaction.reply({ content: "This menu has expired.", flags: 'Ephemeral' });
+            interaction.customId === 'selectplayer' ? userId = interaction.values[0] : alias = interaction.values[0];
+
+            const newComponents = [];
+            for (const row of interaction.message.components) {
+                const newRow = ActionRowBuilder.from(row);
+                newComponents.push(newRow);
+            }
+            const currentRow = interaction.customId === 'selectplayer' ? newComponents[0] : newComponents[1];
+            currentRow.components[0].options.find(option => option.data.value === interaction.values[0]).setDefault(true);
+            currentRow.components[0].setDisabled(true);
+            if (userId) this.guess.userId = userId;
+            if (alias) this.guess.alias = alias;
+            interaction.message.edit({ components: newComponents });
+            if (!this.guess.userId || !this.guess.alias) return interaction.deferUpdate();
+        }
+        else {
+            userId = interaction.options?._hoistedOptions[0].value || interaction.mentions.users.first()?.id;
+            alias = Tools.toId(interaction.options?._hoistedOptions[1].value || interaction.content.split(' ')[2]);
+            if (userId === interaction.member.id) return interaction.reply("You cannot guess your own self...");
+            if (![...this.aliases.values()].includes(alias)) return interaction.reply("Not an alias.");
+            if (!this.players.has(userId)) return interaction.reply("User not in game.");
+            this.guess = { userId, alias };
+        }
+
         clearTimeout(this.playerTimer);
-        if (this.aliases.get(userid) === alias) {
-            await interaction.reply(`Correct! <@${userid}> (${alias}) has been eliminated.`);
-            this.players.delete(userid);
-            this.aliases.delete(userid);
-            if (this.players.size === 1) {
-                this.winner = interaction.user.id;
+        if (this.aliases.get(userId) === alias) {
+            await interaction.reply(`Correct! <@${userId}> (${alias}) has been eliminated.`);
+            if (!this.started) return;
+            clearTimeout(this.playerTimer);
+            this.players.delete(userId);
+            this.aliases.delete(userId);
+            if (this.players.size < 2) {
+                this.winner = interaction.member.id;
                 return this.onEnd();
             }
             this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
         }
         else {
-            interaction.reply("Incorrect...");
-            this.turn = userid;
+            await interaction.reply("Incorrect...");
+            if (!this.started) return;
+            clearTimeout(this.playerTimer);
+            this.turn = userId;
             this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
         }
+        this.guess = {};
     }
-    async onLeave(userid) {
-        await super.onLeave(userid);
-        if (this.aliases.has(userid)) {
-            this.channel.send(`Their alias was: ${this.aliases.get(userid)}`);
-            this.aliases.delete(userid);
+    onLeave(userId) {
+        super.onLeave(userId);
+        if (this.aliases.has(userId)) {
+            this.channel.send(`Their alias was: ${this.aliases.get(userId)}`);
+            this.aliases.delete(userId);
         }
-        if (this.players.size === 1 && this.setAliases) {
+        if (this.players.size < 2 && this.setAliases) {
             this.winner = this.players.keys().next().value;
             return this.onEnd();
         }
     }
     update() {
-        let players = "", aliases = [...this.aliases.values()].join('\n\n');
-        for (const player of this.players.keys()) {
-            players += `<@${player}>\n\n`;
-        }
-        const embed = new MessageEmbed()
+        const players = Tools.joinList([...this.players.keys()].map(id => `<@${id}>`)), aliases = Tools.joinList([...this.aliases.values()]);
+        const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
             .setTitle("Empires")
-            .addField("__Players__", players, true)
-            .addField("__Aliases__", aliases, true)
+            .addFields({ name: "__Players__", value: players, inline: true })
+            .addFields({ name: "__Aliases__", value: aliases, inline: true })
             .setTimestamp();
-        this.channel.send({ content: `<@${this.turn}>'s turn!`, embeds: [embed] });
+
+        const playerOptions = [];
+        for (const [playerId, playerTag] of this.players.entries()) {
+            if (playerId === this.turn) continue;
+            playerOptions.push(new StringSelectMenuOptionBuilder()
+                .setLabel(playerTag)
+                .setValue(playerId)
+            );
+        }
+        playerOptions.push(new StringSelectMenuOptionBuilder()
+            .setLabel('ccc')
+            .setValue('838501697299021825')
+        );
+        const guessPlayerMenu = new StringSelectMenuBuilder()
+            .setCustomId('selectplayer')
+            .setPlaceholder("Select a player")
+            .addOptions(playerOptions);
+
+        const aliasOptions = [];
+        for (const alias of this.aliases.values()) {
+            aliasOptions.push(new StringSelectMenuOptionBuilder()
+                .setLabel(alias)
+                .setValue(alias)
+            );
+        }
+        aliasOptions.push(new StringSelectMenuOptionBuilder()
+            .setLabel('bbb')
+            .setValue('bbb')
+        );
+        aliasOptions.push(new StringSelectMenuOptionBuilder()
+            .setLabel('ccc')
+            .setValue('ccc')
+        );
+        const guessAliasMenu = new StringSelectMenuBuilder()
+            .setCustomId('selectalias')
+            .setPlaceholder("Select an alias")
+            .addOptions(aliasOptions);
+
+        const guessPlayerMenuRow = new ActionRowBuilder().addComponents(guessPlayerMenu);
+        const guessAliasMenuRow = new ActionRowBuilder().addComponents(guessAliasMenu);
+
+        return this.channel.send({ content: `<@${this.turn}>'s turn!`, embeds: [embed], components: [guessPlayerMenuRow, guessAliasMenuRow] });
     }
     onEnd() {
-        if (this.playerTimer) clearTimeout(this.playerTimer);
-        if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
+        // Disable select menus
+        if (this.selectMenusMessage) {
+            const newComponents = [];
+            for (const row of this.selectMenusMessage.components) {
+                const newRow = ActionRowBuilder.from(row);
+                newRow.components[0].setDisabled(true);
+                newComponents.push(newRow);
+            }
+            this.selectMenusMessage.edit({ components: newComponents });
+        }
         super.onEnd();
     }
 }

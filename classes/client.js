@@ -1,11 +1,16 @@
 'use strict';
 
 const fs = require('fs');
+const { GatewayIntentBits, Collection } = require('discord.js');
+const DiscordClient = require('discord.js').Client;
 
 class Client {
     constructor() {
-        this.discord = require('discord.js');
-        this.bot = new this.discord.Client({ intents: ['GUILDS', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES'] });
+        this.bot = new DiscordClient({
+            intents: [GatewayIntentBits.Guilds,
+            GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.MessageContent]
+        });
         this.disconnected = false;
         this.disabled = false;
         this.restarting = false;
@@ -39,7 +44,7 @@ class Client {
         this.events.parse();
     }
     loadCommands() {
-        this.commands = new this.discord.Collection();
+        this.commands = new Collection();
         const commandFiles = fs.readdirSync('./commands');
         for (const commandFile of commandFiles) {
             if (!commandFile.endsWith('.js')) continue;

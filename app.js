@@ -10,22 +10,6 @@ global.Config = require('./config/config.js');
 
 global.Games = require('./games/games.js');
 
-global.Request = require('request');
-
-const PG = require('pg').Client;
-
-global.Database = new PG({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false,
-    }
-});
-
-Database.connect();
-Database.on('error', err => {
-    console.log(err);
-});
-
 global.info = text => {
     if (typeof text !== 'string') return false;
     return console.log('Info: '.green + new Date() + ' ' + text);

@@ -16,10 +16,7 @@ exports.cmdchar = '.';
 exports.avatarURL = '';
 
 // Ids of the users that are developers of the bot
-exports.developers = [''];
-
-// YouTube API token
-exports.youtubeapi = '';
+exports.developers = [];
 
 // Activity to be shown on the bot's user
 exports.activity = '';

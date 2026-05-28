@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed } = Client.discord;
+const { EmbedBuilder } = require('discord.js');
 
 class RussianRoulette extends Games.Game {
     constructor(interaction, points) {
@@ -47,11 +47,11 @@ class RussianRoulette extends Games.Game {
         clearTimeout(this.playerTimer);
         this.canGuess = false;
         const roll = parseInt((Math.random() * 7) + 1);
-        const embed = new MessageEmbed()
-        .setTitle("Rolling 1 - 7")
-        .setDescription(`\`${roll}\``)
-        .setTimestamp();
-        this.channel.send({embeds: [embed]});
+        const embed = new EmbedBuilder()
+            .setTitle("Rolling 1 - 7")
+            .setDescription(`\`${roll}\``)
+            .setTimestamp();
+        this.channel.send({ embeds: [embed] });
         if (roll <= guess) {
             this.onLeave(userid);
             this.channel.send(`RIP! <@${userid}> has been eliminated!`);
@@ -78,11 +78,11 @@ class RussianRoulette extends Games.Game {
         for (const player of this.queue) {
             players += `<@${player}>: ${this.players.get(player)}\n`;
         }
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
             .setTitle("Russian Roulette")
             .setTimestamp()
-            .addField("Players", players);
+            .addFields({ name: "Players", value: players });
         this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed] });
     }
     onEnd() {

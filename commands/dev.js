@@ -2,6 +2,17 @@
 
 const fs = require('fs');
 
+const OptionTypes = {
+    STRING: 3,
+    INTEGER: 4,
+    BOOLEAN: 5,
+    USER: 6,
+    CHANNEL: 7,
+    ROLE: 8,
+    NUMBER: 10,
+    ATTACHMENT: 11
+};
+
 const commands = {
     kill: {
         devOnly: true,
@@ -22,7 +33,7 @@ const commands = {
         },
         options: [
             {
-                type: "STRING",
+                type: OptionTypes.STRING,
                 name: "code",
                 description: "Code to evaluate.",
                 required: true
@@ -30,7 +41,7 @@ const commands = {
         ],
         execute(interaction) {
             try {
-                let evaled = eval(interaction.options._hoistedOptions[0].value);
+                let evaled = eval(interaction.options?._hoistedOptions[0].value || interaction.content.split(' ').slice(1).join(' '));
                 if (typeof evaled !== 'string') evaled = require('util').inspect(evaled);
 
                 interaction.reply(`\`\`\`${this.clean(evaled)}\`\`\``, { code: "xl" });
@@ -44,7 +55,7 @@ const commands = {
         hidden: true,
         options: [
             {
-                type: "STRING",
+                type: OptionTypes.STRING,
                 name: "module",
                 description: "Module you want to reload.",
                 required: true
@@ -52,11 +63,11 @@ const commands = {
         ],
         execute(interaction) {
             const validModules = ['config', 'games', 'tools', 'commands', 'events'];
-            const module = Tools.toId(interaction.options._hoistedOptions[0].value);
+            const module = Tools.toId(interaction.options?._hoistedOptions[0].value || interaction.content.split(' ').slice(1).join(' '));
             switch (module) {
                 case 'config':
-                    Tools.uncacheTree('../config.js');
-                    global.Config = require('../config.js');
+                    Tools.uncacheTree('../config/config.js');
+                    global.Config = require('../config//config.js');
                     break;
                 case 'games':
                     const games = fs.readdirSync('./games/');
@@ -97,7 +108,7 @@ const commands = {
         hidden: true,
         execute(interaction) {
             Client.restart = true;
-            interaction.reply({ content: "The bot has been set up to restart. No commands will work until the bot restarts or you disable it.", ephemeral: true });
+            interaction.reply({ content: "The bot has been set up to restart. No commands will work until the bot restarts or you disable it.", flags: 'Ephemeral' });
         }
     },
     cancelrestart: {
@@ -105,7 +116,7 @@ const commands = {
         hidden: true,
         execute(interaction) {
             Client.restart = false;
-            interaction.reply({ content: "The restart has been cancelled. Commands will work again.", ephemeral: true });
+            interaction.reply({ content: "The restart has been cancelled. Commands will work again.", flags: 'Ephemeral' });
         }
     }
 };

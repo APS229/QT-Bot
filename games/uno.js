@@ -1,7 +1,7 @@
 'use strict';
 
 const colors = ['blue', 'green', 'red', 'yellow'];
-const { Permissions, MessageActionRow, MessageButton, MessageSelectMenu, MessageAttachment, MessageEmbed } = Client.discord;
+const { Permissions, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, AttachmentBuilder, EmbedBuilder } = require('discord.js');
 
 class UNO {
     constructor(channel, server) {
@@ -182,9 +182,9 @@ class UNO {
                 }
                 if (menuOptions.length) {
                     rows.push(
-                        new MessageActionRow()
+                        new ActionRowBuilder()
                             .addComponents(
-                                new MessageSelectMenu()
+                                new StringSelectMenuBuilder()
                                     .setCustomId('play' + i)
                                     .setPlaceholder(`${Tools.toTitleCase(cases[i])} Cards`)
                                     .setOptions(menuOptions)
@@ -196,7 +196,7 @@ class UNO {
             return interaction.reply({ components: rows, ephemeral: true });
         }
         else if (interaction.isCommand()) card = interaction.options.get('card').value.toLowerCase();
-        else if (interaction.isSelectMenu()) card = interaction.values[0];
+        else if (interaction.isStringSelectMenu()) card = interaction.values[0];
         let cardName, cardValue, thirdValue;
         const cardSplit = [cardName, cardValue, thirdValue] = card.split(' ');
         const [topCardName, topCardValue] = this.topCard.split(' ');
@@ -279,7 +279,7 @@ class UNO {
                 break;
         }
         this.updateStr = `<@${player}> has played ${this.format(card)}.${this.updateStr !== 'None' ? '\n\n' + this.updateStr : ''}`;
-        if (interaction.isSelectMenu()) interaction.update({ content: 'You have played: ' + this.format(card), components: [] });
+        if (interaction.isStringSelectMenu()) interaction.update({ content: 'You have played: ' + this.format(card), components: [] });
         else interaction.reply({ content: 'You have played: ' + this.format(card), ephemeral: true });
         if (this.players.get(this.prevPlayer)?.cards.length === 1 && !this.players.get(this.prevPlayer)?.uno) {
             this.draw(this.prevPlayer, 2);
@@ -335,8 +335,8 @@ class UNO {
     async update() {
         if (this.message) await this.message.delete();
         const topCardColor = this.topCard.split(' ')[0];
-        const img = new MessageAttachment(`./images/${topCardColor}.png`);
-        const embed = new MessageEmbed()
+        const img = new AttachmentBuilder(`./images/${topCardColor}.png`);
+        const embed = new EmbedBuilder()
             .setColor(topCardColor.toUpperCase())
             .setTitle('UNO')
             .setThumbnail(`attachment://${topCardColor}.png`)
@@ -352,21 +352,21 @@ class UNO {
             .setTimestamp()
             .setFooter({ text: Config.username, iconURL: Config.avatarURL });
         this.updateStr = "None";
-        const row = new MessageActionRow()
+        const row = new ActionRowBuilder()
             .addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId('play')
                     .setLabel('Play')
                     .setStyle('PRIMARY'),
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId('hand')
                     .setLabel('Hand')
                     .setStyle('PRIMARY'),
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId('draw')
                     .setLabel('Draw')
                     .setStyle('PRIMARY'),
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId('uno')
                     .setLabel('UNO!')
                     .setStyle('SUCCESS')

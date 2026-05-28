@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed } = Client.discord;
+const { EmbedBuilder } = require('discord.js');
 
 class DiceDisaster extends Games.Game {
     constructor(interaction) {
@@ -36,6 +36,7 @@ class DiceDisaster extends Games.Game {
                 this.cooldownTimer = setTimeout(async () => {
                     const roll = parseInt((Math.random() * 100) + 1);
                     await this.channel.send(`Rolling 1 - 100: ${roll}`);
+                    if (!this.started) return;
                     if (roll >= this.bidder.bid) {
                         this.winner = this.bidder.id;
                         return this.onEnd();
@@ -55,11 +56,11 @@ class DiceDisaster extends Games.Game {
     }
     onGuess(interaction) {
         const bid = interaction.options._hoistedOptions[0].value;
-        if (bid > 100 || bid < 1) return interaction.reply({ content: "Your bid must be a number between 1 - 100.", ephemeral: true });
-        if (this.bidder.bid >= bid) return interaction.reply({ content: `<@${this.bidder.id}> has a higher bid with ${this.bidder.bid}!`, ephemeral: true });
-        this.bidder.id = interaction.user.id;
+        if (bid > 100 || bid < 1) return interaction.reply({ content: "Your bid must be a number between 1 - 100.", flags: 'Ephemeral' });
+        if (this.bidder.bid >= bid) return interaction.reply({ content: `<@${this.bidder.id}> has a higher bid with ${this.bidder.bid}!`, flags: 'Ephemeral' });
+        this.bidder.id = interaction.member.id;
         this.bidder.bid = bid;
-        interaction.reply(`<@${interaction.user.id}> bid ${bid}!`);
+        interaction.reply(`<@${interaction.member.id}> bid ${bid}!`);
         if (bid === 100) {
             clearTimeout(this.roundTimer);
             this.channel.send(`<@${this.bidder.id}> has the highest bid with ${this.bidder.bid}!`);
@@ -79,23 +80,18 @@ class DiceDisaster extends Games.Game {
         }
     }
     update() {
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle("Dice Disaster")
             .setDescription("Bid a number 1 - 100")
             .setTimestamp();
         this.channel.send({ content: Tools.joinList([...this.players.keys()].map(p => '<@' + p + '>')), embeds: [embed] });
     }
-    onLeave(userid) {
-        super.onLeave(userid);
+    onLeave(userId) {
+        super.onLeave(userId);
         if (this.players.size === 1) {
             this.winner = this.players.keys().next().value;
             this.onEnd();
         }
-    }
-    onEnd() {
-        if (this.roundTimer) clearTimeout(this.roundTimer);
-        if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
-        super.onEnd();
     }
 }
 

@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed } = Client.discord;
+const { EmbedBuilder } = require('discord.js');
 
 class Edges extends Games.PuzzleGame {
     constructor(interaction, points) {
@@ -42,7 +42,7 @@ class Edges extends Games.PuzzleGame {
         this.canGuess = true;
         this.roundTimer = setTimeout(() => {
             this.canGuess = false;
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle("Time's up!")
                 .setDescription(`The answers were: *${Tools.joinList(this.currentAnswer)}*`)
             this.channel.send({ embeds: [embed] });
@@ -67,12 +67,12 @@ class Edges extends Games.PuzzleGame {
         for (const player of this.players.entries()) {
             players += `<@${player[0]}>: ${player[1]}\n`;
         }
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
             .setTitle(this.puzzle)
             .setDescription(`**Category:** ${this.category}`)
             .setTimestamp();
-        if (players) embed.addField("Players", players);
+        if (players) embed.addFields({ name: "Players", value: players });
         this.channel.send({ embeds: [embed] });
     }
     onEnd() {

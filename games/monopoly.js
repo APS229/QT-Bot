@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed } = Client.discord;
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const fs = require('fs');
 
 const tileTypes = {
@@ -26,7 +26,6 @@ class Monopoly extends Games.Game {
         - If a player lands on a property, they will have a prompt to buy it, if they don't decide to buy it then an auction will start for the property.\n
         - If a player lands on an action, there's multiple things that can happen.\n
         - Landing on Bank will give you ⏣ 100, landing on Hotel will make you lose ⏣ upto 700.\n
-        - Jail is NOT implemented yet.\n
         - If you land on someone's property you'll pay rent equal to the price of the property.\n
         - If they have multiple properties of same type (emoji) then the rent will also be multiplied.\n
         - If you don't have enough money to pay rent, you will be eliminated and the property owner will get all your properties and money.\n
@@ -56,9 +55,9 @@ class Monopoly extends Games.Game {
         this.roundTimer = null;
         this.resolveTurn = null;
         this.auctionedProperty = null;
-        this.playerTime = 15;
-        this.cooldownTime = 3;
-        this.roundTime = 8;
+        this.playerTime = 25;
+        this.cooldownTime = 5;
+        this.roundTime = 10;
         this.takenTurns = 0;
         this.round = 0;
         this.rumblePrize = 200;
@@ -281,16 +280,16 @@ class Monopoly extends Games.Game {
         this.onNextRound();
     }
     getSummary(userid) {
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle("Summary for Monopoly")
             .setTimestamp();
         if (this.players.has(userid)) {
             const playerDetails = this.players.get(userid);
-            embed.addField(`${playerDetails.order}`, `**Player:** <@${userid}>\n**Balance:** ${playerDetails.balance}\n**Properties:** ${playerDetails.properties.length ? Tools.joinList(playerDetails.properties.map(p => p + ' \\' + this.data[p].emoji)) : "None"}`);
+            embed.addFields({ name: `${playerDetails.order}`, value: `**Player:** <@${userid}>\n**Balance:** ${playerDetails.balance}\n**Properties:** ${playerDetails.properties.length ? Tools.joinList(playerDetails.properties.map(p => p + ' \\' + this.data[p].emoji)) : "None"}` });
             return embed;
         }
         for (const player of this.players) {
-            embed.addField(`${player[1].order}`, `**Player:** <@${player[0]}>\n**Balance:** ${player[1].balance}\n**Properties:** ${player[1].properties.length ? Tools.joinList(player[1].properties.map(p => p + ' \\' + this.data[p].emoji)) : "None"}`);
+            embed.addFields({ name: `${player[1].order}`, value: `**Player:** <@${player[0]}>\n**Balance:** ${player[1].balance}\n**Properties:** ${player[1].properties.length ? Tools.joinList(player[1].properties.map(p => p + ' \\' + this.data[p].emoji)) : "None"}` });
         }
         return embed;
     }
@@ -417,7 +416,7 @@ class Monopoly extends Games.Game {
                     else {
                         playerDetails.inJail = false;
                         playerDetails.jailTurns = 0;
-                        this.players.get(this.queue[0], playerDetails);
+                        this.players.set(this.queue[0], playerDetails);
                         text = ' to get out of **Jail** \\⛓️';
                     }
                 }
@@ -452,15 +451,13 @@ class Monopoly extends Games.Game {
         promise.then(() => {
             this.cooldownTimer = setTimeout(() => {
                 if (this.ended) return;
-                if (dice1 !== dice2) {
-                    if (!this.playerEliminated) {
-                        const thisPlayer = this.queue[0];
-                        this.queue.shift();
-                        this.queue.push(thisPlayer);
-                        this.takenTurns++;
-                    }
-                    this.playerEliminated = false;
+                if (this.playerEliminated || dice1 !== dice2) {
+                    const thisPlayer = this.queue[0];
+                    this.queue.shift();
+                    this.queue.push(thisPlayer);
+                    this.takenTurns++;
                 }
+                this.playerEliminated = false;
                 this.takenTurns < this.queue.length ? this.onNextTurn() : this.onNextRound();
             }, this.cooldownTime * 1000);
         });
@@ -517,7 +514,19 @@ class Monopoly extends Games.Game {
                 this.startAuction();
             }
             else {
-                this.channel.send(`Would you like to buy **${property}** \\${this.data[property].emoji} for **⏣ ${price}**? (You currently have: **⏣ ${playerDetails.balance}**)`);
+                const message = {
+                    content: `Would you like to buy **${property}** \\${this.data[property].emoji} for **⏣ ${price}**? (You currently have: **⏣ ${playerDetails.balance}**)`,
+                    components: []
+                };
+                message.components.push(new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('buy')
+                            .setLabel('Buy')
+                            .setStyle('Success')
+                    )
+                );
+                this.channel.send(message);
                 this.canBuy = true;
                 this.playerTimer = setTimeout(() => {
                     if (this.ended) return;
@@ -569,33 +578,33 @@ class Monopoly extends Games.Game {
         this.canBid = true;
     }
     onBid(interaction) {
-        const bid = interaction.options._hoistedOptions[0].value;
-        if (bid % 5 !== 0 || bid < 5) return interaction.reply({ content: "Your bid must be a multiple of **⏣ 5**.", ephemeral: true });
-        const playerDetails = this.players.get(interaction.user.id);
-        if (bid > playerDetails.balance) return interaction.reply({ content: `You can't bid more than what you have. (**⏣ ${playerDetails.balance}**)`, ephemeral: true });
-        if (bid <= this.bid.number) return interaction.reply({ content: `Your bid must be higher than current bid (**⏣ ${this.bid.number}**)!`, ephemeral: true });
+        const bid = interaction.options?._hoistedOptions[0].value || interaction.content.split(' ').slice(1)[0];
+        if (bid % 5 !== 0 || bid < 5) return interaction.reply({ content: "Your bid must be a multiple of **⏣ 5**.", flags: 'Ephemeral' });
+        const playerDetails = this.players.get(interaction.member.id);
+        if (bid > playerDetails.balance) return interaction.reply({ content: `You can't bid more than what you have. (**⏣ ${playerDetails.balance}**)`, flags: 'Ephemeral' });
+        if (bid <= this.bid.number) return interaction.reply({ content: `Your bid must be higher than current bid (**⏣ ${this.bid.number}**)!`, flags: 'Ephemeral' });
         clearTimeout(this.roundTimer);
-        this.bid = { userid: interaction.user.id, number: bid };
+        this.bid = { userid: interaction.member.id, number: bid };
         this.roundTimer = setTimeout(() => {
             this.canBid = false;
             playerDetails.properties.push(this.auctionedProperty);
             playerDetails.balance -= bid;
-            this.channel.send(`**${this.auctionedProperty}** \\${this.data[this.auctionedProperty].emoji} was sold to <@${interaction.user.id}> for **⏣ ${bid}**!`);
+            this.channel.send(`**${this.auctionedProperty}** \\${this.data[this.auctionedProperty].emoji} was sold to <@${interaction.member.id}> for **⏣ ${bid}**!`);
             this.bid = { userid: '', number: 0 };
             this.resolveTurn();
         }, this.roundTime * 1000);
-        interaction.reply(`<@${interaction.user.id}> bid **⏣ ${bid}**!`);
+        interaction.reply(`<@${interaction.member.id}> bid **⏣ ${bid}**!`);
     }
     async onBuy(interaction) {
         clearTimeout(this.playerTimer);
         this.canBuy = false;
-        const position = this.players.get(interaction.user.id).position;
+        const position = this.players.get(interaction.member.id).position;
         const property = this.board[position[0]][position[1]];
-        const playerDetails = this.players.get(interaction.user.id);
+        const playerDetails = this.players.get(interaction.member.id);
         playerDetails.balance -= this.data[property].price;
         playerDetails.properties.push(property);
-        this.players.set(interaction.user.id, playerDetails);
-        await interaction.reply(`<@${interaction.user.id}> bought the property **${property}** \\${this.data[property].emoji} for **⏣ ${this.data[property].price}**!`);
+        this.players.set(interaction.member.id, playerDetails);
+        await interaction.reply(`<@${interaction.member.id}> bought the property **${property}** \\${this.data[property].emoji} for **⏣ ${this.data[property].price}**!`);
         this.resolveTurn();
     }
     async onResolveJail(method) {
@@ -605,9 +614,9 @@ class Monopoly extends Games.Game {
     }
     async update() {
         const players = Tools.joinList([...this.players.entries()].map(p => `<@${p[0]}> (${p[1].order})`));
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle(`Monopoly Round ${this.round}`)
-            .addField("Players", players)
+            .addFields({ name: "Players", value: players })
             .setTimestamp();
         await this.channel.send({ embeds: [embed] });
     }
@@ -662,9 +671,6 @@ class Monopoly extends Games.Game {
     }
     onEnd() {
         this.ended = true;
-        if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
-        if (this.playerTimer) clearTimeout(this.playerTimer);
-        if (this.roundTimer) clearTimeout(this.roundTimer);
         super.onEnd();
     }
 }

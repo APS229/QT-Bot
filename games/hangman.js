@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageAttachment, MessageEmbed } = Client.discord;
+const { AttachmentBuilder, EmbedBuilder } = require('discord.js');
 
 class Hangman extends Games.PuzzleGame {
     constructor(interaction, points) {
@@ -74,8 +74,8 @@ class Hangman extends Games.PuzzleGame {
             if (!successfulGuess) this.usedGuesses.push(guess);
             if (this.usedGuesses.length === this.lives) {
                 this.canGuess = false;
-                const img = new MessageAttachment('./images/hangman/6.png');
-                const embed = new MessageEmbed()
+                const img = new AttachmentBuilder('./images/hangman/6.png');
+                const embed = new EmbedBuilder()
                     .setTitle("☠️ The man was hanged because of too many bad guesses! ☠️")
                     .setDescription(`The answer was: *${this.currentAnswer}*`)
                     .setImage('attachment://6.png')
@@ -113,8 +113,8 @@ class Hangman extends Games.PuzzleGame {
                 if (guess.length === this.answer.length) this.usedGuesses.push(guess);
                 if (this.usedGuesses.length === this.lives) {
                     this.canGuess = false;
-                    const img = new MessageAttachment('./images/hangman/6.png');
-                    const embed = new MessageEmbed()
+                    const img = new AttachmentBuilder('./images/hangman/6.png');
+                    const embed = new EmbedBuilder()
                         .setTitle("☠️ The man was hanged because of too many bad guesses! ☠️")
                         .setDescription(`The answer was: *${this.currentAnswer}*`)
                         .setImage('attachment://6.png')
@@ -135,14 +135,14 @@ class Hangman extends Games.PuzzleGame {
         for (const player of this.queue) {
             players += `<@${player}>: ${this.players.get(player)}\n`;
         }
-        const img = new MessageAttachment(`./images/hangman/${this.usedGuesses.length}.png`);
-        const embed = new MessageEmbed()
+        const img = new AttachmentBuilder(`./images/hangman/${this.usedGuesses.length}.png`);
+        const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
             .setTitle(`\`\`${this.puzzle.join(' ')}\`\``)
             .setDescription(`**Category:** ${this.category}`)
-            .addField("Current player", `<@${this.queue[0]}>`, true)
-            .addField("Used guesses", this.usedGuesses.length ? this.usedGuesses.join(', ') : "None", true)
-            .addField("All players", players, true)
+            .addFields({ name: "Current player", value: `<@${this.queue[0]}>`, inline: true })
+            .addFields({ name: "Used guesses", value: this.usedGuesses.length ? this.usedGuesses.join(', ') : "None", inline: true })
+            .addFields({ name: "All players", value: players, inline: true })
             .setImage(`attachment://${this.usedGuesses.length}.png`)
             .setTimestamp();
         this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed], files: [img] });

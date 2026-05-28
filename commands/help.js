@@ -1,6 +1,18 @@
 'use strict';
 
 const fs = require('fs');
+const { EmbedBuilder } = require('discord.js');
+
+const OptionTypes = {
+    STRING: 3,
+    INTEGER: 4,
+    BOOLEAN: 5,
+    USER: 6,
+    CHANNEL: 7,
+    ROLE: 8,
+    NUMBER: 10,
+    ATTACHMENT: 11
+};
 
 const commands = {
     help: {
@@ -8,7 +20,7 @@ const commands = {
         execute(interaction) {
             // const target = null;
             // if (!target) {
-            const embed = new Client.discord.MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(`Available commands in ${Config.username}`)
                 .setAuthor({ name: Config.username, iconURL: Config.avatarURL })
                 .setFooter({ text: `Requested by ${interaction.member.displayName}`, iconURL: interaction.user.avatarURL() })
@@ -26,7 +38,7 @@ const commands = {
                     }
                     if (commands.length) {
                         commands.sort();
-                        embed.addField(type, commands.join(', '));
+                        embed.addFields({ name: type, value: commands.join(', ') });
                     }
                 }
             }
@@ -38,7 +50,7 @@ const commands = {
             //     if (cmdInfo) {
             //         let required = 'User';
             //         if (cmdInfo.modOnly) required = 'Manager OR Manage Roles permission';
-            //         const embed = new Client.discord.MessageEmbed()
+            //         const embed = new Client.discord.EmbedBuilder()
             //             .setTitle(`Help for the command: ${target}`)
             //             .setAuthor(Config.username, Config.avatarURL)
             //             .setFooter(`Requested by ${user.username}`, user.avatarURL)

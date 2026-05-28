@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, MessageAttachment } = Client.discord;
+const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const fs = require('fs');
 
 class GobbleWoman extends Games.Game {
@@ -42,8 +42,8 @@ class GobbleWoman extends Games.Game {
         this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
     }
     async update() {
-        const img = new MessageAttachment('./images/gobblewoman/gobble.gif');
-        const embed = new MessageEmbed()
+        const img = new AttachmentBuilder('./images/gobblewoman/gobble.gif');
+        const embed = new EmbedBuilder()
         .setTitle("Gobble Woman")
         .setDescription(this.messages || "Nothing happened.")
         .setImage('attachment://gobble.gif')
@@ -56,3 +56,6 @@ class GobbleWoman extends Games.Game {
         super.onEnd();
     }
 }
+
+// exports.game = GobbleWoman;
+// exports.id = 'gobblewoman';

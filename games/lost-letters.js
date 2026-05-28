@@ -1,7 +1,7 @@
 'use strict';
 
 const VOWELS = ['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'];
-const { MessageEmbed } = Client.discord;
+const { EmbedBuilder } = require('discord.js');
 
 class LostLetters extends Games.PuzzleGame {
     constructor(interaction, points) {
@@ -26,9 +26,9 @@ class LostLetters extends Games.PuzzleGame {
         this.canGuess = true;
         this.roundTimer = setTimeout(() => {
             this.canGuess = false;
-            const embed = new MessageEmbed()
-            .setTitle("Time's up!")
-            .setDescription(`The answer was: *${this.currentAnswer}*`)
+            const embed = new EmbedBuilder()
+                .setTitle("Time's up!")
+                .setDescription(`The answer was: *${this.currentAnswer}*`)
             this.channel.send({ embeds: [embed] });
             this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
         }, this.roundTime * 1000);
@@ -37,7 +37,7 @@ class LostLetters extends Games.PuzzleGame {
         if (guess === this.answer) {
             clearTimeout(this.roundTimer);
             this.canGuess = false;
-            this.players.set(userid, this.players.has(userid) ? this.players.get(userid) + 1: 1);
+            this.players.set(userid, this.players.has(userid) ? this.players.get(userid) + 1 : 1);
             this.channel.send(`<@${userid}> advances to ${this.players.get(userid)} point(s)! The answer was: *${this.currentAnswer}*`);
             if (this.players.get(userid) === this.points) {
                 this.winner = userid;
@@ -51,12 +51,12 @@ class LostLetters extends Games.PuzzleGame {
         for (const player of this.players.entries()) {
             players += `<@${player[0]}>: ${player[1]}\n`;
         }
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
             .setTitle(`\`\`${this.puzzle}\`\``)
             .setDescription(`**Category:** ${this.category}`)
             .setTimestamp();
-        if (players) embed.addField("Players", players);
+        if (players) embed.addFields({ name: "Players", value: players });
         this.channel.send({ embeds: [embed] });
     }
 }

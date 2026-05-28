@@ -1,5 +1,16 @@
 'use strict';
 
+const OptionTypes = {
+    STRING: 3,
+    INTEGER: 4,
+    BOOLEAN: 5,
+    USER: 6,
+    CHANNEL: 7,
+    ROLE: 8,
+    NUMBER: 10,
+    ATTACHMENT: 11
+};
+
 const commands = {
     // pick: {
     //     options: [
@@ -119,7 +130,7 @@ const commands = {
     randomcat: {
         desc: "Shows a picture of a random cat.",
         execute(interaction) {
-            require('request')('https://api.thecatapi.com/v1/images/search', (error, response, body) => {
+            require('fetch').fetchUrl('https://api.thecatapi.com/v1/images/search', (error, response, body) => {
                 if (error) return console.log("Error in command randomcat: " + error);
                 const cat = `${JSON.parse(body)[0].url}`;
                 interaction.reply({ files: [cat] });
@@ -129,7 +140,7 @@ const commands = {
     randomdog: {
         desc: "Shows a picture of a random dog.",
         execute(interaction) {
-            require('request')('https://dog.ceo/api/breeds/image/random', (error, response, body) => {
+            require('fetch').fetchUrl('https://dog.ceo/api/breeds/image/random', (error, response, body) => {
                 if (error) return console.log("Error in command randomdog: " + error);
                 const dog = `${JSON.parse(body).message}`;
                 interaction.reply({ files: [dog] });
@@ -139,7 +150,7 @@ const commands = {
     nickname: {
         options: [
             {
-                type: 'STRING',
+                type: OptionTypes.STRING,
                 name: 'nick',
                 description: "Nickname you want to change to.",
                 required: true
@@ -148,17 +159,17 @@ const commands = {
         desc: "Change your nickname.",
         async execute(interaction) {
             const target = interaction.options._hoistedOptions[0].value;
-            if (target.length > 32) return interaction.reply({ content: "Nickname too long.", ephemeral: true });
-            if (target.length < 3) return interaction.reply({ content: "Nickname too short.", ephemeral: true });
-            if (/[^a-zA-Z0-9]/g.test(target.substring(0, 3))) return interaction.reply({ content: "You can't use that nickname because the first 3 characters are not alphanumeric.", ephemeral: true });
+            if (target.length > 32) return interaction.reply({ content: "Nickname too long.", flags: 'Ephemeral' });
+            if (target.length < 3) return interaction.reply({ content: "Nickname too short.", flags: 'Ephemeral' });
+            if (/[^a-zA-Z0-9]/g.test(target.substring(0, 3))) return interaction.reply({ content: "You can't use that nickname because the first 3 characters are not alphanumeric.", flags: 'Ephemeral' });
             const currentName = interaction.member.displayName;
-            if (currentName === target) return interaction.reply({ content: `Your current nickname is already ${currentName}.`, ephemeral: true });
+            if (currentName === target) return interaction.reply({ content: `Your current nickname is already ${currentName}.`, flags: 'Ephemeral' });
             try {
                 await interaction.member.setNickname(target);
-                interaction.reply({ content: `Nickname successfully changed to: ${target}`, ephemeral: true });
+                interaction.reply({ content: `Nickname successfully changed to: ${target}`, flags: 'Ephemeral' });
             }
             catch (err) {
-                interaction.reply({ content: "Missing permissions to change your nickname.", ephemeral: true });
+                interaction.reply({ content: "Missing permissions to change your nickname.", flags: 'Ephemeral' });
             }
         }
     }

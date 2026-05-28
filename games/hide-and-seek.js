@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, MessageAttachment } = Client.discord;
+const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const fs = require('fs');
 
 class HideAndSeek extends Games.Game {
@@ -75,14 +75,14 @@ class HideAndSeek extends Games.Game {
     }
     onHide(interaction) {
         const choice = Tools.toId(interaction.options._hoistedOptions[0].value);
-        if (!this.choicesId.includes(choice)) return interaction.reply({ content: `Invalid choice! Current hiding spots are: ${Tools.joinList(this.choices)}`, ephemeral: true });
-        if (this.players.get(interaction.user.id)) return interaction.reply({ content: "You have already picked a hiding spot!", ephemeral: true });
+        if (!this.choicesId.includes(choice)) return interaction.reply({ content: `Invalid choice! Current hiding spots are: ${Tools.joinList(this.choices)}`, flags: 'Ephemeral' });
+        if (this.players.get(interaction.user.id)) return interaction.reply({ content: "You have already picked a hiding spot!", flags: 'Ephemeral' });
         this.players.set(interaction.user.id, choice);
-        interaction.reply({ content: `Your choice is: ${this.choices[this.choicesId.indexOf(choice)]}`, ephemeral: true });
+        interaction.reply({ content: `Your choice is: ${this.choices[this.choicesId.indexOf(choice)]}`, flags: 'Ephemeral' });
     }
     onSeek(interaction) {
         const choice = Tools.toId(interaction.options._hoistedOptions[0].value);
-        if (!this.choicesId.includes(choice)) return interaction.reply({ content: `Invalid choice! Current hiding spots are: ${Tools.joinList(this.choices)}`, ephemeral: true });
+        if (!this.choicesId.includes(choice)) return interaction.reply({ content: `Invalid choice! Current hiding spots are: ${Tools.joinList(this.choices)}`, flags: 'Ephemeral' });
         this.canSeek = false;
         clearTimeout(this.playerTimer);
         interaction.reply(`<@${interaction.user.id}> picked ${this.choices[this.choicesId.indexOf(choice)]} and found...`);
@@ -116,8 +116,8 @@ class HideAndSeek extends Games.Game {
         const playerKeys = [...this.players.keys()];
         playerKeys.splice(playerKeys.indexOf(this.seeker), 1);
         const players = Tools.joinList(playerKeys.map(p => '<@' + p + '>'));
-        const img = new MessageAttachment('./images/hideandseek/round.gif');
-        const embed = new MessageEmbed()
+        const img = new AttachmentBuilder('./images/hideandseek/round.gif');
+        const embed = new EmbedBuilder()
             .setTitle('Hide and Seek')
             .setDescription("Please pick a hiding spot from the list below!")
             .addField("Hiding spots", Tools.joinList(this.choices))
