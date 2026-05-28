@@ -14,9 +14,9 @@ class Empires extends Games.Game {
         - The one to survive until the end will be the winner.`;
         this.aliases = new Map();
         this.turn = null;
-        this.requiredPlayers = 2;
+        this.requiredPlayers = 4;
         this.playerTime = 45;
-        this.roundTime = 10;
+        this.roundTime = 60;
         this.cooldownTime = 5;
         this.setAliases = false;
         this.guess = { userId: null, alias: null };
