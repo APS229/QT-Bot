@@ -63,21 +63,38 @@ class Game {
     onStart() {
         this.started = true;
         if (!this.freejoin) {
-            const components = this.startMessage.components;
-            const newComponents = new ActionRowBuilder();
-            for (const component of components[0].components) {
-                newComponents.addComponents(ButtonBuilder.from(component).setDisabled(true));
+            const components = this.startMessage.components[0].components;
+            const newComponents = [];
+            const row = new ActionRowBuilder();
+            for (const button of components) {
+                row.addComponents(ButtonBuilder.from(button).setDisabled(true));
             }
-            this.startMessage.edit({ components: [newComponents] });
+            newComponents.push(row);
+            this.startMessage.edit({ components: newComponents });
             this.startMessage = null;
         }
     }
+    async updatePlayerListMessage() {
+        const players = [...this.players.keys()].map(player => player = `<@${player}>`).join('\n');
+        const embed = new EmbedBuilder()
+            .setTitle(`Players (${this.players.size})`)
+            .setDescription(players || "None")
+            .setTimestamp()
+            .setFooter({
+                text: `${Config.username}`,
+                iconURL: Config.avatarURL
+            });
+        if (!this.playerListMessage) return this.playerListMessage = await this.channel.send({ embeds: [embed] });
+        this.playerListMessage.edit({ embeds: [embed] });
+    }
     onJoin(userId, userTag) {
+        if (this.players.size === this.maxPlayers) return this.channel.send("The game has reached the max amount of players!");
         this.players.set(userId, userTag);
-        if (this.players.size === this.maxPlayers) this.channel.send("The game has reached the max amount of players!");
+        if (!this.started) this.updatePlayerListMessage();
     }
     onLeave(userId) {
         this.players.delete(userId);
+        if (!this.started) this.updatePlayerListMessage();
         if (this.started && this.skipPlayer) {
             const index = this.queue.indexOf(userId);
             this.queue.splice(index, 1);

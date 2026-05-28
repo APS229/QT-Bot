@@ -93,16 +93,15 @@ const commands = {
         desc: "Lists all players in the current game.",
         execute(interaction) {
             if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
-            let players = "";
-            for (const player of Client.activeGame.players.entries()) {
-                players += `<@${player[0]}>\n`;
-            }
-            if (!players) players = "None";
+            const players = [...Client.activeGame.players.keys()].map(player => player = `<@${player}>`).join('\n');
             const embed = new EmbedBuilder()
                 .setTitle(`Players (${Client.activeGame.players.size})`)
-                .setDescription(players)
+                .setDescription(players || "None")
                 .setTimestamp()
-                .setFooter({ text: `Requested by ${interaction.member.displayName}`, iconURL: interaction.member.avatarURL() ? interaction.member.avatarURL() : (interaction.user?.avatarURL() || interaction.author.avatarURL()) })
+                .setFooter({
+                    text: `Requested by ${interaction.member.displayName}`,
+                    iconURL: interaction.member.avatarURL() ? interaction.member.avatarURL() : (interaction.user?.avatarURL() || interaction.author.avatarURL())
+                });
             interaction.reply({ embeds: [embed] });
         }
     },
