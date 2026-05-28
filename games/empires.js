@@ -14,9 +14,9 @@ class Empires extends Games.Game {
         - The one to survive until the end will be the winner.`;
         this.aliases = new Map();
         this.turn = null;
-        this.requiredPlayers = 4;
+        this.requiredPlayers = 2;
         this.playerTime = 45;
-        this.roundTime = 60;
+        this.roundTime = 10;
         this.cooldownTime = 5;
         this.setAliases = false;
         this.guess = { userId: null, alias: null };
@@ -78,6 +78,7 @@ class Empires extends Games.Game {
                 const newRow = ActionRowBuilder.from(row);
                 newComponents.push(newRow);
             }
+            // Set the selected option and disable the select menu
             const currentRow = interaction.customId === 'selectplayer' ? newComponents[0] : newComponents[1];
             currentRow.components[0].options.find(option => option.data.value === interaction.values[0]).setDefault(true);
             currentRow.components[0].setDisabled(true);
@@ -93,6 +94,7 @@ class Empires extends Games.Game {
             if (![...this.aliases.values()].includes(alias)) return interaction.reply("Not an alias.");
             if (!this.players.has(userId)) return interaction.reply("User not in game.");
             this.guess = { userId, alias };
+            this.disableSelectMenus();
         }
 
         clearTimeout(this.playerTimer);
@@ -167,8 +169,7 @@ class Empires extends Games.Game {
 
         return this.channel.send({ content: `<@${this.turn}>'s turn!`, embeds: [embed], components: [guessPlayerMenuRow, guessAliasMenuRow] });
     }
-    onEnd() {
-        // Disable select menus
+    disableSelectMenus() {
         if (this.selectMenusMessage) {
             const newComponents = [];
             for (const row of this.selectMenusMessage.components) {
@@ -178,6 +179,9 @@ class Empires extends Games.Game {
             }
             this.selectMenusMessage.edit({ components: newComponents });
         }
+    }
+    onEnd() {
+        this.disableSelectMenus();
         super.onEnd();
     }
 }
