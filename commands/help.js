@@ -23,7 +23,7 @@ const commands = {
             const embed = new EmbedBuilder()
                 .setTitle(`Available commands in ${Config.username}`)
                 .setAuthor({ name: Config.username, iconURL: Config.avatarURL })
-                .setFooter({ text: `Requested by ${interaction.member.displayName}`, iconURL: interaction.user.avatarURL() })
+                .setFooter({ text: `Requested by ${interaction.member.displayName}`, iconURL: interaction.member.avatarURL() ? interaction.member.avatarURL() : (interaction.user?.avatarURL() || interaction.author.avatarURL()) })
                 .setTimestamp();
             const commandFiles = fs.readdirSync('./commands');
             for (const commandFile of commandFiles) {
