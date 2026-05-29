@@ -53,7 +53,8 @@ const commands = {
 
             if (Client.activeGame.players.has(interaction.member.id)) return interaction.reply({ content: "You have already joined this game!", flags: 'Ephemeral' });
             if (Client.activeGame.players.size === Client.activeGame.maxPlayers) return interaction.reply({ content: "Max amount of players have been reached for this game.", flags: 'Ephemeral' });
-            Client.activeGame.onJoin(interaction.member.id, interaction.member.user.tag);
+            // TODO: make the second argument user tag only
+            Client.activeGame.onJoin(interaction.member.id, Client.activeGame.id === 'empires' ? interaction.member.user.tag : 0);
             interaction.reply({ content: `You have successfully joined the game of ${Client.activeGame.name}!`, flags: 'Ephemeral' });
         }
     },
@@ -123,11 +124,31 @@ const commands = {
     },
     endgame: {
         modOnly: true,
-        desc: "Ends the current game..",
+        desc: "Ends the current game.",
         execute(interaction) {
             if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
             interaction.reply(`The game of ${Client.activeGame.name} was forcibly ended.`);
             Client.activeGame.onEnd();
+        }
+    },
+    guess: {
+        options: [
+            {
+                type: OptionTypes.STRING,
+                name: 'answer',
+                description: "The guess answer.",
+                required: true
+            }
+        ],
+        desc: "Guess an answer in the current game.",
+        execute(interaction) {
+            // TODO: check if current channel is same as game channel for all commands that use .onGuess
+            // TODO: convert .onGuess() in puzzle games/russian roulette/hangman to use interaction directly
+            if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
+            if (Client.activeGame.type !== 'puzzle' && Client.activeGame.id !== 'russianroulette') return interaction.reply({ content: "You cannot guess answers in this game.", flags: 'Ephemeral' });
+            if (!Client.activeGame.canGuess) return interaction.reply({ content: "Please wait until next round starts.", flags: 'Ephemeral' });
+            const guess = Tools.toId(interaction.options?._hoistedOptions[0].value || interaction.content.split(' ')[1]);
+            Client.activeGame.onGuess(interaction.member.id, guess);
         }
     },
     alias: {
@@ -189,8 +210,8 @@ const commands = {
         desc: "Choose a door in the game of Trick House.",
         execute(interaction) {
             if (Client.activeGame?.id !== 'trickhouse') return interaction.reply({ content: "No game of Trick House is going on right now.", flags: 'Ephemeral' });
-            if (!Client.activeGame?.players.has(interaction.member.id)) return interaction.reply({ content: `You are not in the current game of ${Client.activeGame.name}.`, flags: 'Ephemeral' });
-            if (!Client.activeGame?.canGuess) return interaction.reply({ content: "Please wait until next round starts.", flags: 'Ephemeral' });
+            if (!Client.activeGame.players.has(interaction.member.id)) return interaction.reply({ content: `You are not in the current game of ${Client.activeGame.name}.`, flags: 'Ephemeral' });
+            if (!Client.activeGame.canGuess) return interaction.reply({ content: "Please wait until next round starts.", flags: 'Ephemeral' });
             Client.activeGame.onGuess(interaction);
         }
     },
