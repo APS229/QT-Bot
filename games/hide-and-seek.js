@@ -49,23 +49,24 @@ class HideAndSeek extends Games.Game {
         this.canHide = true;
         this.roundTimer = setTimeout(async () => {
             this.canHide = false;
-            for (const player of this.players) {
-                if (!player[1] && player[0] !== this.seeker) {
-                    this.channel.send(`<@${player[0]}> didn't pick a hiding spot and has been eliminated.`);
-                    this.onLeave(player[0]);
-                    if (this.players.size === 1) {
+            for (const [player, playerChoice] of this.players) {
+                if (!playerChoice && player !== this.seeker) {
+                    this.channel.send(`<@${player}> didn't pick a hiding spot and has been eliminated.`);
+                    this.onLeave(player);
+                    if (this.players.size < 2) {
                         this.winner = this.players.keys().next().value;
                         return this.onEnd();
                     }
                 }
             }
             await this.channel.send(`Seeker <@${this.seeker}>, pick a hiding spot to seek in! Spots: ${Tools.joinList(this.choices)}`);
+            if (!this.started) return;
             this.canSeek = true;
             this.playerTimer = setTimeout(() => {
                 this.canSeek = false;
                 this.channel.send(`<@${this.seeker}> didn't pick a hiding spot to seek in time and has been eliminated!`);
                 this.onLeave(this.seeker);
-                if (this.players.size === 1) {
+                if (this.players.size < 2) {
                     this.winner = this.players.keys().next().value;
                     return this.onEnd();
                 }
@@ -74,37 +75,38 @@ class HideAndSeek extends Games.Game {
         }, this.roundTime * 1000);
     }
     onHide(interaction) {
-        const choice = Tools.toId(interaction.options._hoistedOptions[0].value);
+        const pickedSpot = interaction.options?._hoistedOptions[0].value;
+        if (!pickedSpot) return interaction.reply("Your hiding spot must be anonymous, please use the slash command.");
+        const choice = Tools.toId(pickedSpot);
         if (!this.choicesId.includes(choice)) return interaction.reply({ content: `Invalid choice! Current hiding spots are: ${Tools.joinList(this.choices)}`, flags: 'Ephemeral' });
-        if (this.players.get(interaction.user.id)) return interaction.reply({ content: "You have already picked a hiding spot!", flags: 'Ephemeral' });
-        this.players.set(interaction.user.id, choice);
+        if (this.players.get(interaction.member.id)) return interaction.reply({ content: "You have already picked a hiding spot!", flags: 'Ephemeral' });
+        this.players.set(interaction.member.id, choice);
         interaction.reply({ content: `Your choice is: ${this.choices[this.choicesId.indexOf(choice)]}`, flags: 'Ephemeral' });
     }
     onSeek(interaction) {
-        const choice = Tools.toId(interaction.options._hoistedOptions[0].value);
+        const choice = Tools.toId(interaction.options?._hoistedOptions[0].value || interaction.content.split(' ')[1]);
         if (!this.choicesId.includes(choice)) return interaction.reply({ content: `Invalid choice! Current hiding spots are: ${Tools.joinList(this.choices)}`, flags: 'Ephemeral' });
         this.canSeek = false;
         clearTimeout(this.playerTimer);
-        interaction.reply(`<@${interaction.user.id}> picked ${this.choices[this.choicesId.indexOf(choice)]} and found...`);
-        const elimPlayers = [];
-        [...this.players].forEach(player => {
-            if (player[1] === choice) {
-                elimPlayers.push(player[0]);
-                this.onLeave(player[0]);
-            }
-        });
+        interaction.reply(`<@${interaction.member.id}> picked ${this.choices[this.choicesId.indexOf(choice)]} and found...`);
+        const elimPlayers = [...this.players.keys()].filter(player => this.players.get(player) == choice);
         this.cooldownTimer = setTimeout(async () => {
             if (elimPlayers.length) {
-                await this.channel.send(`${Tools.joinList(elimPlayers.map(p => '<@' + p + '>'))} hiding behind it!`);
-                if (this.players.size === 1) {
+                await this.channel.send(`${Tools.joinList(elimPlayers.map(player => `<@${player}>`))} hiding behind it!`);
+                if (!this.started) return;
+                for (const player of elimPlayers) {
+                    this.onLeave(player);
+                }
+                if (this.players.size < 2) {
                     this.winner = this.players.keys().next().value;
                     return this.onEnd();
                 }
             }
             else {
                 await this.channel.send("Nobody!");
+                if (!this.started) return;
                 this.onLeave(this.seeker);
-                if (this.players.size === 1) {
+                if (this.players.size < 2) {
                     this.winner = this.players.keys().next().value;
                     return this.onEnd();
                 }
@@ -113,16 +115,20 @@ class HideAndSeek extends Games.Game {
         }, this.cooldownTime * 1000);
     }
     update() {
-        const playerKeys = [...this.players.keys()];
-        playerKeys.splice(playerKeys.indexOf(this.seeker), 1);
-        const players = Tools.joinList(playerKeys.map(p => '<@' + p + '>'));
+        const hiders  = [...this.players.keys()];
+        hiders.splice(hiders.indexOf(this.seeker), 1);
+        const players = Tools.joinList(hiders.map(player => `<@${player}>`));
         const img = new AttachmentBuilder('./images/hideandseek/round.gif');
         const embed = new EmbedBuilder()
             .setTitle('Hide and Seek')
             .setDescription("Please pick a hiding spot from the list below!")
-            .addField("Hiding spots", Tools.joinList(this.choices))
+            .addFields({ name: "Hiding spots", value: Tools.joinList(this.choices) })
             .setImage('attachment://round.gif')
-            .setTimestamp();
+            .setTimestamp()
+            .setFooter({
+                text: Config.username,
+                iconURL: Config.avatarURL
+            });
         this.channel.send({ content: players, embeds: [embed], files: [img] });
     }
     onLeave(userid) {
@@ -131,13 +137,13 @@ class HideAndSeek extends Games.Game {
             if (this.playerTimer) clearTimeout(this.playerTimer);
             if (this.roundTimer) clearTimeout(this.roundTimer);
             this.channel.send("The seeker left the game, moving on to next round...");
-            if (this.players.size === 1) {
+            if (this.players.size < 2) {
                 this.winner = this.players.keys().next().value;
                 return this.onEnd();
             }
             this.onNextRound();
         }
-        if (this.seeker !== userid && this.players.size === 1) {
+        if (this.seeker !== userid && this.players.size < 2) {
             this.winner = this.players.keys().next().value;
             return this.onEnd();
         }
