@@ -7,7 +7,7 @@ class LostLetters extends Games.PuzzleGame {
     constructor(interaction, points) {
         super(interaction, points || 10);
         this.name = 'Lost Letters';
-        this.description = `- Use guess [answer] to make your guess. Example: \`guess answer\`\n
+        this.description = `- Use \`/guess [answer]\` to make your guess.\n
         - The vowels in question are missing, you need to fill out the vowels and answer correctly to earn points.`;
         this.freejoin = true;
         this.init();
@@ -47,10 +47,7 @@ class LostLetters extends Games.PuzzleGame {
         }
     }
     update() {
-        let players = "";
-        for (const player of this.players.entries()) {
-            players += `<@${player[0]}>: ${player[1]}\n`;
-        }
+        const players = [...this.players.entries()].map(([player, points]) => `<@${player}>: ${points}`).join('\n');
         const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
             .setTitle(`\`\`${this.puzzle}\`\``)

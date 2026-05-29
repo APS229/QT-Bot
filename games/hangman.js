@@ -7,7 +7,7 @@ class Hangman extends Games.PuzzleGame {
         super(interaction, points || 3);
         this.name = 'Hangman';
         this.description = `- Use the \`/joingame\` and \`/leavegame\` commands or the buttons below to join or leave the game.\n
-        - Use \`guess [letter/word]\` to make your guess. Examples: \`guess answer\`, \`guess a\`\n
+        - Use \`/guess [letter/word]\` to make your guess. Examples: \`/guess answer\`, \`/guess a\`\n
         - If the guessed letter is in the word, the underscores containing the letter will be replaced by the letter.\n
         - You can guess the word even if it's not your turn.\n
         - You cannot guess the letter if it's not your turn.\n
@@ -46,11 +46,11 @@ class Hangman extends Games.PuzzleGame {
             this.playerTimer = setTimeout(() => this.skipPlayer(), this.playerTime * 1000);
         }, this.playerTime * 1000);
     }
-    onGuess(userid, guess) {
-        if (!this.canGuess || !this.players.has(userid) || this.usedGuesses.includes(guess)) return;
-        if (!guess.length) return this.channel.send(`<@${userid}>, your guess must have alphanumeric characters.`);
+    onGuess(userId, guess) {
+        if (!this.canGuess || !this.players.has(userId) || this.usedGuesses.includes(guess)) return;
+        if (!guess.length) return this.channel.send(`<@${userId}>, your guess must have alphanumeric characters.`);
         if (guess.length === 1) {
-            if (this.usedGuesses.includes(guess) || Tools.toId(this.puzzle.join('')).includes(guess) || this.queue[0] !== userid) return;
+            if (this.usedGuesses.includes(guess) || Tools.toId(this.puzzle.join('')).includes(guess) || this.queue[0] !== userId) return;
             let successfulGuess = false;
             for (let i = 0; i < this.currentAnswer.length; i++) {
                 if (this.currentAnswer[i].toLowerCase() === guess) {
@@ -59,10 +59,10 @@ class Hangman extends Games.PuzzleGame {
                 }
             }
             if (Tools.toId(this.puzzle.join('')) === this.answer) {
-                this.players.set(userid, this.players.has(userid) ? this.players.get(userid) + 1 : 1);
-                this.channel.send(`<@${userid}> advances to ${this.players.get(userid)} point(s)! The answer was: *${this.currentAnswer}*`);
-                if (this.players.get(userid) === this.points) {
-                    this.winner = userid;
+                this.players.set(userId, this.players.has(userId) ? this.players.get(userId) + 1 : 1);
+                this.channel.send(`<@${userId}> advances to ${this.players.get(userId)} point(s)! The answer was: *${this.currentAnswer}*`);
+                if (this.players.get(userId) === this.points) {
+                    this.winner = userId;
                     return this.onEnd();
                 }
                 this.canGuess = false;
@@ -96,10 +96,10 @@ class Hangman extends Games.PuzzleGame {
         }
         else if (guess.length > 1) {
             if (guess === this.answer) {
-                this.players.set(userid, this.players.has(userid) ? this.players.get(userid) + 1 : 1);
-                this.channel.send(`<@${userid}> advances to ${this.players.get(userid)} point(s)! The answer was: *${this.currentAnswer}*`);
-                if (this.players.get(userid) === this.points) {
-                    this.winner = userid;
+                this.players.set(userId, this.players.has(userId) ? this.players.get(userId) + 1 : 1);
+                this.channel.send(`<@${userId}> advances to ${this.players.get(userId)} point(s)! The answer was: *${this.currentAnswer}*`);
+                if (this.players.get(userId) === this.points) {
+                    this.winner = userId;
                     return this.onEnd();
                 }
                 this.canGuess = false;
@@ -126,15 +126,12 @@ class Hangman extends Games.PuzzleGame {
                     }, this.cooldownTime * 1000);
                     return;
                 }
-                this.channel.send(`<@${userid}> incorrect, that is not the answer.`);
+                this.channel.send(`<@${userId}> incorrect, that is not the answer.`);
             }
         }
     }
     update() {
-        let players = "***** ";
-        for (const player of this.queue) {
-            players += `<@${player}>: ${this.players.get(player)}\n`;
-        }
+        const players = '***** ' + this.queue.map(player => `<@${player}>: ${this.players.get(player)}`).join('\n');
         const img = new AttachmentBuilder(`./images/hangman/${this.usedGuesses.length}.png`);
         const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
@@ -144,7 +141,11 @@ class Hangman extends Games.PuzzleGame {
             .addFields({ name: "Used guesses", value: this.usedGuesses.length ? this.usedGuesses.join(', ') : "None", inline: true })
             .addFields({ name: "All players", value: players, inline: true })
             .setImage(`attachment://${this.usedGuesses.length}.png`)
-            .setTimestamp();
+            .setTimestamp()
+            .setFooter({
+                text: `${Config.username}`,
+                iconURL: Config.avatarURL
+            });
         this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed], files: [img] });
     }
     skipPlayer() {

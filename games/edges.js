@@ -6,7 +6,7 @@ class Edges extends Games.PuzzleGame {
     constructor(interaction, points) {
         super(interaction, points || 7);
         this.name = "Edges";
-        this.description = `- Use \`guess [answer]\` to make your guess.\n
+        this.description = `- Use \`/guess [answer]\` to make your guess.\n
         - The question will have the starting and ending letters of the answers.`;
         this.freejoin = true;
         this.data = {};
@@ -49,14 +49,14 @@ class Edges extends Games.PuzzleGame {
             this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
         }, this.roundTime * 1000);
     }
-    onGuess(userid, guess) {
+    onGuess(userId, guess) {
         if (this.answer.includes(guess)) {
             clearTimeout(this.roundTimer);
             this.canGuess = false;
-            this.players.set(userid, this.players.has(userid) ? this.players.get(userid) + 1 : 1);
-            this.channel.send(`<@${userid}> advances to ${this.players.get(userid)} point(s)! The answers were: *${Tools.joinList(this.currentAnswer)}*`);
-            if (this.players.get(userid) === this.points) {
-                this.winner = userid;
+            this.players.set(userId, this.players.has(userId) ? this.players.get(userId) + 1 : 1);
+            this.channel.send(`<@${userId}> advances to ${this.players.get(userId)} point(s)! The answers were: *${Tools.joinList(this.currentAnswer)}*`);
+            if (this.players.get(userId) === this.points) {
+                this.winner = userId;
                 return this.onEnd();
             }
             this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
@@ -75,11 +75,6 @@ class Edges extends Games.PuzzleGame {
             });
         if (players) embed.addFields({ name: "Players", value: players });
         this.channel.send({ embeds: [embed] });
-    }
-    onEnd() {
-        if (this.roundTimer) clearTimeout(this.roundTimer);
-        if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
-        super.onEnd();
     }
 }
 

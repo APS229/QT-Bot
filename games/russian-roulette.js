@@ -6,7 +6,7 @@ class RussianRoulette extends Games.Game {
     constructor(interaction, points) {
         super(interaction, points || 10);
         this.name = 'Russian Roulette';
-        this.description = `- Use \`guess [1-6]\` to make a guess for the roll on your turn.\n
+        this.description = `- Use \`/guess [1-6]\` to make a guess for the roll on your turn.\n
         - If the rolled number is less than or equal to your guess, you will be eliminated.\n
         - If the rolled number is more than your guess, you will get points equal to your guess.\n
         - You will win if you reach the the required points to win or if you are the only player left.`;
@@ -84,11 +84,6 @@ class RussianRoulette extends Games.Game {
             .setTimestamp()
             .addFields({ name: "Players", value: players });
         this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed] });
-    }
-    onEnd() {
-        if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
-        if (this.playerTimer) clearTimeout(this.playerTimer);
-        super.onEnd();
     }
 }
 

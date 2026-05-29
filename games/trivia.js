@@ -2,6 +2,7 @@
 
 const { EmbedBuilder } = require('discord.js');
 
+// Game plan: change this to use other category data
 class Trivia extends Games.PuzzleGame {
     constructor(interaction, points) {
         super(interaction, points || 10);
@@ -76,5 +77,5 @@ class Trivia extends Games.PuzzleGame {
     }
 }
 
-exports.game = Trivia;
-exports.id = 'trivia';
+// exports.game = Trivia;
+// exports.id = 'trivia';
