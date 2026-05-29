@@ -51,12 +51,8 @@ class HideAndSeek extends Games.Game {
             this.canHide = false;
             for (const [player, playerChoice] of this.players) {
                 if (!playerChoice && player !== this.seeker) {
-                    this.channel.send(`<@${player}> didn't pick a hiding spot and has been eliminated.`);
+                    this.channel.send(`<@${player}> didn't pick a hiding spot to hide in and has been eliminated.`);
                     this.onLeave(player);
-                    if (this.players.size < 2) {
-                        this.winner = this.players.keys().next().value;
-                        return this.onEnd();
-                    }
                 }
             }
             await this.channel.send(`Seeker <@${this.seeker}>, pick a hiding spot to seek in! Spots: ${Tools.joinList(this.choices)}`);
@@ -66,10 +62,6 @@ class HideAndSeek extends Games.Game {
                 this.canSeek = false;
                 this.channel.send(`<@${this.seeker}> didn't pick a hiding spot to seek in time and has been eliminated!`);
                 this.onLeave(this.seeker);
-                if (this.players.size < 2) {
-                    this.winner = this.players.keys().next().value;
-                    return this.onEnd();
-                }
                 this.onNextRound();
             }, this.playerTime * 1000);
         }, this.roundTime * 1000);
@@ -97,25 +89,17 @@ class HideAndSeek extends Games.Game {
                 for (const player of elimPlayers) {
                     this.onLeave(player);
                 }
-                if (this.players.size < 2) {
-                    this.winner = this.players.keys().next().value;
-                    return this.onEnd();
-                }
             }
             else {
                 await this.channel.send("Nobody!");
                 if (!this.started) return;
                 this.onLeave(this.seeker);
-                if (this.players.size < 2) {
-                    this.winner = this.players.keys().next().value;
-                    return this.onEnd();
-                }
             }
             this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
         }, this.cooldownTime * 1000);
     }
     update() {
-        const hiders  = [...this.players.keys()];
+        const hiders = [...this.players.keys()];
         hiders.splice(hiders.indexOf(this.seeker), 1);
         const players = Tools.joinList(hiders.map(player => `<@${player}>`));
         const img = new AttachmentBuilder('./images/hideandseek/round.gif');
@@ -133,19 +117,15 @@ class HideAndSeek extends Games.Game {
     }
     onLeave(userid) {
         super.onLeave(userid);
+        if (this.players.size < 2) {
+            this.winner = this.players.keys().next().value;
+            return this.onEnd();
+        }
         if (this.seeker === userid && this.canSeek) {
             if (this.playerTimer) clearTimeout(this.playerTimer);
             if (this.roundTimer) clearTimeout(this.roundTimer);
             this.channel.send("The seeker left the game, moving on to next round...");
-            if (this.players.size < 2) {
-                this.winner = this.players.keys().next().value;
-                return this.onEnd();
-            }
             this.onNextRound();
-        }
-        if (this.seeker !== userid && this.players.size < 2) {
-            this.winner = this.players.keys().next().value;
-            return this.onEnd();
         }
     }
 }
