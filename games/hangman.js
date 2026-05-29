@@ -143,7 +143,7 @@ class Hangman extends Games.PuzzleGame {
             .setImage(`attachment://${this.usedGuesses.length}.png`)
             .setTimestamp()
             .setFooter({
-                text: `${Config.username}`,
+                text: Config.username,
                 iconURL: Config.avatarURL
             });
         this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed], files: [img] });

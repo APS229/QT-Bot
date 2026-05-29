@@ -47,7 +47,7 @@ class TrickHouse extends Games.Game {
                 .setImage('attachment://trap.jpg')
                 .setTimestamp()
                 .setFooter({
-                    text: `${Config.username}`,
+                    text: Config.username,
                     iconURL: Config.avatarURL
                 });
             await this.channel.send({ embeds: [embed], files: [trap] });
@@ -88,7 +88,7 @@ class TrickHouse extends Games.Game {
             .setImage('attachment://image.png')
             .setTimestamp()
             .setFooter({
-                text: `${Config.username}`,
+                text: Config.username,
                 iconURL: Config.avatarURL
             });
         this.channel.send({ content: Tools.joinList(players), embeds: [embed], files: [img] });

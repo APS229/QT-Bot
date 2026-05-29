@@ -148,12 +148,6 @@ class HideAndSeek extends Games.Game {
             return this.onEnd();
         }
     }
-    onEnd() {
-        if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
-        if (this.playerTimer) clearTimeout(this.playerTimer);
-        if (this.roundTimer) clearTimeout(this.roundTimer);
-        super.onEnd();
-    }
 }
 
 exports.game = HideAndSeek;

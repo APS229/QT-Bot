@@ -52,7 +52,11 @@ class LostLetters extends Games.PuzzleGame {
             .setColor("#FFFFFF")
             .setTitle(`\`\`${this.puzzle}\`\``)
             .setDescription(`**Category:** ${this.category}`)
-            .setTimestamp();
+            .setTimestamp()
+            .setFooter({
+                text: Config.username,
+                iconURL: Config.avatarURL
+            });
         if (players) embed.addFields({ name: "Players", value: players });
         this.channel.send({ embeds: [embed] });
     }

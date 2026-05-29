@@ -85,7 +85,7 @@ class DiceDisaster extends Games.Game {
             .setDescription("Bid a number 1 - 100")
             .setTimestamp()
             .setFooter({
-                text: `${Config.username}`,
+                text: Config.username,
                 iconURL: Config.avatarURL
             });
         this.channel.send({ content: Tools.joinList([...this.players.keys()].map(p => `<@${p}>`)), embeds: [embed] });

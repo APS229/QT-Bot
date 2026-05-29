@@ -76,7 +76,7 @@ class Client {
     // To be ran only when adding or updating slash commands
     async updateSlashCommands() {
         const rest = new REST().setToken(Config.token);
-        const commands = [...this.commands.entries()].map(([commandName, commandData]) => {
+        const commands = [...this.commands].map(([commandName, commandData]) => {
             return {
                 name: commandName,
                 description: commandData.desc,

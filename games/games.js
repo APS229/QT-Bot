@@ -81,7 +81,7 @@ class Game {
             .setDescription(players || "None")
             .setTimestamp()
             .setFooter({
-                text: `${Config.username}`,
+                text: Config.username,
                 iconURL: Config.avatarURL
             });
         if (!this.playerListMessage) return this.playerListMessage = await this.channel.send({ embeds: [embed] });

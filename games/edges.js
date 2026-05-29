@@ -70,7 +70,7 @@ class Edges extends Games.PuzzleGame {
             .setDescription(`**Category:** ${this.category}`)
             .setTimestamp()
             .setFooter({
-                text: `${Config.username}`,
+                text: Config.username,
                 iconURL: Config.avatarURL
             });
         if (players) embed.addFields({ name: "Players", value: players });

@@ -139,7 +139,7 @@ class Empires extends Games.Game {
             .addFields({ name: "__Aliases__", value: aliases, inline: true })
             .setTimestamp()
             .setFooter({
-                text: `${Config.username}`,
+                text: Config.username,
                 iconURL: Config.avatarURL
             });
 

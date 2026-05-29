@@ -227,9 +227,9 @@ const commands = {
         desc: "Choose a hiding spot in the game of Hide and Seek.",
         execute(interaction) {
             if (Client.activeGame?.id !== 'hideandseek') return interaction.reply({ content: "No game of Hide and Seek is going on right now.", flags: 'Ephemeral' });
-            if (!Client.activeGame?.players.has(interaction.member.id)) return interaction.reply({ content: `You are not in the current game of ${Client.activeGame.name}.`, flags: 'Ephemeral' });
+            if (!Client.activeGame.players.has(interaction.member.id)) return interaction.reply({ content: `You are not in the current game of ${Client.activeGame.name}.`, flags: 'Ephemeral' });
             if (Client.activeGame.seeker === interaction.member.id) return interaction.reply({ content: "You are the seeker, you can't pick a hiding spot.", flags: 'Ephemeral' });
-            if (!Client.activeGame?.canHide) return interaction.reply({ content: "Please wait until next round starts.", flags: 'Ephemeral' });
+            if (!Client.activeGame.canHide) return interaction.reply({ content: "Please wait until next round starts.", flags: 'Ephemeral' });
             Client.activeGame.onHide(interaction);
         }
     },

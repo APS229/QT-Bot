@@ -82,6 +82,10 @@ class RussianRoulette extends Games.Game {
             .setColor("#FFFFFF")
             .setTitle("Russian Roulette")
             .setTimestamp()
+            .setFooter({
+                text: Config.username,
+                iconURL: Config.avatarURL
+            })
             .addFields({ name: "Players", value: players });
         this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed] });
     }
