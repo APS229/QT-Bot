@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-const { GatewayIntentBits, Collection } = require('discord.js');
+const { REST, Routes, GatewayIntentBits, Collection, SlashCommandBuilder } = require('discord.js');
 const DiscordClient = require('discord.js').Client;
 
 class Client {
@@ -51,6 +51,10 @@ class Client {
             const file = require('../commands/' + commandFile);
             if (file.commands) {
                 for (const cmd in file.commands) {
+                    if (!file.commands[cmd].execute) {
+                        console.warn(`WARNING: Skipped loading command '${cmd}' in ${commandFile} as it is missing execute() property`);
+                        continue;
+                    }
                     if (!file.commands[cmd].desc) file.commands[cmd].desc = 'No description';
                     this.commands.set(cmd, file.commands[cmd]);
                 }
@@ -68,6 +72,28 @@ class Client {
             }
         }
         global.Games = require('../games/games.js');
+    }
+    // To be ran only when adding or updating slash commands
+    async updateSlashCommands() {
+        const rest = new REST().setToken(Config.token);
+        const commands = [...this.commands.entries()].map(([commandName, commandData]) => {
+            return {
+                name: commandName,
+                description: commandData.desc,
+                options: commandData.options
+            };
+        });
+        try {
+            console.log(`Started refreshing ${commands.length} application (/) commands.`);
+
+            // Peaceful Players - 777956702741463070
+            const data = await rest.put(Routes.applicationGuildCommands(Config.id, '777956702741463070'), { body: commands });
+
+            console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+        }
+        catch (err) {
+            console.error(err);
+        }
     }
 }
 module.exports = new Client();

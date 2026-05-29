@@ -2,7 +2,7 @@
 
 const http = require('http');
 const DiscordEvents = require('discord.js').Events;
-const { ActionRowBuilder, Collection, SlashCommandBuilder } = require('discord.js');
+const { ActionRowBuilder, Collection } = require('discord.js');
 
 class Events {
     constructor(client) {
@@ -13,22 +13,14 @@ class Events {
             if (Config.username) this.bot.user.setUsername(Config.username);
             info(`Logged in as: ${this.bot.user.username}`);
 
+            if (Config.activity) this.bot.user.setActivity('to become a gaming bot', { type: Config.activity });
+
             const servers = [];
             for (const guild of this.bot.guilds.cache) {
                 servers.push(`${guild[1].name} - ${guild[1].id}`);
             }
             if (!servers.length) return;
             info(`Connected to server${servers.length > 1 ? 's' : ''}:\n\t\u00b0 ${servers.sort().join('\n\t\u00b0 ')}`);
-
-            if (Config.activity) this.bot.user.setActivity('to become a gaming bot', { type: Config.activity });
-
-            const commands = new Collection();
-            for (const command of Client.commands) {
-                commands.set(command[0], command[1]);
-            }
-            this.bot.guilds.fetch('777956702741463070').then(guild => {
-                guild.commands = commands;
-            });
         });
 
         this.bot.on(DiscordEvents.ShardError, err => {
@@ -66,9 +58,6 @@ class Events {
                     }
                     if (command.execute) command.execute(message);
                 }
-                if (!Client.activeGame?.canGuess || !messageContent.toLowerCase().startsWith('guess ') || Client.activeGame.channel.id !== message.channel.id) return;
-                if (Client.activeGame?.type !== 'puzzle' && Client.activeGame?.id !== 'russianroulette') return;
-                Client.activeGame.onGuess(message.member.id, Tools.toId(messageContent.slice(6)));
             }
             catch (err) {
                 message.channel.send(`There was an error occured.`);
