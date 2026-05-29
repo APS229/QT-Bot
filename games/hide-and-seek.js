@@ -115,13 +115,13 @@ class HideAndSeek extends Games.Game {
             });
         this.channel.send({ content: players, embeds: [embed], files: [img] });
     }
-    onLeave(userid) {
-        super.onLeave(userid);
+    onLeave(userId) {
+        super.onLeave(userId);
         if (this.players.size < 2) {
             this.winner = this.players.keys().next().value;
             return this.onEnd();
         }
-        if (this.seeker === userid && this.canSeek) {
+        if (this.seeker === userId && this.canSeek) {
             if (this.playerTimer) clearTimeout(this.playerTimer);
             if (this.roundTimer) clearTimeout(this.roundTimer);
             this.channel.send("The seeker left the game, moving on to next round...");

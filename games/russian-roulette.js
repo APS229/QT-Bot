@@ -27,57 +27,53 @@ class RussianRoulette extends Games.Game {
         this.onNextRound();
     }
     onNextRound() {
+        if (!this.started) return;
         this.canGuess = true;
         this.update();
         this.playerTimer = setTimeout(() => {
             this.channel.send(`Time's up! <@${this.queue[0]}> didn't make a guess and has been eliminated.`);
             this.onLeave(this.queue[0]);
+            if (!this.started) return;
             this.queue.shift();
-            if (this.queue.length < 2) {
-                this.winner = this.queue[0];
-                return this.onEnd();
-            }
+            this.canGuess = false;
             this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
         }, this.playerTime * 1000);
     }
-    onGuess(userid, guess) {
-        if (userid !== this.queue[0]) return;
+    onGuess(userId, guess) {
+        if (userId !== this.queue[0]) return;
         guess = parseInt(guess);
-        if (isNaN(guess) || guess > 6 || guess < 1) return this.channel.send("Your guess must be a number between 1 - 6.");
+        if (!guess || guess > 6 || guess < 1) return this.channel.send("Your guess must be a number from 1 - 6.");
         clearTimeout(this.playerTimer);
         this.canGuess = false;
         const roll = parseInt((Math.random() * 7) + 1);
         const embed = new EmbedBuilder()
             .setTitle("Rolling 1 - 7")
             .setDescription(`\`${roll}\``)
-            .setTimestamp();
+            .setTimestamp()
+            .setFooter({
+                text: Config.username,
+                iconURL: Config.avatarURL
+            });
         this.channel.send({ embeds: [embed] });
         if (roll <= guess) {
-            this.onLeave(userid);
-            this.channel.send(`RIP! <@${userid}> has been eliminated!`);
+            this.channel.send(`RIP! <@${userId}> has been eliminated!`);
+            this.onLeave(userId);
             this.queue.shift();
-            if (this.queue.length < 2) {
-                this.winner = this.queue[0];
-                return this.onEnd();
-            }
         }
         else {
-            this.channel.send(`Lucky! <@${userid}> earned ${guess} points.`);
-            this.players.set(userid, this.players.get(userid) + guess);
-            if (guess >= this.points) {
-                this.winner = userid;
-                return this.oEnd();
+            this.channel.send(`Lucky! <@${userId}> earned ${guess} points.`);
+            this.players.set(userId, this.players.get(userId) + guess);
+            if (this.players.get(userId) >= this.points) {
+                this.winner = userId;
+                return this.onEnd();
             }
             this.queue.shift();
-            this.queue.push(userid);
+            this.queue.push(userId);
         }
-        setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
+        this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
     }
     update() {
-        let players = "";
-        for (const player of this.queue) {
-            players += `<@${player}>: ${this.players.get(player)}\n`;
-        }
+        const players = this.queue.map(player => `<@${player}>: ${this.players.get(player)}`).join('\n');
         const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
             .setTitle("Russian Roulette")
@@ -89,7 +85,14 @@ class RussianRoulette extends Games.Game {
             .addFields({ name: "Players", value: players });
         this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed] });
     }
+    onLeave(userId) {
+        super.onLeave(userId);
+        if (this.players.size < 2) {
+            this.winner = this.players.keys().next()?.value;
+            return this.onEnd();
+        }
+    }
 }
 
-// exports.game = RussianRoulette;
-// exports.id = 'russianroulette';
+exports.game = RussianRoulette;
+exports.id = 'russianroulette';

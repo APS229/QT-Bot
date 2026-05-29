@@ -98,15 +98,15 @@ class Game {
         if (this.started && this.skipPlayer) {
             const index = this.queue.indexOf(userId);
             this.queue.splice(index, 1);
+            if (this.queue.length < 2) {
+                this.channel.send(`Not enough players, ending the game of ${this.name}...`);
+                this.winner = this.queue[0];
+                return this.onEnd();
+            }
             if (index === 0) {
                 if (this.playerTimer) clearTimeout(this.playerTimer);
                 this.update();
                 this.playerTimer = setTimeout(() => this.skipPlayer(), this.playerTime * 1000);
-            }
-            if (this.queue.length < 2) {
-                this.channel.send(`Not enough players, ending the game of ${this.name}...`);
-                this.winner = this.queue[0];
-                this.onEnd();
             }
         }
     }

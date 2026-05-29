@@ -22,6 +22,7 @@ class Hangman extends Games.PuzzleGame {
         this.onNextRound();
     }
     onNextRound() {
+        if (!this.started) return;
         if (this.playerTimer) clearTimeout(this.playerTimer);
         this.category = Object.keys(Client.data).random();
         this.currentAnswer = Array.isArray(Client.data[this.category]) ? Client.data[this.category].random() : Object.keys(Client.data[this.category]).random();
@@ -38,6 +39,7 @@ class Hangman extends Games.PuzzleGame {
         this.canGuess = true;
         this.update();
         this.playerTimer = setTimeout(() => {
+            if (!this.started) return;
             this.channel.send(`Skipping <@${this.queue[0]}>'s turn...`);
             const previousPlayer = this.queue[0];
             this.queue.shift();
@@ -79,7 +81,11 @@ class Hangman extends Games.PuzzleGame {
                     .setTitle("☠️ The man was hanged because of too many bad guesses! ☠️")
                     .setDescription(`The answer was: *${this.currentAnswer}*`)
                     .setImage('attachment://6.png')
-                    .setTimestamp();
+                    .setTimestamp()
+                    .setFooter({
+                        text: Config.username,
+                        iconURL: Config.avatarURL
+                    });
                 this.channel.send({ embeds: [embed], files: [img] });
                 if (this.playerTimer) clearTimeout(this.playerTimer);
                 this.cooldownTimer = setTimeout(() => {
@@ -118,10 +124,14 @@ class Hangman extends Games.PuzzleGame {
                         .setTitle("☠️ The man was hanged because of too many bad guesses! ☠️")
                         .setDescription(`The answer was: *${this.currentAnswer}*`)
                         .setImage('attachment://6.png')
-                        .setTimestamp();
+                        .setTimestamp()
+                        .setFooter({
+                            text: Config.username,
+                            iconURL: Config.avatarURL
+                        });
                     this.channel.send({ embeds: [embed], files: [img] });
                     if (this.playerTimer) clearTimeout(this.playerTimer);
-                    this.cooldownTimer = setTimeout(() => {
+                    if (this.players.size > 1) this.cooldownTimer = setTimeout(() => {
                         this.onNextRound();
                     }, this.cooldownTime * 1000);
                     return;
@@ -149,17 +159,13 @@ class Hangman extends Games.PuzzleGame {
         this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed], files: [img] });
     }
     skipPlayer() {
+        if (!this.started) return;
         this.channel.send(`Skipping <@${this.queue[0]}>'s turn...`);
         const previousPlayer = this.queue[0];
         this.queue.shift();
         this.queue.push(previousPlayer);
         this.update();
         this.playerTimer = setTimeout(() => this.skipPlayer(), this.playerTime * 1000);
-    }
-    onEnd() {
-        if (this.playerTimer) clearTimeout(this.playerTimer);
-        if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
-        super.onEnd();
     }
 }
 
