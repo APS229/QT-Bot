@@ -63,7 +63,7 @@ class Edges extends Games.PuzzleGame {
         }
     }
     update() {
-        const players = [...this.players.entries()].map(([player, playerPoints]) => `<@${player}>: ${playerPoints}`).join('\n');
+        const players = [...this.players].map(([player, playerPoints]) => `<@${player}>: ${playerPoints}`).join('\n');
         const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
             .setTitle(this.puzzle)

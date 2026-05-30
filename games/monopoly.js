@@ -264,7 +264,7 @@ class Monopoly extends Games.Game {
         }
     }
     onStart() {
-        const randomized = [...this.players.entries()].shuffle();
+        const randomized = [...this.players].shuffle();
         for (let i = 0; i < randomized.length; i++) {
             randomized[i][1] = {
                 balance: 1500,
@@ -613,7 +613,7 @@ class Monopoly extends Games.Game {
         this.resolveJail(method);
     }
     async update() {
-        const players = Tools.joinList([...this.players.entries()].map(p => `<@${p[0]}> (${p[1].order})`));
+        const players = Tools.joinList([...this.players].map(p => `<@${p[0]}> (${p[1].order})`));
         const embed = new EmbedBuilder()
             .setTitle(`Monopoly Round ${this.round}`)
             .addFields({ name: "Players", value: players })

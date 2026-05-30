@@ -53,7 +53,7 @@ class TrickHouse extends Games.Game {
             await this.channel.send({ embeds: [embed], files: [trap] });
             if (!this.started) return;
 
-            for (const [playerId, playerChoice] of this.players.entries()) {
+            for (const [playerId, playerChoice] of this.players) {
                 if (!this.doorsId.includes(playerChoice)) {
                     this.onLeave(playerId);
                     this.channel.send(`<@${playerId}> didn't pick a door and has been eliminated!`);

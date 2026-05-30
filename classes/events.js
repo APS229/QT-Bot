@@ -68,8 +68,9 @@ class Events {
         this.bot.on(DiscordEvents.InteractionCreate, interaction => {
             try {
                 if (interaction.isStringSelectMenu()) {
-                    if (Client.activeGame?.id !== 'empires') return interaction.reply({ content: "There is no game of Empires going on right now.", flags: 'Ephemeral' });
-                    Client.activeGame.onGuess(interaction);
+                    if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
+                    if (!Client.activeGame.handleSelectMenu) return interaction.reply({ content: "This menu ie expired.", flags: 'Ephemeral' });
+                    Client.activeGame.handleSelectMenu(interaction);
                 }
                 else {
                     const command = Client.commands.get(interaction.commandName) || Client.commands.get(interaction.customId);

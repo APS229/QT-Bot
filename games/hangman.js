@@ -5,15 +5,15 @@ const { AttachmentBuilder, EmbedBuilder } = require('discord.js');
 class Hangman extends Games.PuzzleGame {
     constructor(interaction, points) {
         super(interaction, points || 3);
-        this.name = 'Hangman';
-        this.description = `- Use the \`/joingame\` and \`/leavegame\` commands or the buttons below to join or leave the game.\n
-        - Use \`/guess [letter/word]\` to make your guess. Examples: \`/guess answer\`, \`/guess a\`\n
+        this.name = "Hangman";
+        this.description = `- Use \`/guess [letter/word]\` to make your guess. Examples: \`/guess answer\`, \`/guess a\`\n
         - If the guessed letter is in the word, the underscores containing the letter will be replaced by the letter.\n
         - You can guess the word even if it's not your turn.\n
         - You cannot guess the letter if it's not your turn.\n
         - You will get a point for guessing the last letter or the right word.`;
         this.usedGuesses = [];
         this.lives = 5;
+        this.queue = [];
         this.init();
     }
     onStart() {

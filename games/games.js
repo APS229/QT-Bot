@@ -125,7 +125,6 @@ class PuzzleGame extends Game {
     constructor(interaction, points) {
         super(interaction, points);
         this.puzzle = '';
-        this.queue = [];
         this.currentAnswer = '';
         this.type = 'puzzle';
         this.playerTime = 15;

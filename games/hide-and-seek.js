@@ -6,7 +6,7 @@ const fs = require('fs');
 class HideAndSeek extends Games.Game {
     constructor(interaction) {
         super(interaction);
-        this.name = 'Hide and Seek';
+        this.name = "Hide and Seek";
         this.description = `- Every round a random seeker will be picked and everyone else will have to go hide in a hiding spot.\n
         - After 30 seconds, the seeker will pick a random hiding spot to seek in and players hiding there will be eliminated.\n
         - If the seeker finds no one, seeker gets eliminated.\n

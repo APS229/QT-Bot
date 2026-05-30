@@ -5,7 +5,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, 
 class Empires extends Games.Game {
     constructor(interaction) {
         super(interaction);
-        this.name = 'Empires';
+        this.name = "Empires";
         this.description = `- Don't tell others your alias, make it less obvious.\n
         - You will have 60 seconds to choose your alias using the \`/alias\` command before the game starts.\n
         - **On your turn only**, use \`/guessalias\` command to guess someone with an alias.\n
@@ -65,10 +65,14 @@ class Empires extends Games.Game {
             this.onNextRound();
         }, this.playerTime * 1000);
     }
-    async onGuess(interaction) {
+    async handleSelectMenu(interaction) {
+        if (interaction.message.id !== this.selectMenusMessage?.id) return interaction.reply({ content: "This menu has expired.", flags: 'Ephemeral' });
+        this.onGuess(interaction, 'selectmenu');
+    }
+    async onGuess(interaction, interactionType) {
         if (this.turn !== interaction.member.id) return interaction.reply({ content: "It's not your turn.", flags: 'Ephemeral' });
         let userId = null, alias = null;
-        if (interaction.values && interaction.isStringSelectMenu()) {
+        if (interactionType === 'selectmenu') {
             // Expired menu
             if (interaction.message.id !== this.selectMenusMessage?.id) return interaction.reply({ content: "This menu has expired.", flags: 'Ephemeral' });
             interaction.customId === 'selectplayer' ? userId = interaction.values[0] : alias = interaction.values[0];
@@ -144,7 +148,7 @@ class Empires extends Games.Game {
             });
 
         const playerOptions = [];
-        for (const [playerId, playerTag] of this.players.entries()) {
+        for (const [playerId, playerTag] of this.players) {
             if (playerId === this.turn) continue;
             playerOptions.push(new StringSelectMenuOptionBuilder()
                 .setLabel(playerTag)
