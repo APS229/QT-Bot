@@ -41,10 +41,10 @@ class TrickHouse extends Games.Game {
         this.roundTimer = setTimeout(async () => {
             this.canGuess = false;
             this.trap = this.doors.random();
-            const trap = new AttachmentBuilder('./images/trickhouse/trap.jpg');
+            const trap = new AttachmentBuilder('./images/trickhouse/trap.png');
             const embed = new EmbedBuilder()
                 .setTitle(`The trap door was... __${this.trap}__!`)
-                .setImage('attachment://trap.jpg')
+                .setImage('attachment://trap.png')
                 .setTimestamp()
                 .setFooter({
                     text: Config.username,

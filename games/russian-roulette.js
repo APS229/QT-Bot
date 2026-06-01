@@ -87,9 +87,15 @@ class RussianRoulette extends Games.Game {
     }
     onLeave(userId) {
         super.onLeave(userId);
-        if (this.players.size < 2) {
+        if (this.started && this.players.size < 2) {
             this.winner = this.players.keys().next()?.value;
             return this.onEnd();
+        }
+        const turn = this.queue[0];
+        this.queue.splice(this.queue.indexOf(userId), 1);
+        if (userId === turn) {
+            clearTimeout(this.playerTimer);
+            this.onNextRound();
         }
     }
 }

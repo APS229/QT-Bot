@@ -1,38 +1,34 @@
 'use strict';
 
 const colors = ['blue', 'green', 'red', 'yellow'];
-const { Permissions, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, AttachmentBuilder, EmbedBuilder } = require('discord.js');
+const { Permissions, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, AttachmentBuilder, EmbedBuilder } = require('discord.js');
 
-class UNO {
-    constructor(channel, server) {
-        this.name = 'UNO';
-        this.players = new Map();
-        this.roles = new Map();
-        this.DISCARDED_CARDS = [];
-        this.channel = channel;
-        this.server = server;
-        this.started = false;
-        this.firstCard = true;
-        this.updateStr = "None";
-        this.winners = [];
+class UNO extends Games.Game {
+    constructor(interaction) {
+        super(interaction);
+        this.name = "UNO";
+        // TODO: add a description
+        // this.description = ``;
+        this.deck = [];
+        this.discardPile = [];
+        this.firstTurn = true;
+        this.actions = "";
         this.queue = [];
-        this.topCard = null;
-        this.prevPlayer = '';
+        this.topCard = '';
+        this.topCardColor = '';
+        this.playerTime = 15;
+        this.playerTimer = null;
         this.init();
     }
-    async init() {
-        await this.loadCards();
-        this.channel.send("**A new game of UNO has been created! Use the command ``.join`` to join the game.**");
+    async loadData() {
+        if (!Client.CARDS) {
+            const message = await this.channel.send("Loading cards data since last restart...");
+            await this.loadCards();
+            message.edit("Cards data loaded.");
+        }
+        this.deck = [...Client.CARDS];
     }
     async loadCards() {
-        if (!Client.CARDS) {
-            this.channel.send("Loading cards data since last restart...");
-            await this.loadData();
-            this.channel.send("Cards data loaded.");
-        }
-        this.CARDS = [...Client.CARDS];
-    }
-    async loadData() {
         Client.CARDS = [];
         for (let i = 0; i < colors.length; i++) {
             Client.CARDS.push(colors[i] + ' ' + 0);
@@ -51,84 +47,20 @@ class UNO {
         }
     }
     async onStart() {
-        if (this.players.size < 2) return this.channel.send("There are not enough players to start the game.");
-        this.started = true;
-        this.timer = setTimeout(() => {
-            const players = [...this.players.entries()];
-            this.channel.send("**(UNO) TIME'S UP!**");
-            this.winners = players.slice(0, players.sort((a, b) => a[1].cards.length - b[1].cards.length).map(v => v[1].cards.length === players[0][1].cards.length).lastIndexOf(true) + 1).map(v => v = v[0]);
-            this.onEnd();
-        }, 10 * 60 * 1000);
-        this.channel.send("**The game of UNO is now starting!**");
-        this.assignCards();
-        let card = this.CARDS.random();
-        this.CARDS.splice(this.CARDS.indexOf(card), 1);
-        this.DISCARDED_CARDS.push(card);
-        if (card.startsWith('wild')) card += ' ' + colors.random();
-        this.topCard = card;
-        this.updateStr = `The top card is: **${this.format(this.topCard)}**\n\n`;
-        const cardName = card.split(' ')[0];
-        const cardValue = card.split(' ')[1];
-        const thirdValue = card.split(' ')[2];
-        switch (cardName) {
-            case 'wild':
-                if (colors.includes(cardValue)) this.topCard = cardValue;
-                else if (cardValue === '+4') {
-                    const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
-                    this.draw(drawnPlayer, 4);
-                    this.updateStr += `<@${drawnPlayer}> was forced to draw 4 cards.`;
-                    this.queue.shift();
-                    this.queue.push(drawnPlayer);
-                    this.topCard = thirdValue;
-                }
-                break;
-            case 'red':
-            case 'yellow':
-            case 'blue':
-            case 'green':
-                switch (cardValue) {
-                    case '+2':
-                        const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
-                        this.draw(drawnPlayer, 2);
-                        this.updateStr += `<@${drawnPlayer}> was forced to draw 2 cards.`;
-                        this.queue.shift();
-                        this.queue.push(drawnPlayer);
-                        break;
-                    case 'skip':
-                        const skippedPlayer = this.queue[this.firstCard ? 0 : 1];
-                        this.updateStr += `<@${skippedPlayer}>'s turn was skipped!`;
-                        this.queue.shift();
-                        this.queue.push(skippedPlayer);
-                        break;
-                    case 'reverse':
-                        this.queue.reverse();
-                        this.updateStr += "The turn order was reversed!";
-                        break;
-                }
-                break;
-        }
-        this.update();
-        this.firstCard = false;
-    }
-    assignCards() {
+        super.onStart();
         for (const player of this.players.keys()) {
-            const cards = [];
-            for (let i = 0; i < 7; i++) {
-                const card = this.CARDS.random();
-                cards.push(card);
-                this.CARDS.splice(this.CARDS.indexOf(card), 1);
-            }
-            this.players.set(player, { uno: false, cards: cards });
+            this.players.set(player, { uno: false, cards: [] });
             this.queue.push(player);
         }
         this.queue = this.queue.shuffle();
+
+        this.assignCards();
+        this.onNextRound();
     }
-    showPlayers() {
-        const players = [];
+    assignCards() {
         for (const player of this.players.keys()) {
-            players.push(this.server.members.cache.find(m => m.user.id === player).displayName);
+            this.drawCards(player, 7);
         }
-        this.channel.send(`**Players (${players.length}):** ${players.length ? players.join(', ') : 'none'}`);
     }
     format(card) {
         card = Tools.toTitleCase(card);
@@ -144,246 +76,258 @@ class UNO {
         else if (card.startsWith('Yellow')) {
             return '🟡 ' + card;
         }
-        // wild cards only
+        // Wild cards only
         else {
             return '⚫ ' + card;
         }
     }
-    drawPlayer(interaction) {
-        const player = interaction.user.id;
-        if (this.queue[0] !== player) return interaction.reply({ content: "It is currently not your turn!", ephemeral: true });
-        const card = this.draw(player, 1)[0];
+    async onNextRound() {
+        if (!this.started) return;
+        if (this.firstTurn) {
+            let card = this.deck.random();
+            this.topCard = card;
+            if (card.startsWith('wild')) card += ` ${colors.random()}`;
+            this.topCardColor = this.playCard(card);
+            this.channel.send(`The top card is: **${this.format(card)}**`);
+            this.firstTurn = false;
+        }
+
+        if (this.playerTimer) clearTimeout(this.playerTimer);
+        if (this.actions) this.channel.send(this.actions);
+        const running = await this.update();
+        if (!running) return;
+        this.playerTimer = setTimeout(() => {
+            if (!this.started) return;
+            const player = this.queue[0];
+            this.channel.send(`Time's up! <@${player}> drew a card.`);
+            this.drawCards(player, 1);
+            this.players.get(player).uno = false;
+            this.queue.shift();
+            this.queue.push(player);
+            this.onNextRound();
+        }, this.playerTime * 1000);
+    }
+    handleSelectMenu(interaction) {
+        if (interaction.message.id !== this.selectMenusMessage?.id) return interaction.reply({ content: "This menu has expired.", flags: 'Ephemeral' });
+        this.play(interaction, 'selectmenu');
+    }
+    play(interaction, interactionType) {
+        const currentPlayer = this.queue[0];
+        const player = interaction.member.id;
+        if (currentPlayer !== player) return interaction.reply({ content: "It is currently not your turn.", flags: 'Ephemeral' });
+
+        // TODO: check for button / select menu
+        if (!interaction.content && !interaction.isChatInputCommand()) return interaction.reply({content: "Play button/menu is currently work-in-progress. Use `/play card: [card]` instead."});
+        let card = (interaction.content?.split(' ').slice(1).join(' ') || interaction.options?.get('card').value).toLowerCase();
+
+        const [cardName, cardAction, cardActionColor] = card.split(' ');
+
+        if (cardName === 'wild') {
+            if (cardAction === '+4') {
+                if (!this.players.get(player).cards.includes('wild +4')) return interaction.reply({ content: `You don't have the card: ${this.format('wild +4')}`, flags: 'Ephemeral' });
+                if (!colors.includes(cardActionColor)) return interaction.reply({ content: "Please specify a color after Wild +4.", flags: 'Ephemeral' });
+                else card = 'wild +4';
+            }
+            else if (!this.players.get(player).cards.includes('wild')) return interaction.reply({ content: `You don't have the card: ${this.format('wild')}`, flags: 'Ephemeral' });
+            else if (!colors.includes(cardAction)) return interaction.reply({ content: "Please specify a color after Wild.", flag: 'Ephemeral' });
+            else card = 'wild';
+        }
+        else if (!Client.CARDS.includes(card)) return interaction.reply({ content: "That card doesn't exist in this game.", flags: 'Ephemeral' });
+        else if (!this.players.get(player).cards.includes(card)) return interaction.reply({ content: `You don't have the card: ${this.format(card)}`, flags: 'Ephemeral' });
+        else if (colors.includes(cardName)) {
+            if (cardName !== this.topCardColor && cardAction !== this.topCard.split(' ')[1]) return interaction.reply({ content: "Your card must either match the color or the action of the top card!", flags: 'Ephemeral' });
+        }
+        this.topCard = card;
+        this.topCardColor = this.playCard(`${cardName} ${cardAction} ${cardActionColor}`, interaction.member.id);
+        interaction.reply({ content: `You played: ${this.format(card)}`, flags: 'Ephemeral' });
+
+        if (this.playerTimer) clearTimeout(this.playerTimer);
+        this.onNextRound();
+    }
+    draw(interaction) {
+        const player = interaction.member.id;
+        if (this.queue[0] !== player) return interaction.reply({ content: "It is currently not your turn.", flags: 'Ephemeral' });
+
+        const card = this.drawCards(player, 1)[0];
+        interaction.reply({ content: `You have drawn: ${this.format(card)}`, flags: 'Ephemeral' });
+        this.channel.send(`<@${player}> drew a card.`);
+        this.players.get(player).uno = false;
         this.queue.shift();
         this.queue.push(player);
-        interaction.reply({ content: `You have drawn: ${card}`, ephemeral: true });
-        this.updateStr = `<@${player}> has drawn a card.`;
-        this.prevPlayer = player;
-        this.update();
+
+        if (this.playerTimer) clearTimeout(this.playerTimer);
+        this.onNextRound();
     }
-    play(interaction) {
-        const currentPlayer = this.queue[0];
-        const player = interaction.user.id;
-        if (currentPlayer !== player) return interaction.reply({ content: "It is currently not your turn!", ephemeral: true });
-        const playerCards = this.players.get(player).cards;
-        let card = '';
-        if (interaction.isButton()) {
-            const menuOptions = [], rows = [], cases = ['blue', 'green', 'red', 'yellow', 'wild'];
-            for (let i = 0; i < 5; i++) {
-                const caseCards = [...new Set(playerCards)].filter(c => c.startsWith(cases[i])).sort();
-                for (const caseCard of caseCards) {
-                    if (cases[i] === 'wild') {
-                        for (const color of colors) {
-                            menuOptions.push({ label: this.format(caseCard + ' ' + color), value: caseCard + ' ' + color });
-                        }
-                    }
-                    else {
-                        menuOptions.push({ label: this.format(caseCard), value: caseCard });
-                    }
-                }
-                if (menuOptions.length) {
-                    rows.push(
-                        new ActionRowBuilder()
-                            .addComponents(
-                                new StringSelectMenuBuilder()
-                                    .setCustomId('play' + i)
-                                    .setPlaceholder(`${Tools.toTitleCase(cases[i])} Cards`)
-                                    .setOptions(menuOptions)
-                            )
-                    );
-                    menuOptions.length = 0;
-                }
+    showHand(interaction) {
+        const cards = this.players.get(interaction.member.id).cards.map(card => this.format(card));
+        return interaction.reply({ content: `Your current hand: ${cards.join(', ')}`, flags: 'Ephemeral' });
+    }
+    declareUno(interaction) {
+        // TODO: implement
+    }
+    playCard(fullCardName) {
+        if (!this.started) return;
+
+        const player = this.firstTurn ? '' : this.queue[0];
+        const nextPlayer = player ? this.queue[1] : this.queue[0];
+
+        const [cardName, cardAction, cardActionColor] = fullCardName.split(' ');
+        let cardColor = '';
+
+        // First turn means the card should be put into discard pile from the deck
+        const card = `${cardName}` + (cardName === 'wild' && cardAction !== '+4' ? '' : ` ${cardAction}`);
+        const index = player ? this.players.get(player).cards.indexOf(card) : this.deck.indexOf(card);
+        if (index > -1) player ? this.players.get(player).cards.splice(index, 1) : this.deck.splice(index, 1);
+        this.discardPile.push(card);
+
+        if (player) {
+            this.queue.shift();
+            this.queue.push(player);
+        }
+
+        if (cardName === 'wild') {
+            if (colors.includes(cardAction)) cardColor = cardAction;
+            else if (cardAction === '+4') {
+                this.actions += `<@${nextPlayer}> was forced to draw 4 cards.`;
+                this.drawCards(nextPlayer, 4);
+                this.queue.shift();
+                this.queue.push(nextPlayer);
+                cardColor = cardActionColor;
             }
-            return interaction.reply({ components: rows, ephemeral: true });
         }
-        else if (interaction.isCommand()) card = interaction.options.get('card').value.toLowerCase();
-        else if (interaction.isStringSelectMenu()) card = interaction.values[0];
-        let cardName, cardValue, thirdValue;
-        const cardSplit = [cardName, cardValue, thirdValue] = card.split(' ');
-        const [topCardName, topCardValue] = this.topCard.split(' ');
-        if (!playerCards.includes(card) && !playerCards.includes(cardSplit.slice(0, cardSplit.length - 1).join(' '))) return interaction.reply({ content: "You don't have such card in your hand.", ephemeral: true });
-        switch (cardName) {
-            case 'wild':
-                if (colors.includes(cardValue)) {
-                    this.topCard = cardValue;
-                    this.queue.shift();
-                    this.queue.push(currentPlayer);
-                    this.DISCARDED_CARDS.push(cardName);
-                    this.players.get(player).cards.splice(playerCards.indexOf('wild'), 1)
-                }
-                else if (cardValue === '+4') {
-                    if (!colors.includes(thirdValue)) return interaction.reply({ content: "You must specify a valid color.", ephemeral: true });
-                    this.topCard = thirdValue;
-                    const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
-                    this.draw(drawnPlayer, 4, cardName + ' ' + cardValue);
-                    this.updateStr = `<@${drawnPlayer}> was forced to draw 4 cards.`;
-                    this.queue.shift();
-                    this.queue.push(currentPlayer);
-                    this.queue.shift();
-                    this.queue.push(drawnPlayer);
-                    this.DISCARDED_CARDS.push(cardName + ' ' + cardValue);
-                    this.players.get(player).cards.splice(playerCards.indexOf('wild +4'), 1);
-                }
-                else {
-                    return interaction.reply({ content: "You must specify a valid card value.", ephemeral: true });
-                }
-                break;
-            case 'red':
-            case 'yellow':
-            case 'blue':
-            case 'green':
-                if (topCardName !== cardName && topCardValue !== cardValue) return interaction.reply({ content: "The card must match the color or the value with the top card.", ephemeral: true });
-                this.topCard = card;
-                this.DISCARDED_CARDS.push(card);
-                switch (cardValue) {
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                        this.queue.shift();
-                        this.queue.push(currentPlayer);
-                        break;
-                    case '+2':
-                        const drawnPlayer = this.queue[this.firstCard ? 0 : 1];
-                        this.draw(drawnPlayer, 2, cardName + ' ' + cardValue);
-                        this.updateStr = `<@${drawnPlayer}> was forced to draw 2 cards.`;
-                        this.queue.shift();
-                        this.queue.push(currentPlayer);
-                        this.queue.shift();
-                        this.queue.push(drawnPlayer);
-                        break;
-                    case 'skip':
-                        const skippedPlayer = this.queue[this.firstCard ? 0 : 1];
-                        this.updateStr = `<@${skippedPlayer}>'s turn was skipped!`;
-                        this.queue.shift();
-                        this.queue.push(currentPlayer);
-                        this.queue.shift();
-                        this.queue.push(skippedPlayer);
-                        break;
-                    case 'reverse':
-                        this.queue.reverse();
-                        if (this.queue.length === 2) {
-                            const firstPlayer = this.queue[0];
-                            this.queue.shift();
-                            this.queue.push(firstPlayer);
-                        }
-                        this.updateStr = "The turn order was reversed!";
-                        break;
-                }
-                this.players.get(player).cards.splice(playerCards.indexOf(card), 1);
-                break;
-        }
-        this.updateStr = `<@${player}> has played ${this.format(card)}.${this.updateStr !== 'None' ? '\n\n' + this.updateStr : ''}`;
-        if (interaction.isStringSelectMenu()) interaction.update({ content: 'You have played: ' + this.format(card), components: [] });
-        else interaction.reply({ content: 'You have played: ' + this.format(card), ephemeral: true });
-        if (this.players.get(this.prevPlayer)?.cards.length === 1 && !this.players.get(this.prevPlayer)?.uno) {
-            this.draw(this.prevPlayer, 2);
-            this.updateStr = `<@${this.prevPlayer}> forgot to click UNO! and was forced to draw 2 cards.\n\n${this.updateStr}`;
-        }
-        if (!this.players.get(player).cards.length) {
-            this.winners = [player];
-            return this.onEnd();
-        }
-        if (player !== this.queue[0] && this.prevPlayer) {
-            this.players.get(this.prevPlayer).uno = false;
-            this.prevPlayer = player;
-        }
-        this.update();
-    }
-    disqualify(players) {
-        for (const player of players) {
-            for (const card of this.players.get(player).cards) {
-                this.DISCARDED_CARDS.push(card);
+        else if (colors.includes(cardName)) {
+            if (cardAction === '+2') {
+                this.drawCards(nextPlayer, 2);
+                this.actions += `<@${nextPlayer}> was forced to draw 2 cards.`;
+                this.queue.shift();
+                this.queue.push(nextPlayer);
             }
-            this.players.delete(player);
-            this.queue.splice(this.queue.indexOf(player), 1);
+            else if (cardAction === 'skip') {
+                this.actions += `<@${nextPlayer}>'s turn was skipped!`;
+                this.queue.shift();
+                this.queue.push(nextPlayer);
+            }
+            else if (cardAction === 'reverse') {
+                this.queue.reverse();
+                this.actions += "The turn order was reversed.";
+            }
+            cardColor = cardName;
         }
-        if (this.queue.length < 2) {
-            this.winners = [this.queue[0]];
-            return this.onEnd();
-        }
-        this.update();
+        return cardColor;
     }
-    draw(player, amount, card) {
-        if (!card) card = this.topCard;
+    drawCards(player, amount) {
+        if (!this.started) return;
         const drawnCards = [];
         for (let i = 0; i < amount; i++) {
-            const drawnCard = this.CARDS.random();
-            this.CARDS.splice(this.CARDS.indexOf(drawnCard), 1);
-            if (!this.CARDS.length) {
-                this.DISCARDED_CARDS.splice(this.DISCARDED_CARDS.indexOf(card), 1);
-                this.CARDS = [...this.DISCARDED_CARDS];
-                this.DISCARDED_CARDS = [this.topCard];
+            const drawnCard = this.deck.random();
+            this.deck.splice(this.deck.indexOf(drawnCard), 1);
+
+            if (!this.deck.length) {
+                this.discardPile.splice(this.discardPile.indexOf(this.topCard), 1);
+                this.deck = [...this.discardPile];
+                this.discardPile = [this.topCard];
             }
-            this.players.get(player).cards.push(drawnCard);
-            drawnCards.push(this.format(drawnCard));
+
+            drawnCards.push(drawnCard);
         }
-        this.players.get(player).uno = false;
+        this.players.get(player).cards.push(...drawnCards);
         return drawnCards;
     }
-    showHand(player) {
-        if (!this.players.has(player)) return;
-        const cards = [];
-        this.players.get(player).cards.forEach(c => cards.push(this.format(c)));
-        return `Your current hand: ${cards.join(', ')}`;
+    onLeave(userId) {
+        const cards = this.started ? this.players.get(userId).cards : [];
+        super.onLeave(userId);
+        if (this.started) {
+            if (this.players.size < 2) {
+                this.winner = this.players.keys().next()?.value;
+                return this.onEnd();
+            }
+            this.discardPile.push(...cards);
+            const turn = this.queue[0];
+            this.queue.splice(this.queue.indexOf(userId), 1);
+            if (userId === turn) {
+                clearTimeout(this.playerTimer);
+                this.onNextRound();
+            }
+        }
     }
     async update() {
-        if (this.message) await this.message.delete();
-        const topCardColor = this.topCard.split(' ')[0];
-        const img = new AttachmentBuilder(`./images/${topCardColor}.png`);
+        if (!this.started) return;
+        this.disableButtons();
+        this.disableSelectMenus();
+
+        const topCardColor = this.topCardColor;
+        const img = new AttachmentBuilder(`./images/${this.id}/colors/${topCardColor}.png`);
+        const players = this.queue.map(player => `<@${player}> (${this.players.get(player).cards.length})`).join('\n');
         const embed = new EmbedBuilder()
-            .setColor(topCardColor.toUpperCase())
-            .setTitle('UNO')
+            .setColor(Tools.toTitleCase(topCardColor))
+            .setTitle(this.name)
             .setThumbnail(`attachment://${topCardColor}.png`)
-            .addField('__Top card__', this.format(this.topCard))
-            .addField(`__Players(${this.players.size})__`, this.queue.map(u => u = `<@${u}> (${this.players.get(u).cards.length})`)/*.map(u => {
-                if (this.queue.indexOf(u) === 0) u = '***** ' + u;
-            })*/.join('\n'))
-            .addField('__Logs__', this.updateStr)
-            .addField('__Information__', `- Click the Play button or use the command \`\`/play card: [card]\`\` to play a card.\n
+            .addFields({ name: '__Top card__', value: this.format(this.topCard) },
+                { name: `__Players (${this.players.size})__`, value: players },
+                { name: '__Actions__', value: this.actions },
+                {
+                    name: '__Information__',
+                    value: `- Click the Play button or use the command \`\`/play card: [card]\`\` to play a card.\n
             - Click the Hand button or use the command \`\`/hand\`\` to check your cards.\n
             - Click the Draw button or use the command \`\`/draw\`\` if you don't have a card to play.\n
-            - Click the UNO button or use the command \`\`/uno\`\` if you have 1 card left.`)
+            - Click the UNO button or use the command \`\`/uno\`\` if you have 1 card left.`
+                })
             .setTimestamp()
-            .setFooter({ text: Config.username, iconURL: Config.avatarURL });
-        this.updateStr = "None";
+            .setFooter({
+                text: Config.username,
+                iconURL: Config.avatarURL
+            });
+
+        this.actions = "";
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId('play')
                     .setLabel('Play')
-                    .setStyle('PRIMARY'),
+                    .setStyle('Primary'),
                 new ButtonBuilder()
                     .setCustomId('hand')
                     .setLabel('Hand')
-                    .setStyle('PRIMARY'),
+                    .setStyle('Primary'),
                 new ButtonBuilder()
                     .setCustomId('draw')
                     .setLabel('Draw')
-                    .setStyle('PRIMARY'),
+                    .setStyle('Primary'),
                 new ButtonBuilder()
                     .setCustomId('uno')
                     .setLabel('UNO!')
-                    .setStyle('SUCCESS')
+                    .setStyle('Success')
             );
-        this.message = await this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed], components: [row], files: [img] });
+        this.buttonsMenuMessage = await this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed], components: [row], files: [img] });
+        // Game still running
+        if (this.started) return true;
+    }
+    disableSelectMenus() {
+        if (this.selectMenusMessage) {
+            const newComponents = [];
+            for (const row of this.selectMenusMessage.components) {
+                const newRow = ActionRowBuilder.from(row);
+                newRow.components[0].setDisabled(true);
+                newComponents.push(newRow);
+            }
+            this.selectMenusMessage.edit({ components: newComponents });
+        }
+    }
+    disableButtons() {
+        if (this.buttonsMenuMessage) {
+            const row = ActionRowBuilder.from(this.buttonsMenuMessage.components[0]);
+            for (const button of row.components) {
+                button.setDisabled(true);
+            }
+            this.buttonsMenuMessage.edit({ components: [row] });
+        }
     }
     onEnd() {
-        if (this.message) {
-            const components = this.message.components;
-            for (const button of components[0].components) button.disabled = true;
-            this.message.edit({ content: '**The game of UNO has ended.**', components: components });
-        }
-        if (this.timer) clearTimeout(this.timer);
-        if (this.winners.length) this.channel.send(`**Congratulations to ${this.winners.map(w => w = '<@' + w + '>').join(', ')} for winning the UNO game!**`);
-        delete Client.activeGame;
+        this.disableButtons();
+        this.disableSelectMenus();
+        super.onEnd();
     }
 }
 
-// exports.game = UNO;
-// exports.id = 'uno';
+exports.game = UNO;
+exports.id = 'uno';

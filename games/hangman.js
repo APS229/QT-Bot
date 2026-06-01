@@ -141,6 +141,7 @@ class Hangman extends Games.PuzzleGame {
         }
     }
     update() {
+        if (!this.started) return;
         const players = '***** ' + this.queue.map(player => `<@${player}>: ${this.players.get(player)}`).join('\n');
         const img = new AttachmentBuilder(`./images/hangman/${this.usedGuesses.length}.png`);
         const embed = new EmbedBuilder()

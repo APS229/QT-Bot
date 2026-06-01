@@ -30,7 +30,7 @@ const commands = {
             }
         ],
         modOnly: true,
-        desc: "Starts a new game of the specified game.",
+        desc: "Start a new game of the specified game.",
         execute(interaction) {
             if (Client.activeGame) return interaction.reply({ content: `There's already a game of ${Client.activeGame.name} going on in <#${Client.activeGame.channel.id}>.`, flags: 'Ephemeral' });
             const [...args] = interaction.options?._hoistedOptions || interaction.content.split(' ').slice(1);
@@ -44,8 +44,7 @@ const commands = {
         }
     },
     joingame: {
-        button: true,
-        desc: "Joins the current game.",
+        desc: "Join the current game.",
         execute(interaction) {
             if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
             if (Client.activeGame.freejoin) return interaction.reply({ content: "This game is free to play, you don't have to join.", flags: 'Ephemeral' });
@@ -59,11 +58,10 @@ const commands = {
         }
     },
     leavegame: {
-        button: true,
-        desc: "Leaves the current game.",
+        desc: "Leave the current game.",
         execute(interaction) {
             if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
-
+            if (Client.activeGame.freejoin) return interaction.reply({ content: "You cannot leave a free-join game.", flags: 'Ephemeral' });
             if (!Client.activeGame.players.has(interaction.member.id)) return interaction.reply({ content: "You are not in the current game.", flags: 'Ephemeral' });
             if (Client.activeGame.started) interaction.reply(`<@${interaction.member.id}> gave up!`);
             else interaction.reply({ content: `You have successfully left the game of ${Client.activeGame.name}!`, flags: 'Ephemeral' });
@@ -91,7 +89,7 @@ const commands = {
     },
     players: {
         modOnly: true,
-        desc: "Lists all players in the current game.",
+        desc: "List all players in the current game.",
         execute(interaction) {
             if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
             const players = [...Client.activeGame.players.keys()].map(player => `<@${player}>`).join('\n');
@@ -108,7 +106,7 @@ const commands = {
     },
     startgame: {
         modOnly: true,
-        desc: "Starts the current game.",
+        desc: "Start the current game.",
         execute(interaction) {
             if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
             if (Client.activeGame.freejoin) return interaction.reply({ content: "This game is free to play, you don't have to start it.", flags: 'Ephemeral' });
@@ -124,7 +122,7 @@ const commands = {
     },
     endgame: {
         modOnly: true,
-        desc: "Ends the current game.",
+        desc: "End the current game.",
         execute(interaction) {
             if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
             interaction.reply(`The game of ${Client.activeGame.name} was forcibly ended.`);
@@ -278,7 +276,6 @@ const commands = {
         }
     },
     buy: {
-        button: true,
         desc: "Buy a property in the game of Monopoly.",
         execute(interaction) {
             if (Client.activeGame?.id !== 'monopoly') return interaction.reply({ content: "No game of Monopoly is going on right now.", flags: 'Ephemeral' });
@@ -293,7 +290,7 @@ const commands = {
             {
                 type: OptionTypes.USER,
                 name: 'player',
-                description: "Player you want to see details of."
+                description: "The player you want to see the details of."
             }
         ],
         desc: "Shows the player details in the game of Monopoly.",
@@ -307,7 +304,7 @@ const commands = {
         }
     },
     bail: {
-        desc: "Bail out of Jail in the game of Monopoly",
+        desc: "Bail out of Jail in the game of Monopoly.",
         async execute(interaction) {
             if (Client.activeGame?.id !== 'monopoly') return interaction.reply({ content: "No game of Monopoly is going on right now.", flags: 'Ephemeral' });
             if (!Client.activeGame?.players.has(interaction.member.id)) return interaction.reply({ content: `You are not in the current game of ${Client.activeGame.name}.`, flags: 'Ephemeral' });
@@ -319,7 +316,7 @@ const commands = {
         }
     },
     rolldice: {
-        desc: "Bail out of Jail in the game of Monopoly",
+        desc: "Roll dice to get out of Jail in the game of Monopoly.",
         async execute(interaction) {
             if (Client.activeGame?.id !== 'monopoly') return interaction.reply({ content: "No game of Monopoly is going on right now.", flags: 'Ephemeral' });
             if (!Client.activeGame?.players.has(interaction.member.id)) return interaction.reply({ content: `You are not in the current game of ${Client.activeGame.name}.`, flags: 'Ephemeral' });
@@ -328,6 +325,53 @@ const commands = {
             if (!Client.activeGame.canBail) return interaction.reply({ content: "You cannot rolldice to try and get out of **Jail** \\⛓️ right now.", flags: 'Ephemeral' });
             await interaction.reply(`<@${interaction.member.id}> decided to roll dice to try and get out of **Jail** \\⛓️!`);
             Client.activeGame.onResolveJail('dice');
+        }
+    },
+    uno: {
+        desc: "Declare UNO! in the game of UNO.",
+        execute(interaction) {
+            if (Client.activeGame?.id !== 'uno') return interaction.reply({ content: "No game of UNO is going on right now.", flags: 'Ephemeral' });
+            if (!Client.activeGame?.players.has(interaction.member.id)) return interaction.reply({ content: `You are not in the current game of ${Client.activeGame.name}.`, flags: 'Ephemeral' });
+            if (!Client.activeGame.started) return interaction.reply({ content: "The game hasn't started yet.", flags: 'Ephemeral' });
+            Client.activeGame.declareUno(interaction);
+        }
+    },
+    play: {
+        options: [
+            {
+                type: OptionTypes.STRING,
+                name: 'card',
+                description: "The card that you want to play.",
+                required: true
+            }
+        ],
+        desc: "Play a card in the game of UNO.",
+        execute(interaction) {
+            if (Client.activeGame?.id !== 'uno') return interaction.reply({ content: "No game of UNO is going on right now.", flags: 'Ephemeral' });
+            if (!Client.activeGame?.players.has(interaction.member.id)) return interaction.reply({ content: `You are not in the current game of ${Client.activeGame.name}.`, flags: 'Ephemeral' });
+            if (!Client.activeGame.started) return interaction.reply({ content: "The game hasn't started yet.", flags: 'Ephemeral' });
+            if (interaction.member.id !== Client.activeGame.queue[0]) return interaction.reply({ content: "It is currently not your turn!", flags: 'Ephemeral' });
+            Client.activeGame.play(interaction);
+        }
+    },
+    draw: {
+        desc: "Draw a card in the game of UNO.",
+        execute(interaction) {
+            if (Client.activeGame?.id !== 'uno') return interaction.reply({ content: "No game of UNO is going on right now.", flags: 'Ephemeral' });
+            if (!Client.activeGame?.players.has(interaction.member.id)) return interaction.reply({ content: `You are not in the current game of ${Client.activeGame.name}.`, flags: 'Ephemeral' });
+            if (!Client.activeGame.started) return interaction.reply({ content: "The game hasn't started yet.", flags: 'Ephemeral' });
+            if (interaction.member.id !== Client.activeGame.queue[0]) return interaction.reply({ content: "It is currently not your turn!", flags: 'Ephemeral' });
+            Client.activeGame.draw(interaction);
+        }
+    },
+    hand: {
+        desc: "View your hand of cards in the game of UNO.",
+        execute(interaction) {
+            if (Client.activeGame?.id !== 'uno') return interaction.reply({ content: "No game of UNO is going on right now.", flags: 'Ephemeral' });
+            if (!Client.activeGame?.players.has(interaction.member.id)) return interaction.reply({ content: `You are not in the current game of ${Client.activeGame.name}.`, flags: 'Ephemeral' });
+            if (!Client.activeGame.started) return interaction.reply({ content: "The game hasn't started yet.", flags: 'Ephemeral' });
+            if (interaction.content) return interaction.reply("You can only view your hand using Hand button or the slash command.");
+            Client.activeGame.showHand(interaction);
         }
     },
     animals: {

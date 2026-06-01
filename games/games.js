@@ -63,15 +63,7 @@ class Game {
     onStart() {
         this.started = true;
         if (!this.freejoin) {
-            const components = this.startMessage.components[0].components;
-            const newComponents = [];
-            const row = new ActionRowBuilder();
-            for (const button of components) {
-                row.addComponents(ButtonBuilder.from(button).setDisabled(true));
-            }
-            newComponents.push(row);
-            this.startMessage.edit({ components: newComponents });
-            this.startMessage = null;
+            this.disableStartMessageButtons();
         }
     }
     async updatePlayerListMessage() {
@@ -84,13 +76,14 @@ class Game {
                 text: Config.username,
                 iconURL: Config.avatarURL
             });
-        if (!this.playerListMessage) return this.playerListMessage = await this.channel.send({ embeds: [embed] });
-        this.playerListMessage.edit({ embeds: [embed] });
+        if (!this.playerListMessage) return this.playerListMessage = this.channel.send({ embeds: [embed] });
+        const message = await this.playerListMessage;
+        message.edit({ embeds: [embed] });
     }
     onJoin(userId, userTag) {
         if (this.players.size === this.maxPlayers) return this.channel.send("The game has reached the max amount of players!");
         this.players.set(userId, userTag);
-        if (!this.started) this.updatePlayerListMessage();
+        if (!this.started) { this.updatePlayerListMessage(); }
     }
     onLeave(userId) {
         this.players.delete(userId);
@@ -110,11 +103,25 @@ class Game {
             }
         }
     }
+    disableStartMessageButtons() {
+        if (this.startMessage) {
+            const components = this.startMessage.components[0].components;
+            const newComponents = [];
+            const row = new ActionRowBuilder();
+            for (const button of components) {
+                row.addComponents(ButtonBuilder.from(button).setDisabled(true));
+            }
+            newComponents.push(row);
+            this.startMessage.edit({ components: newComponents });
+            this.startMessage = null;
+        }
+    }
     onEnd() {
         this.started = false;
         if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
         if (this.roundTimer) clearTimeout(this.roundTimer);
         if (this.playerTimer) clearTimeout(this.playerTimer);
+        if (!this.freejoin) this.disableStartMessageButtons();
         if (this.winner) this.channel.send(`The winner is <@${this.winner}>!`);
         else this.channel.send("No winners this game.");
         delete Client.activeGame;

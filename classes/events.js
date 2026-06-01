@@ -74,8 +74,8 @@ class Events {
                 }
                 else {
                     const command = Client.commands.get(interaction.commandName) || Client.commands.get(interaction.customId);
+                    if (!command) return interaction.reply("This command/interaction is no longer available.");
                     if (Client.restart && !command.devOnly) return interaction.reply("The bot is currently set up to restart. You cannot run any commands during the restart.");
-                    if (!command || !command.button && interaction.customId) return;
                     if (command.devOnly && !Config.developers.includes(interaction.user.id)) return interaction.reply("This command is only for developers.");
                     if (command.modOnly && !interaction.member.permissions.toArray().includes('ManageRoles') && !Config.developers.includes(interaction.user.id)) {
                         return interaction.reply("You don't have permission to use this command.");

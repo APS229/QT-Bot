@@ -1,6 +1,6 @@
 'use strict';
 
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
 
 class Empires extends Games.Game {
     constructor(interaction) {
@@ -50,7 +50,7 @@ class Empires extends Games.Game {
     }
     async onNextRound() {
         if (this.playerTimer) clearTimeout(this.playerTimer);
-        this.selectMenusMessage = await this.update();
+        if (!await this.update()) return;
         if (!this.started) return;
         this.playerTimer = setTimeout(async () => {
             await this.channel.send(`<@${this.turn}> didn't respond in time and has been eliminated! Their alias was: ${this.aliases.get(this.turn)}`);
@@ -130,11 +130,13 @@ class Empires extends Games.Game {
             this.aliases.delete(userId);
         }
         if (this.players.size < 2 && this.setAliases) {
-            this.winner = this.players.keys().next().value;
+            this.winner = this.players.keys().next()?.value;
             return this.onEnd();
         }
     }
-    update() {
+    async update() {
+        if (!this.started) return;
+        this.disableSelectMenus();
         const players = Tools.joinList([...this.players.keys()].map(id => `<@${id}>`)), aliases = Tools.joinList([...this.aliases.values()]);
         const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
@@ -175,7 +177,9 @@ class Empires extends Games.Game {
         const guessPlayerMenuRow = new ActionRowBuilder().addComponents(guessPlayerMenu);
         const guessAliasMenuRow = new ActionRowBuilder().addComponents(guessAliasMenu);
 
-        return this.channel.send({ content: `<@${this.turn}>'s turn!`, embeds: [embed], components: [guessPlayerMenuRow, guessAliasMenuRow] });
+        this.selectMenusMessage = await this.channel.send({ content: `<@${this.turn}>'s turn!`, embeds: [embed], components: [guessPlayerMenuRow, guessAliasMenuRow] });
+        // Game still running
+        if (this.started) return true;
     }
     disableSelectMenus() {
         if (this.selectMenusMessage) {
