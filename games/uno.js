@@ -1,14 +1,17 @@
 'use strict';
 
 const colors = ['blue', 'green', 'red', 'yellow'];
-const { Permissions, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, AttachmentBuilder, EmbedBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, AttachmentBuilder, EmbedBuilder } = require('discord.js');
 
 class UNO extends Games.Game {
     constructor(interaction) {
         super(interaction);
         this.name = "UNO";
-        // TODO: add a description
-        // this.description = ``;
+        this.description = `- Play a card that matches the top card's color, number or action from your hand on your turn.\n
+        - You can play a Wild card from your hand disregarding the top card on your turn.\n
+        - Click the UNO! button or use the \`/uno\` command when you have 1 card left before the next card is played. Otherwise, you will draw 2 cards due to penalty.\n
+        - Commands: \`/play card: cardname\` (Ex: \`/play card: red skip\`, \`/play card: wild +4 red\`), \`/hand\`, \`/draw\` and \`/uno\`. \n
+        - Get to 0 cards to win!`;
         this.deck = [];
         this.discardPile = [];
         this.firstTurn = true;
