@@ -158,7 +158,7 @@ class UNO extends Games.Game {
 
         this.topCard = card;
         this.playCard(`${cardName} ${cardAction} ${cardActionColor}`, player);
-        interaction.reply({ content: `You played: ${this.format(card)}`, flags: 'Ephemeral' });
+        interaction.reply(`You played: ${this.format(card)}`);
 
 
         if (!playerHand.length) {
@@ -211,8 +211,8 @@ class UNO extends Games.Game {
         if (index > -1) player ? this.players.get(player).hand.splice(index, 1) : this.deck.splice(index, 1);
         this.discardPile.push(card);
 
-        // Array.reverse() automatically puts the current player in last spot
-        if (player && cardAction !== 'reverse') {
+        // Array.reverse() automatically puts the current player in last spot, but shouldn't in case of 2 players
+        if (player && (cardAction !== 'reverse' || this.players.size === 2)) {
             this.queue.shift();
             this.queue.push(player);
             this.prevPlayer = player;
@@ -258,7 +258,7 @@ class UNO extends Games.Game {
 
             if (!this.deck.length) {
                 this.discardPile.splice(this.discardPile.indexOf(this.topCard), 1);
-                this.deck = [...this.discardPile];
+                this.deck = [...this.discardPile.shuffle()];
                 this.discardPile = [this.topCard];
             }
 
