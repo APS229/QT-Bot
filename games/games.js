@@ -12,7 +12,7 @@ class Game {
         this.players = new Map();
         this.freejoin = false;
         this.winner = null;
-        this.requiredPlayers = 1;
+        this.requiredPlayers = 2;
         this.maxPlayers = 20;
         const hostUser = interaction.user || interaction.author;
         this.host = { tag: hostUser.tag, id: hostUser.id, icon: hostUser.avatarURL() };
@@ -83,7 +83,7 @@ class Game {
     onJoin(userId, userTag) {
         if (this.players.size === this.maxPlayers) return this.channel.send("The game has reached the max amount of players!");
         this.players.set(userId, userTag);
-        if (!this.started) { this.updatePlayerListMessage(); }
+        if (!this.started) this.updatePlayerListMessage();
     }
     onLeave(userId) {
         this.players.delete(userId);
