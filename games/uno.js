@@ -60,7 +60,7 @@ class UNO extends Games.Game {
     }
     assignCards() {
         for (const player of this.players.keys()) {
-            this.drawCards(player, 2);
+            this.drawCards(player, 7);
         }
     }
     format(card) {
@@ -118,7 +118,7 @@ class UNO extends Games.Game {
     }
     play(interaction, interactionType) {
         const player = interaction.member.id;
-        if (player !== this.queue[0]) return interaction.reply({ content: "It is currently not your turn.", flags: 'Ephemeral' });
+        if (player !== this.queue[0]) return interaction.reply({ content: "It's not your turn.", flags: 'Ephemeral' });
 
         // TODO: check for button / select menu
         if (!interaction.content && !interaction.isChatInputCommand()) return interaction.reply({ content: "Play button/menu is currently work-in-progress. Use `/play card: [card]` instead." });
@@ -148,8 +148,8 @@ class UNO extends Games.Game {
         if (this.prevPlayer) {
             const prevPlayerData = this.players.get(this.prevPlayer);
             if (prevPlayerData.hand.length === 1 && !prevPlayerData.uno) {
-                this.channel.send(`<@${this.prevPlayer}> forgot to say UNO! and drew a card.`);
-                this.drawCards(this.prevPlayer, 1);
+                this.channel.send(`<@${this.prevPlayer}> forgot to say UNO! and drew 2 cards.`);
+                this.drawCards(this.prevPlayer, 2);
             }
         }
 
@@ -166,13 +166,12 @@ class UNO extends Games.Game {
     }
     draw(interaction) {
         const player = interaction.member.id;
-        if (this.queue[0] !== player) return interaction.reply({ content: "It is currently not your turn.", flags: 'Ephemeral' });
+        if (this.queue[0] !== player) return interaction.reply({ content: "It's not your turn.", flags: 'Ephemeral' });
 
         if (this.playerTimer) clearTimeout(this.playerTimer);
         const card = this.drawCards(player, 1)[0];
         if (!interaction.content) interaction.reply({ content: `You have drawn: ${this.format(card)}`, flags: 'Ephemeral' });
         this.channel.send(`<@${player}> drew a card.`);
-        this.players.get(player).uno = false;
         this.queue.shift();
         this.queue.push(player);
 
@@ -183,12 +182,17 @@ class UNO extends Games.Game {
         return interaction.reply({ content: `Your current hand: ${cards.join(', ')}`, flags: 'Ephemeral' });
     }
     declareUno(interaction) {
+        if (!interaction.content && interaction.member.id !== this.prevPlayer) return interaction.reply({ content: "You can't say UNO! right now.", flags: 'Ephemeral' });
         const playerData = this.players.get(interaction.member.id);
         if (playerData.hand.length === 1 && !playerData.uno) {
             playerData.uno = true;
-            this.channel.send(`UNO! <@${interaction.member.id}> has 1 card left.`);
+            const message = `UNO! <@${interaction.member.id}> has 1 card left.`;
+            interaction.content ? this.channel.send(message) : interaction.reply(message);
         }
-        if (!interaction.content) interaction.deferUpdate();
+        else if (!interaction.content) {
+            if (interaction.isChatInputCommand()) return interaction.reply({ content: "You have already said UNO!", flags: 'Ephemeral' });
+            interaction.deferUpdate();
+        }
     }
     playCard(fullCardName) {
         if (!this.started) return;
@@ -204,7 +208,7 @@ class UNO extends Games.Game {
         if (index > -1) player ? this.players.get(player).hand.splice(index, 1) : this.deck.splice(index, 1);
         this.discardPile.push(card);
 
-        // Array.reverse automatically puts the current player in last spot
+        // Array.reverse() automatically puts the current player in last spot
         if (player && cardAction !== 'reverse') {
             this.queue.shift();
             this.queue.push(player);
@@ -242,6 +246,8 @@ class UNO extends Games.Game {
     }
     drawCards(player, amount) {
         if (!this.started) return;
+        this.players.get(player).uno = false;
+
         const drawnCards = [];
         for (let i = 0; i < amount; i++) {
             const drawnCard = this.deck.random();
