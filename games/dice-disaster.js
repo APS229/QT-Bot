@@ -11,7 +11,7 @@ class DiceDisaster extends Games.Game {
         - After the timer a random number will be chosen from 1 to 100.\n
         - If the highest bidder's bid is equal or lower than the random number, then they will win.\n
         - If the highest bidder's bid is higher than random number, then they will be eliminated.\n
-        - The player who survives till 1 player is left also wins.\n
+        - The player who survives until 1 player is left also wins.\n
         - Nobody will win and the game will end due to inactivity if no one bids anything.`;
         this.roundTime = 45;
         this.roundTimer = null;

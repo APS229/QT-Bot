@@ -126,7 +126,9 @@ class UNO extends Games.Game {
         // TODO: check for button / select menu
         if (!interaction.content && !interaction.isChatInputCommand()) return interaction.reply({ content: "Play button/menu is currently work-in-progress. Use `/play card: [card]` instead." });
 
-        let card = (interaction.content?.split(' ').slice(1).join(' ') || interaction.options?.get('card').value).toLowerCase();
+        const arg = (interaction.content?.split(' ').slice(1).join(' ') || interaction.options?.get('card'));
+        if (!arg) return interaction.reply({ content: "Please specify a card.", flags: 'Ephemeral' });
+        let card = arg.toLowerCase();
 
         const [cardName, cardAction, cardActionColor] = card.split(' ');
         const playerHand = this.players.get(player).hand;

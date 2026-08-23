@@ -54,7 +54,7 @@ class Events {
                     if (Client.restart && !command.devOnly) return message.reply("The bot is currently set up to restart. You cannot run any commands during the restart.");
                     if (command.devOnly && !Config.developers.includes(message.member.id)) return message.reply("This command is only for developers.");
                     if (command.modOnly && !message.member.permissions.toArray().includes('ManageRoles') && !Config.developers.includes(message.member.id)) {
-                        return message.reply("You don't have permission to use this command.");
+                        return message.reply("You don't have the permission to use this command.");
                     }
                     if (command.execute) command.execute(message);
                 }
@@ -78,7 +78,7 @@ class Events {
                     if (Client.restart && !command.devOnly) return interaction.reply("The bot is currently set up to restart. You cannot run any commands during the restart.");
                     if (command.devOnly && !Config.developers.includes(interaction.user.id)) return interaction.reply("This command is only for developers.");
                     if (command.modOnly && !interaction.member.permissions.toArray().includes('ManageRoles') && !Config.developers.includes(interaction.user.id)) {
-                        return interaction.reply("You don't have permission to use this command.");
+                        return interaction.reply("You don't have the permission to use this command.");
                     }
                     if (command.execute) command.execute(interaction);
                 }
