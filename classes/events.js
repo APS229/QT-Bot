@@ -2,7 +2,7 @@
 
 const http = require('http');
 const DiscordEvents = require('discord.js').Events;
-const { ActionRowBuilder, Collection } = require('discord.js');
+const { PermissionFlagsBits } = require('discord.js');
 
 class Events {
     constructor(client) {
@@ -49,11 +49,13 @@ class Events {
                 });
             }
             try {
-                const command = Client.commands.get(messageContent.split(' ')[0].slice(1).toLowerCase());
+                const commandName = messageContent.split(' ')[0].slice(1).toLowerCase();
+                const command = Client.commands.get(commandName);
                 if (messageContent.startsWith(Config.cmdchar) && command) {
                     if (Client.restart && !command.devOnly) return message.reply("The bot is currently set up to restart. You cannot run any commands during the restart.");
                     if (command.devOnly && !Config.developers.includes(message.member.id)) return message.reply("This command is only for developers.");
-                    if (command.modOnly && !message.member.permissions.toArray().includes('ManageRoles') && !Config.developers.includes(message.member.id)) {
+                    // TODO: Implement checking for manager role id
+                    if (command.modOnly && !message.member.permissions.has(PermissionFlagsBits.ManageChannels) && !Config.developers.includes(message.member.id)) {
                         return message.reply("You don't have the permission to use this command.");
                     }
                     if (command.execute) command.execute(message);
@@ -69,7 +71,7 @@ class Events {
             try {
                 if (interaction.isStringSelectMenu()) {
                     if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
-                    if (!Client.activeGame.handleSelectMenu) return interaction.reply({ content: "This menu ie expired.", flags: 'Ephemeral' });
+                    if (!Client.activeGame.handleSelectMenu) return interaction.reply({ content: "This menu has expired.", flags: 'Ephemeral' });
                     Client.activeGame.handleSelectMenu(interaction);
                 }
                 else {
@@ -77,7 +79,8 @@ class Events {
                     if (!command) return interaction.reply("This command/interaction is no longer available.");
                     if (Client.restart && !command.devOnly) return interaction.reply("The bot is currently set up to restart. You cannot run any commands during the restart.");
                     if (command.devOnly && !Config.developers.includes(interaction.user.id)) return interaction.reply("This command is only for developers.");
-                    if (command.modOnly && !interaction.member.permissions.toArray().includes('ManageRoles') && !Config.developers.includes(interaction.user.id)) {
+                    // TODO: Implement checking for manager role id
+                    if (command.modOnly && !interaction.member.permissions.has(PermissionFlagsBits.ManageChannels) && !Config.developers.includes(interaction.user.id)) {
                         return interaction.reply("You don't have the permission to use this command.");
                     }
                     if (command.execute) command.execute(interaction);
@@ -90,7 +93,7 @@ class Events {
             }
         });
 
-        // adding and removing bot from servers
+        // Adding and removing the bot from servers
         this.bot.on(DiscordEvents.GuildCreate, guild => {
             info(`Joined new server: ${guild.name} - ${guild.id}`);
         });

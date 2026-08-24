@@ -7,22 +7,36 @@ class Database {
         this.path = './database/settings';
     }
 
-    create(serverId) {
+    create(serverId, gameChannel, manager) {
         const path = `${this.path}/${serverId}.json`;
 
         const data = {
-
+            id: serverId,
+            gameChannel: gameChannel || '',
+            manager: manager || ''
         };
 
-        fs.writeFileSync(path, JSON.stringify(data));
+        try {
+            fs.writeFileSync(path, JSON.stringify(data));
+            return true;
+        }
+        catch (e) {
+            console.error(e);
+            return;
+        }
     }
 
     query(serverId) {
         const path = `${this.path}/${serverId}.json`;
-        if (!fs.existsSync(path)) return;
+        try {
+            if (!fs.existsSync(path)) this.create(serverId);
 
-        const data = require(path);
-        console.log(data);
+            return fs.readFileSync(path, 'utf8');
+        }
+        catch (e) {
+            console.error(e);
+            return;
+        }
     }
 }
 
