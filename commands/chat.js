@@ -129,22 +129,30 @@ const commands = {
     // },
     randomcat: {
         desc: "Shows a picture of a random cat.",
-        execute(interaction) {
-            require('fetch').fetchUrl('https://api.thecatapi.com/v1/images/search', (error, response, body) => {
-                if (error) return console.log("Error in command randomcat: " + error);
-                const cat = `${JSON.parse(body)[0].url}`;
-                interaction.reply({ files: [cat] });
-            });
+        async execute(interaction) {
+            try {
+                const response = await fetch('https://api.thecatapi.com/v1/images/search');
+                const data = await response.json();
+                const catURL = `${data[0].url}`;
+                interaction.reply(catURL);
+            }
+            catch (e) {
+                console.error(e);
+            }
         }
     },
     randomdog: {
         desc: "Shows a picture of a random dog.",
-        execute(interaction) {
-            require('fetch').fetchUrl('https://dog.ceo/api/breeds/image/random', (error, response, body) => {
-                if (error) return console.log("Error in command randomdog: " + error);
-                const dog = `${JSON.parse(body).message}`;
-                interaction.reply({ files: [dog] });
-            });
+        async execute(interaction) {
+            try {
+                const response = await fetch('https://dog.ceo/api/breeds/image/random');
+                const data = await response.json();
+                const dogURL = data.message;
+                interaction.reply(dogURL);
+            }
+            catch (e) {
+                console.error(e);
+            }
         }
     },
     nickname: {
