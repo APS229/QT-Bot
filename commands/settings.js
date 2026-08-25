@@ -1,17 +1,6 @@
 'use strict';
 
-const { PermissionFlagsBits } = require("discord.js");
-
-const OptionTypes = {
-    STRING: 3,
-    INTEGER: 4,
-    BOOLEAN: 5,
-    USER: 6,
-    CHANNEL: 7,
-    ROLE: 8,
-    NUMBER: 10,
-    ATTACHMENT: 11
-};
+const { ApplicationCommandOptionType, PermissionFlagsBits } = require("discord.js");
 
 const DANGER_PERMISSIONS = [
     PermissionFlagsBits.Administrator,
@@ -33,13 +22,13 @@ const commands = {
     settings: {
         options: [
             {
-                type: OptionTypes.CHANNEL,
+                type: ApplicationCommandOptionType.Channel,
                 name: 'channel',
                 description: "The channel all the games should run in.",
                 required: true
             },
             {
-                type: OptionTypes.ROLE,
+                type: ApplicationCommandOptionType.Role,
                 name: 'manager',
                 description: "The role that manages the games in this server.",
                 required: true

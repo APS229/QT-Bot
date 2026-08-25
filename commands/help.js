@@ -3,17 +3,6 @@
 const fs = require('fs');
 const { EmbedBuilder } = require('discord.js');
 
-const OptionTypes = {
-    STRING: 3,
-    INTEGER: 4,
-    BOOLEAN: 5,
-    USER: 6,
-    CHANNEL: 7,
-    ROLE: 8,
-    NUMBER: 10,
-    ATTACHMENT: 11
-};
-
 const commands = {
     help: {
         desc: "Help for the bot commands.",

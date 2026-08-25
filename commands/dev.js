@@ -1,17 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-
-const OptionTypes = {
-    STRING: 3,
-    INTEGER: 4,
-    BOOLEAN: 5,
-    USER: 6,
-    CHANNEL: 7,
-    ROLE: 8,
-    NUMBER: 10,
-    ATTACHMENT: 11
-};
+const { ApplicationCommandOptionType } = require('discord.js');
 
 const commands = {
     kill: {
@@ -33,7 +23,7 @@ const commands = {
         },
         options: [
             {
-                type: OptionTypes.STRING,
+                type: ApplicationCommandOptionType.String,
                 name: "code",
                 description: "Code to evaluate.",
                 required: true
@@ -55,7 +45,7 @@ const commands = {
         hidden: true,
         options: [
             {
-                type: OptionTypes.STRING,
+                type: ApplicationCommandOptionType.String,
                 name: "module",
                 description: "Module you want to reload.",
                 required: true

@@ -1,30 +1,19 @@
 'use strict';
 
-const { EmbedBuilder } = require('discord.js');
+const { ApplicationCommandOptionType, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
-
-const OptionTypes = {
-    STRING: 3,
-    INTEGER: 4,
-    BOOLEAN: 5,
-    USER: 6,
-    CHANNEL: 7,
-    ROLE: 8,
-    NUMBER: 10,
-    ATTACHMENT: 11
-};
 
 const commands = {
     creategame: {
         options: [
             {
-                type: OptionTypes.STRING,
+                type: ApplicationCommandOptionType.String,
                 name: 'game',
                 description: "The game that you want to create.",
                 required: true
             },
             {
-                type: OptionTypes.INTEGER,
+                type: ApplicationCommandOptionType.Integer,
                 name: 'points',
                 description: "Points required to win.",
             }
@@ -71,7 +60,7 @@ const commands = {
     disqualify: {
         options: [
             {
-                type: OptionTypes.USER,
+                type: ApplicationCommandOptionType.User,
                 name: 'user',
                 description: "User you want to disqualify.",
                 required: true
@@ -132,7 +121,7 @@ const commands = {
     guess: {
         options: [
             {
-                type: OptionTypes.STRING,
+                type: ApplicationCommandOptionType.String,
                 name: 'answer',
                 description: "The guess answer.",
                 required: true
@@ -152,7 +141,7 @@ const commands = {
     alias: {
         options: [
             {
-                type: OptionTypes.STRING,
+                type: ApplicationCommandOptionType.String,
                 name: 'alias',
                 description: "Alias for the game of Empires. (3 to 15 characters)",
                 required: true
@@ -176,13 +165,13 @@ const commands = {
     guessalias: {
         options: [
             {
-                type: OptionTypes.USER,
+                type: ApplicationCommandOptionType.User,
                 name: 'user',
                 description: "Player to guess the alias of in the game of Empires.",
                 required: true
             },
             {
-                type: OptionTypes.STRING,
+                type: ApplicationCommandOptionType.String,
                 name: 'alias',
                 description: "Alias to guess for the game of Empires.",
                 required: true
@@ -199,7 +188,7 @@ const commands = {
     choosedoor: {
         options: [
             {
-                type: OptionTypes.STRING,
+                type: ApplicationCommandOptionType.String,
                 name: 'door',
                 description: "Door to pick in the game of Trick House.",
                 required: true
@@ -216,7 +205,7 @@ const commands = {
     hide: {
         options: [
             {
-                type: OptionTypes.STRING,
+                type: ApplicationCommandOptionType.String,
                 name: 'spot',
                 description: "Hiding spot to pick in the game of Hide and Seek.",
                 required: true
@@ -234,7 +223,7 @@ const commands = {
     seek: {
         options: [
             {
-                type: OptionTypes.STRING,
+                type: ApplicationCommandOptionType.String,
                 name: 'spot',
                 description: "Seeking spot to pick in the game of Hide and Seek.",
                 required: true
@@ -252,7 +241,7 @@ const commands = {
     bid: {
         options: [
             {
-                type: OptionTypes.INTEGER,
+                type: ApplicationCommandOptionType.Integer,
                 name: 'number',
                 description: "The number you want to bid.",
                 required: true
@@ -288,7 +277,7 @@ const commands = {
     summary: {
         options: [
             {
-                type: OptionTypes.USER,
+                type: ApplicationCommandOptionType.User,
                 name: 'player',
                 description: "The player you want to see the details of."
             }
@@ -339,7 +328,7 @@ const commands = {
     play: {
         options: [
             {
-                type: OptionTypes.STRING,
+                type: ApplicationCommandOptionType.String,
                 name: 'card',
                 description: "The card that you want to play.",
                 required: true

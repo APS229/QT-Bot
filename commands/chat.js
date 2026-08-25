@@ -1,16 +1,5 @@
 'use strict';
 
-const OptionTypes = {
-    STRING: 3,
-    INTEGER: 4,
-    BOOLEAN: 5,
-    USER: 6,
-    CHANNEL: 7,
-    ROLE: 8,
-    NUMBER: 10,
-    ATTACHMENT: 11
-};
-
 const commands = {
     // pick: {
     //     options: [
@@ -152,32 +141,6 @@ const commands = {
             }
             catch (e) {
                 console.error(e);
-            }
-        }
-    },
-    nickname: {
-        options: [
-            {
-                type: OptionTypes.STRING,
-                name: 'nick',
-                description: "Nickname you want to change to.",
-                required: true
-            }
-        ],
-        desc: "Change your nickname.",
-        async execute(interaction) {
-            const target = interaction.options._hoistedOptions[0].value;
-            if (target.length > 32) return interaction.reply({ content: "Nickname too long.", flags: 'Ephemeral' });
-            if (target.length < 3) return interaction.reply({ content: "Nickname too short.", flags: 'Ephemeral' });
-            if (/[^a-zA-Z0-9]/g.test(target.substring(0, 3))) return interaction.reply({ content: "You can't use that nickname because the first 3 characters are not alphanumeric.", flags: 'Ephemeral' });
-            const currentName = interaction.member.displayName;
-            if (currentName === target) return interaction.reply({ content: `Your current nickname is already ${currentName}.`, flags: 'Ephemeral' });
-            try {
-                await interaction.member.setNickname(target);
-                interaction.reply({ content: `Nickname successfully changed to: ${target}`, flags: 'Ephemeral' });
-            }
-            catch (err) {
-                interaction.reply({ content: "Missing permissions to change your nickname.", flags: 'Ephemeral' });
             }
         }
     }
