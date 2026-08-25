@@ -69,8 +69,10 @@ const commands = {
                 const inactiveRequiredPermsNames = "```diff\n+ " + inactiveRequiredPerms.map(perm => Object.keys(PermissionFlagsBits).find(key => PermissionFlagsBits[key] === perm)).join('\n+ ') + "```";
                 return interaction.reply(`The bot is missing the following permissions in the specified channel:\n${inactiveRequiredPermsNames}\nPlease edit the channel to include these permissions for the bot.`);
             }
+
             const success = Database.create(interaction.guild.id, options[0].value, options[1].value);
             if (!success) return interaction.reply("There was an error setting up the bot.");
+
             interaction.reply({
                 content: `Successfully set up the bot to use the channel <#${options[0].value}> with the games manager role <@&${options[1].value}>!`,
                 allowedMentions: {
