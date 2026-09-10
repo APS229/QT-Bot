@@ -63,7 +63,7 @@ class Events {
                 }
             }
             catch (err) {
-                message.channel.send(`There was an error occured.`);
+                message.channel.send("An error has occured.");
                 if (Client.activeGame) Client.activeGame.onEnd();
                 console.error(err);
             }
