@@ -3,15 +3,14 @@
 const { EmbedBuilder } = require('discord.js');
 
 class Edges extends Games.PuzzleGame {
-    constructor(interaction, points) {
-        super(interaction, points || 7);
+    constructor(channel, host, points) {
+        super(channel, host, points || 7);
         this.name = "Edges";
-        this.description = `- Use \`/guess [answer]\` to make your guess.\n
-        - The question will have the starting and ending letters of the answers.`;
+        this.description = `- Use \`.guess [answer]\` to make your guess.\n
+        - The question will have the starting and ending letters of the answer.`;
         this.freejoin = true;
         this.data = {};
         this.dataKeys = {};
-        this.init();
     }
     async loadData() {
         for (const category of Object.keys(Client.data)) {
@@ -40,22 +39,23 @@ class Edges extends Games.PuzzleGame {
         this.answer = this.currentAnswer.map(Tools.toId);
         this.update();
         this.canGuess = true;
-        this.roundTimer = setTimeout(() => {
-            this.canGuess = false;
-            const embed = new EmbedBuilder()
-                .setTitle("Time's up!")
-                .setDescription(`The answers were: *${Tools.joinList(this.currentAnswer)}*`)
-            this.channel.send({ embeds: [embed] });
-            this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
-        }, this.roundTime * 1000);
+        this.roundTimer = setTimeout(() => this.setRoundTimer(), this.roundTime * 1000);
+    }
+    setRoundTimer() {
+        this.canGuess = false;
+        const embed = new EmbedBuilder()
+            .setTitle("Time's up!")
+            .setDescription(`The answers were: *${Tools.joinList(this.currentAnswer)}*`)
+        this.sendSync({ embeds: [embed] });
+        this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
     }
     onGuess(userId, guess) {
         if (this.answer.includes(guess)) {
             clearTimeout(this.roundTimer);
             this.canGuess = false;
-            this.players.set(userId, this.players.has(userId) ? this.players.get(userId) + 1 : 1);
-            this.channel.send(`<@${userId}> advances to ${this.players.get(userId)} point(s)! The answers were: *${Tools.joinList(this.currentAnswer)}*`);
-            if (this.players.get(userId) === this.points) {
+            this.players.has(userId) ? this.players.get(userId).points++ : this.players.set(userId, { points: 1 });
+            this.sendSync(`<@${userId}> advances to ${this.players.get(userId).points} point(s)! The answers were: *${Tools.joinList(this.currentAnswer)}*`);
+            if (this.players.get(userId).points === this.points) {
                 this.winner = userId;
                 return this.onEnd();
             }
@@ -63,7 +63,7 @@ class Edges extends Games.PuzzleGame {
         }
     }
     update() {
-        const players = [...this.players].map(([player, playerPoints]) => `<@${player}>: ${playerPoints}`).join('\n');
+        const players = [...this.players].map(([player, playerData]) => `<@${player}>: ${playerData.points}`).join('\n');
         const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
             .setTitle(this.puzzle)
@@ -74,7 +74,7 @@ class Edges extends Games.PuzzleGame {
                 iconURL: Config.avatarURL
             });
         if (players) embed.addFields({ name: "Players", value: players });
-        this.channel.send({ embeds: [embed] });
+        this.sendSync({ embeds: [embed] });
     }
 }
 

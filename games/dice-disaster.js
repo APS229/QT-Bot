@@ -3,11 +3,11 @@
 const { EmbedBuilder } = require('discord.js');
 
 class DiceDisaster extends Games.Game {
-    constructor(interaction) {
-        super(interaction);
+    constructor(channel, host) {
+        super(channel, host);
         this.name = "Dice Disaster";
         this.description = `- When the round starts, you will have 45 seconds to bid a number 1 - 100.\n
-        - Use the command \`/bid\` to bid a number.\n
+        - Use the command \`.bid [number]\` to bid a number.\n
         - After the timer a random number will be chosen from 1 to 100.\n
         - If the highest bidder's bid is equal or lower than the random number, then they will win.\n
         - If the highest bidder's bid is higher than random number, then they will be eliminated.\n
@@ -18,65 +18,62 @@ class DiceDisaster extends Games.Game {
         this.cooldownTime = 5;
         this.cooldownTimer = null;
         this.bidder = { id: '', bid: 0 };
-        this.init();
     }
     onStart() {
         super.onStart();
         this.onNextRound();
     }
     onNextRound() {
+        if (this.ended) return;
         this.bidder.id = '';
         this.bidder.bid = 0;
         this.update();
         this.canGuess = true;
-        this.roundTimer = setTimeout(() => {
-            this.canGuess = false;
-            if (this.bidder.id) {
-                this.channel.send(`<@${this.bidder.id}> has the highest bid with ${this.bidder.bid}!`);
-                this.cooldownTimer = setTimeout(async () => {
-                    const roll = parseInt((Math.random() * 100) + 1);
-                    await this.channel.send(`Rolling 1 - 100: ${roll}`);
-                    if (!this.started) return;
-                    if (roll >= this.bidder.bid) {
-                        this.winner = this.bidder.id;
-                        return this.onEnd();
-                    }
-                    else {
-                        this.channel.send(`RIP! <@${this.bidder.id}> has been eliminated.`);
-                        this.onLeave(this.bidder.id);
-                        if (this.players.size > 1) this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
-                    }
-                }, this.cooldownTime * 1000);
-            }
-            else {
-                this.channel.send("Nobody bid anything...");
+        this.roundTimer = setTimeout(() => this.setRoundTimer(), this.roundTime * 1000);
+    }
+    setRoundTimer() {
+        this.canGuess = false;
+        if (this.bidder.id) {
+            this.sendSync(`<@${this.bidder.id}> has the highest bid with ${this.bidder.bid}!`);
+            this.cooldownTimer = setTimeout(() => this.setCooldownTimer(), this.cooldownTime * 1000);
+        }
+        else {
+            this.sendSync("Nobody bid anything, ending the game.");
+            return this.onEnd();
+        }
+    }
+    async setCooldownTimer() {
+        try {
+            const roll = parseInt((Math.random() * 100) + 1);
+            await this.send(`Rolling 1 - 100: ${roll}`);
+            if (roll >= this.bidder.bid) {
+                this.winner = this.bidder.id;
                 return this.onEnd();
             }
-        }, this.roundTime * 1000);
+            else {
+                await this.send(`RIP! <@${this.bidder.id}> has been eliminated.`);
+                const ended = this.onLeave(this.bidder.id);
+                if (ended) return;
+                this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
+            }
+        }
+        catch (err) {
+            if (!(err instanceof GameEndedError)) {
+                console.error(err);
+            }
+        }
     }
-    onGuess(interaction) {
-        const bid = interaction.options ? interaction.options._hoistedOptions[0].value : parseInt(interaction.content.split(' ')[1]);
-        if (!bid || bid > 100 || bid < 1) return interaction.reply({ content: "Your bid must be a number from 1 - 100.", flags: 'Ephemeral' });
-        if (this.bidder.bid >= bid) return interaction.reply({ content: `<@${this.bidder.id}> has a higher bid with ${this.bidder.bid}!`, flags: 'Ephemeral' });
-        this.bidder.id = interaction.member.id;
+    onGuess(userId, bid) {
+        bid = parseInt(bid);
+        if (!bid || bid > 100 || bid < 1) return this.mentionReply(userId, "Your bid must be a number from 1 - 100.");
+        if (this.bidder.bid >= bid) return;
+        this.bidder.id = userId;
         this.bidder.bid = bid;
-        interaction.reply(`<@${interaction.member.id}> bid ${bid}!`);
+        this.sendSync(`<@${userId}> bid ${bid}!`);
         if (bid === 100) {
             clearTimeout(this.roundTimer);
-            this.channel.send(`<@${this.bidder.id}> has the highest bid with ${this.bidder.bid}!`);
-            this.cooldownTimer = setTimeout(() => {
-                const roll = parseInt((Math.random() * 100) + 1);
-                this.channel.send(`Rolling 1 - 100: ${roll}`);
-                if (roll >= this.bidder.bid) {
-                    this.winner = this.bidder.id;
-                    return this.onEnd();
-                }
-                else {
-                    this.channel.send(`RIP! <@${this.bidder.id}> has been eliminated.`);
-                    this.onLeave(this.bidder.id);
-                    if (this.players.size > 1) this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
-                }
-            }, this.cooldownTime * 1000);
+            this.sendSync(`<@${this.bidder.id}> has the highest bid with ${this.bidder.bid}!`);
+            this.cooldownTimer = setTimeout(() => this.setCooldownTimer(), this.cooldownTime * 1000);
         }
     }
     update() {
@@ -88,13 +85,14 @@ class DiceDisaster extends Games.Game {
                 text: Config.username,
                 iconURL: Config.avatarURL
             });
-        this.channel.send({ content: Tools.joinList([...this.players.keys()].map(p => `<@${p}>`)), embeds: [embed] });
+        this.sendSync({ content: Tools.joinList([...this.players.keys()].map(player => `<@${player}>`)), embeds: [embed] });
     }
     onLeave(userId) {
         super.onLeave(userId);
         if (this.started && this.players.size < 2) {
             this.winner = this.players.keys().next()?.value;
             this.onEnd();
+            return true;
         }
     }
 }

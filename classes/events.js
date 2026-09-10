@@ -2,7 +2,7 @@
 
 const http = require('http');
 const DiscordEvents = require('discord.js').Events;
-const { PermissionFlagsBits } = require('discord.js');
+const { ActivityType, PermissionFlagsBits } = require('discord.js');
 
 class Events {
     constructor(client) {
@@ -13,7 +13,7 @@ class Events {
             if (Config.username) this.bot.user.setUsername(Config.username);
             info(`Logged in as: ${this.bot.user.username}`);
 
-            if (Config.activity) this.bot.user.setActivity('to become a gaming bot', { type: Config.activity });
+            if (Config.activity) this.bot.user.setActivity(Config.activity);
 
             const servers = [];
             for (const guild of this.bot.guilds.cache) {
@@ -50,7 +50,7 @@ class Events {
             }
             try {
                 const commandName = messageContent.split(' ')[0].slice(1).toLowerCase();
-                const command = Client.commands.get(commandName);
+                const command = Client.textCommands.get(commandName);
                 if (message.channel.id === Database.query(message.guild.id).gameChannel && messageContent.startsWith(Config.cmdchar) && command) {
                     if (Client.restart && !command.devOnly) return message.reply("The bot is currently set up to restart. You cannot run any commands during the restart.");
                     if (command.devOnly && !Config.developers.includes(message.member.id)) return message.reply("This command is only for developers.");
@@ -58,7 +58,8 @@ class Events {
                         !message.member.roles.cache.has(Database.query(message.guild.id).manager) && !Config.developers.includes(message.member.id)) {
                         return message.reply("You don't have the permission to use this command.");
                     }
-                    if (command.execute) command.execute(message);
+                    const target = messageContent.split(' ').splice(1).join(' ');
+                    if (command.execute) command.execute(message, target);
                 }
             }
             catch (err) {
@@ -69,10 +70,8 @@ class Events {
         });
         this.bot.on(DiscordEvents.InteractionCreate, interaction => {
             try {
-                if (interaction.isStringSelectMenu()) {
-                    if (!Client.activeGame) return interaction.reply({ content: "There is no game going on right now.", flags: 'Ephemeral' });
-                    if (!Client.activeGame.handleSelectMenu) return interaction.reply({ content: "This menu has expired.", flags: 'Ephemeral' });
-                    Client.activeGame.handleSelectMenu(interaction);
+                if (interaction.isAnySelectMenu()) {
+                    interaction.reply({ content: "Select menus are currently disabled by the developer.", flags: 'Ephemeral' });
                 }
                 else {
                     if (interaction.commandName !== 'settings') {
@@ -80,8 +79,17 @@ class Events {
                         if (!settings.gameChannel) return interaction.reply({ content: "(Moderators) Please first set up the bot using the `/settings` command.", flags: 'Ephemeral' });
                         if (interaction.channel.id !== settings.gameChannel) return interaction.reply({ content: `You can only run commands in the <#${settings.gameChannel}> channel.`, flags: 'Ephemeral' });
                     }
-                    const command = Client.commands.get(interaction.commandName) || Client.commands.get(interaction.customId);
-                    if (!command) return interaction.reply({ content: "This command/interaction is no longer available.", flags: 'Ephemeral' });
+                    let command = null;
+                    if (interaction.isButton()) {
+                        command = Client.slashCommands.get(interaction.customId) ||
+                            Client.slashCommands.find(commandData => commandData.subcommands && commandData.subcommands[interaction.customId]).subcommands[interaction.customId];
+                    }
+                    else {
+                        const parentCommand = Client.slashCommands.get(interaction.commandName);
+                        command = parentCommand.subcommands ? parentCommand.subcommands[interaction.options.getSubcommand()] : parentCommand;
+                    }
+
+                    if (!command) return interaction.reply({ content: "This command is no longer available.", flags: 'Ephemeral' });
                     if (Client.restart && !command.devOnly) return interaction.reply({ content: "The bot is currently set up to restart. You cannot run any commands during the restart.", flags: 'Ephemeral' });
                     if (command.devOnly && !Config.developers.includes(interaction.user.id)) return interaction.reply({ content: "This command is only for developers.", flags: 'Ephemeral' });
                     if (command.modOnly && !interaction.member.permissions.has(PermissionFlagsBits.ManageChannels) &&
@@ -92,7 +100,7 @@ class Events {
                 }
             }
             catch (err) {
-                interaction.reply(`There was an error occured.`);
+                interaction.reply("An error has occurred.");
                 if (Client.activeGame) Client.activeGame.onEnd();
                 console.error(err);
             }

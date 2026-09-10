@@ -2,7 +2,7 @@
 
 const commands = {
     randomcat: {
-        desc: "Shows a picture of a random cat.",
+        description: "Shows a picture of a random cat.",
         async execute(interaction) {
             try {
                 const response = await fetch('https://api.thecatapi.com/v1/images/search');
@@ -16,7 +16,7 @@ const commands = {
         }
     },
     randomdog: {
-        desc: "Shows a picture of a random dog.",
+        description: "Shows a picture of a random dog.",
         async execute(interaction) {
             try {
                 const response = await fetch('https://dog.ceo/api/breeds/image/random');

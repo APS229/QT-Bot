@@ -366,5 +366,5 @@ class UNO extends Games.Game {
     }
 }
 
-exports.game = UNO;
-exports.id = 'uno';
+// exports.game = UNO;
+// exports.id = 'uno';

@@ -20,6 +20,9 @@ const REQUIRED_PERMISSIONS = [
 
 const commands = {
     settings: {
+        description: "Configure the bot's settings for this server.",
+        modOnly: true,
+        slashCommand: true,
         options: [
             {
                 type: ApplicationCommandOptionType.Channel,
@@ -34,12 +37,11 @@ const commands = {
                 required: true
             }
         ],
-        modOnly: true,
-        desc: "Configure the bot's settings for this server.",
         execute(interaction) {
             if (interaction.content) return interaction.reply("Please use the slash command.");
 
-            const options = interaction.options?._hoistedOptions;
+            const channel = interaction.options.get('channel').channel;
+            const managerRoleId = interaction.options.get('manager').value;
 
             const bot = interaction.guild.members.me;
 
@@ -49,7 +51,7 @@ const commands = {
                 return interaction.reply(`The bot has the following dangerous permissions:\n${activeDangerPermsNames}\nPlease remove these permissions in the server settings before continuing.`);
             }
 
-            const channelPerms = options[0].channel.permissionsFor(bot);
+            const channelPerms = channel.permissionsFor(bot);
             if (!channelPerms.has(PermissionFlagsBits.ViewChannel)) {
                 return interaction.reply("No permissions to view the specified channel.");
             }
@@ -59,11 +61,11 @@ const commands = {
                 return interaction.reply(`The bot is missing the following permissions in the specified channel:\n${inactiveRequiredPermsNames}\nPlease edit the channel to include these permissions for the bot.`);
             }
 
-            const success = Database.create(interaction.guild.id, options[0].value, options[1].value);
+            const success = Database.create(interaction.guild.id, channel.id, managerRoleId);
             if (!success) return interaction.reply("There was an error setting up the bot.");
 
             interaction.reply({
-                content: `Successfully set up the bot to use the channel <#${options[0].value}> with the games manager role <@&${options[1].value}>!`,
+                content: `Successfully set up the bot to use the channel <#${channel.id}> with the games manager role <@&${managerRoleId}>!`,
                 allowedMentions: {
                     roles: []
                 }

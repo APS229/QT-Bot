@@ -19,32 +19,17 @@ class Tools {
 		}
 		return newArr.join(' ');
 	}
-	uncacheTree(root) {
-		const filepaths = [require.resolve(root)];
-		while (filepaths.length) {
-			const filepath = filepaths[0];
-			filepaths.shift();
-			if (filepath in require.cache) {
-				const cachedModule = require.cache[filepath];
-				for (const child of cachedModule.children) {
-					if (!child.id.endsWith('.node')) filepaths.push(child.filename);
-				}
+	uncacheFile(filePath) {
+		const resolvedPath = require.resolve(filePath);
 
-				cachedModule.exports = {};
-				cachedModule.children = [];
-				if (cachedModule.parent) {
-					const index = cachedModule.parent.children.indexOf(cachedModule);
-					if (index !== -1) cachedModule.parent.children.splice(index, 1);
-				}
-
-				delete require.cache[filepath];
-			}
+		if (require.cache[resolvedPath]) {
+			delete require.cache[resolvedPath];
 		}
 	}
 	toDurationString(input, options) {
 		const date = new Date(input);
 		const parts = [date.getUTCFullYear() - 1970, date.getUTCMonth(), date.getUTCDate() - 1, date.getUTCHours(), date.getUTCMinutes(),
-			date.getUTCSeconds()];
+		date.getUTCSeconds()];
 		const roundingBoundaries = [6, 15, 12, 30, 30];
 		const unitNames = ["year", "month", "day", "hour", "minute", "second"];
 		if (options && options.milliseconds) {
@@ -87,13 +72,21 @@ class Tools {
 				" " + preFormatting + list[len] + postFormatting;
 		}
 	}
-    toNumberOrderString(input) {
+	toNumberOrderString(input) {
 		const numberString = "" + input;
 		if (numberString.endsWith('11') || numberString.endsWith('12') || numberString.endsWith('13')) return numberString + "th";
 		if (numberString.endsWith('1')) return numberString + "st";
 		if (numberString.endsWith('2')) return numberString + "nd";
 		if (numberString.endsWith('3')) return numberString + "rd";
 		return numberString + "th";
+	}
+	isEmptyObject(obj) {
+		for (const prop in obj) {
+			if (Object.hasOwn(obj, prop)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
 module.exports = new Tools();

@@ -4,21 +4,20 @@ const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const fs = require('fs');
 
 class TrickHouse extends Games.Game {
-    constructor(interaction) {
-        super(interaction);
+    constructor(channel, host) {
+        super(channel, host);
         this.name = "Trick House";
         this.description = `- Use the \`/choosedoor\` command to pick a door during the round.\n
-        - There will be a trap door chosen out of the 3 doors every time.\n
+        - There will be a trap door chosen out of the 3 doors every round.\n
         - If you've picked the trap door or no door, you will get eliminated.\n
         - If only two players are left, there will only be 2 doors to pick from where both players must pick a unique door.\n
         - It is possible everyone gets eliminated by picking the trap door and no one wins.`;
-        this.roundTime = 45;
+        this.roundTime = 60;
         this.roundTimer = null;
         this.doors = [];
         this.doorsId = [];
         this.trap = '';
         this.data = {};
-        this.init();
     }
     async loadData() {
         this.data = JSON.parse(fs.readFileSync('./database/categories.json'));
@@ -35,10 +34,13 @@ class TrickHouse extends Games.Game {
         this.doorsId = this.doors.map(Tools.toId);
         this.update();
         for (const player of this.players.keys()) {
-            this.players.set(player, 0);
+            this.players.get(player).choice = '';
         }
         this.canGuess = true;
-        this.roundTimer = setTimeout(async () => {
+        this.roundTimer = setTimeout(() => this.setRoundTimer(), this.roundTime * 1000);
+    }
+    async setRoundTimer() {
+        try {
             this.canGuess = false;
             this.trap = this.doors.random();
             const trap = new AttachmentBuilder('./images/trickhouse/trap.png');
@@ -50,18 +52,19 @@ class TrickHouse extends Games.Game {
                     text: Config.username,
                     iconURL: Config.avatarURL
                 });
-            await this.channel.send({ embeds: [embed], files: [trap] });
-            if (!this.started) return;
+            await this.send({ embeds: [embed], files: [trap] });
 
-            for (const [playerId, playerChoice] of this.players) {
-                if (!this.doorsId.includes(playerChoice)) {
-                    this.onLeave(playerId);
-                    this.channel.send(`<@${playerId}> didn't pick a door and has been eliminated!`);
+            for (const [playerId, playerData] of this.players) {
+                if (!this.doorsId.includes(playerData.choice)) {
+                    await this.send(`<@${playerId}> didn't pick a door and has been eliminated!`);
+                    const ended = this.onLeave(playerId);
+                    if (ended) return;
                     continue;
                 }
-                if (playerChoice === Tools.toId(this.trap)) {
-                    this.onLeave(playerId);
-                    this.channel.send(`<@${playerId}> fell into the trap door and has been eliminated!`);
+                if (playerData.choice === Tools.toId(this.trap)) {
+                    await this.send(`<@${playerId}> fell into the trap door and has been eliminated!`);
+                    const ended = this.onLeave(playerId);
+                    if (ended) return;
                 }
             }
             if (this.players.size < 2) {
@@ -69,15 +72,15 @@ class TrickHouse extends Games.Game {
                 return this.onEnd();
             }
             this.onNextRound();
-        }, this.roundTime * 1000);
+        }
+        catch (err) {
+            if (!(err instanceof GameEndedError)) {
+                console.error(err);
+            }
+        }
     }
-    onGuess(interaction) {
-        const choice = Tools.toId(interaction.options?._hoistedOptions[0].value || interaction.content.split(' ')[1]);
-        if (!this.doorsId.includes(choice)) return interaction.reply({ content: `Invalid choice! Current doors are: ${Tools.joinList(this.doors)}`, flags: 'Ephemeral' });
-        if (this.players.get(interaction.member.id)) return interaction.reply({ content: "You have already picked a door!", flags: 'Ephemeral' });
-        if (this.players.size === 2 && [...this.players.values()].filter(d => d !== 0)[0] === choice) return interaction.reply({ content: "Someone else has already picked that door! Please choose another.", flags: 'Ephemeral' });
-        this.players.set(interaction.member.id, choice);
-        interaction.reply({ content: `You have chosen the door: ${this.doors[this.doorsId.indexOf(choice)]}`, flags: 'Ephemeral' });
+    onGuess(userId, door) {
+        this.players.get(userId).choice = door;
     }
     update() {
         const players = [...this.players.keys()].map(player => `<@${player}>`);
@@ -91,7 +94,10 @@ class TrickHouse extends Games.Game {
                 text: Config.username,
                 iconURL: Config.avatarURL
             });
-        this.channel.send({ content: Tools.joinList(players), embeds: [embed], files: [img] });
+        this.sendSync({ content: Tools.joinList(players), embeds: [embed], files: [img] });
+    }
+    onLeave(userId) {
+        super.onLeave(userId);
     }
 }
 

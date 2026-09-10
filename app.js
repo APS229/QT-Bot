@@ -1,5 +1,12 @@
 'use strict';
 
+global.GameEndedError = class extends Error {
+    constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
+    }
+};
+
 global.Tools = require('./classes/tools.js');
 
 global.Client = require('./classes/client.js');

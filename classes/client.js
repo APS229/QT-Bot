@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-const { REST, Routes, GatewayIntentBits, Collection, SlashCommandBuilder } = require('discord.js');
+const { Collection, GatewayIntentBits } = require('discord.js');
 const DiscordClient = require('discord.js').Client;
 
 class Client {
@@ -14,7 +14,7 @@ class Client {
         this.disconnected = false;
         this.disabled = false;
         this.restarting = false;
-        this.games = new Map();
+        this.games = new Collection();
         this.events = null;
         this.data = {};
     }
@@ -44,19 +44,38 @@ class Client {
         this.events.parse();
     }
     loadCommands() {
-        this.commands = new Collection();
+        this.slashCommands = new Collection();
+        this.textCommands = new Collection();
         const commandFiles = fs.readdirSync('./commands');
         for (const commandFile of commandFiles) {
             if (!commandFile.endsWith('.js')) continue;
             const file = require('../commands/' + commandFile);
             if (file.commands) {
-                for (const cmd in file.commands) {
-                    if (!file.commands[cmd].execute) {
-                        console.warn(`WARNING: Skipped loading command '${cmd}' in ${commandFile} as it is missing execute() property`);
-                        continue;
+                commandLoop: for (const commandName in file.commands) {
+                    const commandData = file.commands[commandName];
+                    if (!commandData.execute) {
+                        if (Tools.isEmptyObject(commandData.subcommands)) {
+                            console.warn(`WARNING: Skipped loading command '${commandName}' in file ${commandFile} as it is missing 'execute()' property`);
+                        }
+                        else {
+                            for (const subcommandData of Object.values(commandData.subcommands)) {
+                                if (!subcommandData.execute) {
+                                    console.warn(`WARNING: Skipped loading command '${commandName}' in file ${commandFile} as the subcommands are missing 'execute()' property`);
+                                    continue commandLoop;
+                                }
+                            }
+                        }
                     }
-                    if (!file.commands[cmd].desc) file.commands[cmd].desc = 'No description';
-                    this.commands.set(cmd, file.commands[cmd]);
+                    if (!commandData.description) commandData.description = "No description.";
+                    if (commandData.slashCommand) this.slashCommands.set(commandName, commandData);
+                    if (!commandData.execute) {
+                        for (const subcommand in commandData.subcommands) {
+                            this.textCommands.set(subcommand, commandData.subcommands[subcommand]);
+                        }
+                    }
+                    else {
+                        this.textCommands.set(commandName, commandData);
+                    }
                 }
             }
         }
@@ -72,28 +91,6 @@ class Client {
             }
         }
         global.Games = require('../games/games.js');
-    }
-    // To be ran only when adding or updating slash commands
-    async updateSlashCommands() {
-        const rest = new REST().setToken(Config.token);
-        const commands = [...this.commands].map(([commandName, commandData]) => {
-            return {
-                name: commandName,
-                description: commandData.desc,
-                options: commandData.options
-            };
-        });
-        try {
-            console.log(`Started refreshing ${commands.length} application (/) commands.`);
-
-            // Peaceful Players - 777956702741463070
-            const data = await rest.put(Routes.applicationGuildCommands(Config.id, '777956702741463070'), { body: commands });
-
-            console.log(`Successfully reloaded ${data.length} application (/) commands.`);
-        }
-        catch (err) {
-            console.error(err);
-        }
     }
 }
 module.exports = new Client();

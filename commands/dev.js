@@ -1,17 +1,15 @@
 'use strict';
 
 const fs = require('fs');
-const { ApplicationCommandOptionType } = require('discord.js');
+const { ApplicationCommandOptionType, REST, Routes } = require('discord.js');
 
 const commands = {
     kill: {
-        devOnly: true,
+        modOnly: true,
         hidden: true,
         execute(interaction) {
             interaction.reply("Shutting down...");
-            setTimeout(() => {
-                process.exit();
-            }, 500);
+            setTimeout(() => process.exit(), 500);
         }
     },
     js: {
@@ -21,17 +19,9 @@ const commands = {
             if (typeof text === 'string') text.replace(/`/g, '`' + String.fromCharCode(8203)).replace(/@/g, '@' + String.fromCharCode(8203));
             return text;
         },
-        options: [
-            {
-                type: ApplicationCommandOptionType.String,
-                name: "code",
-                description: "Code to evaluate.",
-                required: true
-            }
-        ],
-        execute(interaction) {
+        execute(interaction, target) {
             try {
-                let evaled = eval(interaction.options?._hoistedOptions[0].value || interaction.content.split(' ').slice(1).join(' '));
+                let evaled = eval(target);
                 if (typeof evaled !== 'string') evaled = require('util').inspect(evaled);
 
                 interaction.reply(`\`\`\`${this.clean(evaled)}\`\`\``, { code: "xl" });
@@ -43,51 +33,38 @@ const commands = {
     reload: {
         devOnly: true,
         hidden: true,
-        options: [
-            {
-                type: ApplicationCommandOptionType.String,
-                name: "module",
-                description: "Module you want to reload.",
-                required: true
-            }
-        ],
-        execute(interaction) {
+        execute(interaction, target) {
             const validModules = ['config', 'games', 'tools', 'commands', 'events'];
-            const module = Tools.toId(interaction.options?._hoistedOptions[0].value || interaction.content.split(' ').slice(1).join(' '));
+            const module = Tools.toId(target);
             switch (module) {
                 case 'config':
-                    Tools.uncacheTree('../config/config.js');
+                    Tools.uncacheFile('../config/config.js');
                     global.Config = require('../config//config.js');
                     break;
                 case 'games':
                     const games = fs.readdirSync('./games/');
                     for (const gameFile of games) {
-                        Tools.uncacheTree('../games/' + gameFile);
+                        Tools.uncacheFile('../games/' + gameFile);
                     }
                     Client.loadGames();
                     break;
                 case 'tools':
-                    Tools.uncacheTree('../classes/tools.js');
+                    Tools.uncacheFile('../classes/tools.js');
                     global.Tools = require('../classes/tools.js');
                     break;
                 case 'commands':
                     const commands = fs.readdirSync('./commands/');
                     for (const commandFile of commands) {
-                        Tools.uncacheTree('../commands/' + commandFile);
+                        Tools.uncacheFile('../commands/' + commandFile);
                     }
                     Client.loadCommands();
                     break;
                 case 'events':
-                    Tools.uncacheTree('../classes/events.js');
+                    Tools.uncacheFile('../classes/events.js');
                     require('../classes/events.js')
                     break;
-                case 'shop':
-                    Tools.uncacheTree('../classes/shop.js');
-                    require('../classes/shop.js')
-                    break;
                 default:
-                    interaction.reply("Invalid module.");
-                    interaction.reply(`Valid modules are: ${validModules.join(', ')}`);
+                    interaction.reply(`Invalid module.\nValid modules are: ${validModules.join(', ')}`);
                     return false;
             }
             interaction.reply(`Reloaded module: ${module}`);
@@ -98,7 +75,7 @@ const commands = {
         hidden: true,
         execute(interaction) {
             Client.restart = true;
-            interaction.reply({ content: "The bot has been set up to restart. No commands will work until the bot restarts or you disable it.", flags: 'Ephemeral' });
+            interaction.reply("The bot has been set up to restart. No commands will work until the bot restarts.");
         }
     },
     cancelrestart: {
@@ -106,7 +83,57 @@ const commands = {
         hidden: true,
         execute(interaction) {
             Client.restart = false;
-            interaction.reply({ content: "The restart has been cancelled. Commands will work again.", flags: 'Ephemeral' });
+            interaction.reply("The restart has been cancelled. Commands will work again.");
+        }
+    },
+    // To be ran only when adding or updating slash commands in a server
+    update: {
+        devOnly: true,
+        hidden: true,
+        async execute(interaction, target) {
+            let guildId = interaction.guild.id;
+            if (target && Client.bot.guilds.cache.has(target)) guildId = target;
+
+            const rest = new REST().setToken(Config.token);
+            const slashCommands = [...Client.slashCommands];
+            const commands = [];
+            for (const [commandName, commandData] of slashCommands) {
+                const commandObject = {
+                    name: commandName,
+                    description: commandData.description
+                };
+                if (!commandData.execute || commandData.options?.length) {
+                    commandObject.options = [];
+                    if (!commandData.execute) {
+                        for (const subcommand in commandData.subcommands) {
+                            const subcommandObject = {
+                                type: ApplicationCommandOptionType.Subcommand,
+                                name: subcommand,
+                                description: commandData.subcommands[subcommand].description || "No description."
+                            };
+                            if (commandData.subcommands[subcommand].options?.length) subcommandObject.options = commandData.subcommands[subcommand].options;
+                            commandObject.options.push(subcommandObject);
+                        }
+                    }
+                    if (commandData.options?.length) {
+                        for (const option of commandData.options) {
+                            commandObject.options.push(option);
+                        }
+                    }
+                }
+                commands.push(commandObject);
+            }
+
+            try {
+                const message = await interaction.reply(`Started refreshing ${commands.length} application (/) commands.`);
+
+                const data = await rest.put(Routes.applicationGuildCommands(Config.id, guildId), { body: commands });
+
+                message.edit(message.content + `\nSuccessfully reloaded ${data.length} application (/) commands.`);
+            }
+            catch (err) {
+                console.error(err);
+            }
         }
     }
 };

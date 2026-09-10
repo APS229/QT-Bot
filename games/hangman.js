@@ -3,10 +3,10 @@
 const { AttachmentBuilder, EmbedBuilder } = require('discord.js');
 
 class Hangman extends Games.PuzzleGame {
-    constructor(interaction, points) {
-        super(interaction, points || 3);
+    constructor(channel, host, points) {
+        super(channel, host, points || 3);
         this.name = "Hangman";
-        this.description = `- Use \`/guess [letter/word]\` to make your guess. Examples: \`/guess answer\`, \`/guess a\`\n
+        this.description = `- Use \`.guess [letter/word]\` to make your guess. Examples: \`.guess answer\`, \`.guess a\`\n
         - If the guessed letter is in the word, the underscores containing the letter will be replaced by the letter.\n
         - You can guess the word even if it's not your turn.\n
         - You cannot guess the letter if it's not your turn.\n
@@ -14,7 +14,6 @@ class Hangman extends Games.PuzzleGame {
         this.usedGuesses = [];
         this.lives = 5;
         this.queue = [];
-        this.init();
     }
     onStart() {
         super.onStart();
@@ -22,7 +21,7 @@ class Hangman extends Games.PuzzleGame {
         this.onNextRound();
     }
     onNextRound() {
-        if (!this.started) return;
+        if (this.ended) return;
         if (this.playerTimer) clearTimeout(this.playerTimer);
         this.category = Object.keys(Client.data).random();
         this.currentAnswer = Array.isArray(Client.data[this.category]) ? Client.data[this.category].random() : Object.keys(Client.data[this.category]).random();
@@ -38,19 +37,19 @@ class Hangman extends Games.PuzzleGame {
         this.queue = this.queue.shuffle();
         this.canGuess = true;
         this.update();
-        this.playerTimer = setTimeout(() => {
-            if (!this.started) return;
-            this.channel.send(`Skipping <@${this.queue[0]}>'s turn...`);
-            const previousPlayer = this.queue[0];
-            this.queue.shift();
-            this.queue.push(previousPlayer);
-            this.update();
-            this.playerTimer = setTimeout(() => this.skipPlayer(), this.playerTime * 1000);
-        }, this.playerTime * 1000);
+        this.playerTimer = setTimeout(() => this.setPlayerTimer(), this.playerTime * 1000);
+    }
+    setPlayerTimer() {
+        this.sendSync(`Skipping <@${this.queue[0]}>'s turn...`);
+        const previousPlayer = this.queue[0];
+        this.queue.shift();
+        this.queue.push(previousPlayer);
+        this.update();
+        this.playerTimer = setTimeout(() => this.skipPlayer(), this.playerTime * 1000);
     }
     onGuess(userId, guess) {
         if (!this.canGuess || !this.players.has(userId) || this.usedGuesses.includes(guess)) return;
-        if (!guess.length) return this.channel.send(`<@${userId}>, your guess must have alphanumeric characters.`);
+        if (!guess.length) return this.sendSync(`<@${userId}>, your guess must have alphanumeric characters.`);
         if (guess.length === 1) {
             if (this.usedGuesses.includes(guess) || Tools.toId(this.puzzle.join('')).includes(guess) || this.queue[0] !== userId) return;
             let successfulGuess = false;
@@ -61,16 +60,14 @@ class Hangman extends Games.PuzzleGame {
                 }
             }
             if (Tools.toId(this.puzzle.join('')) === this.answer) {
-                this.players.set(userId, this.players.has(userId) ? this.players.get(userId) + 1 : 1);
-                this.channel.send(`<@${userId}> advances to ${this.players.get(userId)} point(s)! The answer was: *${this.currentAnswer}*`);
-                if (this.players.get(userId) === this.points) {
+                this.players.has(userId) ? this.players.get(userId).points++ : this.players.set(userId, { points: 1 });
+                this.sendSync(`<@${userId}> advances to ${this.players.get(userId).points} point(s)! The answer was: *${this.currentAnswer}*`);
+                if (this.players.get(userId).points === this.points) {
                     this.winner = userId;
                     return this.onEnd();
                 }
                 this.canGuess = false;
-                this.cooldownTimer = setTimeout(() => {
-                    this.onNextRound();
-                }, this.cooldownTime * 1000);
+                this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
                 return;
             }
             if (!successfulGuess) this.usedGuesses.push(guess);
@@ -86,11 +83,9 @@ class Hangman extends Games.PuzzleGame {
                         text: Config.username,
                         iconURL: Config.avatarURL
                     });
-                this.channel.send({ embeds: [embed], files: [img] });
+                this.sendSync({ embeds: [embed], files: [img] });
                 if (this.playerTimer) clearTimeout(this.playerTimer);
-                this.cooldownTimer = setTimeout(() => {
-                    this.onNextRound();
-                }, this.cooldownTime * 1000);
+                this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
                 return;
             }
             const previousPlayer = this.queue[0];
@@ -102,17 +97,15 @@ class Hangman extends Games.PuzzleGame {
         }
         else if (guess.length > 1) {
             if (guess === this.answer) {
-                this.players.set(userId, this.players.has(userId) ? this.players.get(userId) + 1 : 1);
-                this.channel.send(`<@${userId}> advances to ${this.players.get(userId)} point(s)! The answer was: *${this.currentAnswer}*`);
-                if (this.players.get(userId) === this.points) {
+                this.players.has(userId) ? this.players.get(userId).points++ : this.players.set(userId, { points: 1 });
+                this.sendSync(`<@${userId}> advances to ${this.players.get(userId).points} point(s)! The answer was: *${this.currentAnswer}*`);
+                if (this.players.get(userId).points === this.points) {
                     this.winner = userId;
                     return this.onEnd();
                 }
                 this.canGuess = false;
                 if (this.playerTimer) clearTimeout(this.playerTimer);
-                this.cooldownTimer = setTimeout(() => {
-                    this.onNextRound();
-                }, this.cooldownTime * 1000);
+                this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
                 return;
             }
             else {
@@ -129,20 +122,17 @@ class Hangman extends Games.PuzzleGame {
                             text: Config.username,
                             iconURL: Config.avatarURL
                         });
-                    this.channel.send({ embeds: [embed], files: [img] });
+                    this.sendSyncs({ embeds: [embed], files: [img] });
                     if (this.playerTimer) clearTimeout(this.playerTimer);
-                    if (this.players.size > 1) this.cooldownTimer = setTimeout(() => {
-                        this.onNextRound();
-                    }, this.cooldownTime * 1000);
+                    if (this.players.size > 1) this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
                     return;
                 }
-                this.channel.send(`<@${userId}> incorrect, that is not the answer.`);
+                this.mentionReply(userId, "Incorrect, that is not the answer.");
             }
         }
     }
     update() {
-        if (!this.started) return;
-        const players = '***** ' + this.queue.map(player => `<@${player}>: ${this.players.get(player)}`).join('\n');
+        const players = '***** ' + this.queue.map(player => `<@${player}>: ${this.players.get(player).points}`).join('\n');
         const img = new AttachmentBuilder(`./images/hangman/${this.usedGuesses.length}.png`);
         const embed = new EmbedBuilder()
             .setColor("#FFFFFF")
@@ -157,18 +147,36 @@ class Hangman extends Games.PuzzleGame {
                 text: Config.username,
                 iconURL: Config.avatarURL
             });
-        this.channel.send({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed], files: [img] });
+        this.sendSync({ content: `<@${this.queue[0]}>'s turn!`, embeds: [embed], files: [img] });
     }
     skipPlayer() {
-        if (!this.started) return;
-        this.channel.send(`Skipping <@${this.queue[0]}>'s turn...`);
+        if (this.ended) return;
+        this.sendSync(`Skipping <@${this.queue[0]}>'s turn...`);
         const previousPlayer = this.queue[0];
         this.queue.shift();
         this.queue.push(previousPlayer);
         this.update();
         this.playerTimer = setTimeout(() => this.skipPlayer(), this.playerTime * 1000);
     }
+    onLeave(userId) {
+        super.onLeave(userId);
+        if (this.started) {
+            const index = this.queue.indexOf(userId);
+            this.queue.splice(index, 1);
+            if (this.queue.length < 2) {
+                this.sendSync(`Not enough players, ending the game of ${this.name}...`);
+                this.winner = this.queue[0];
+                this.onEnd();
+                return true;
+            }
+            if (index === 0) {
+                if (this.playerTimer) clearTimeout(this.playerTimer);
+                this.update();
+                this.playerTimer = setTimeout(() => this.skipPlayer(), this.playerTime * 1000);
+            }
+        }
+    }
 }
 
-exports.game = Hangman;
-exports.id = 'hangman';
+// exports.game = Hangman;
+// exports.id = 'hangman';

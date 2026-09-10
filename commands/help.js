@@ -5,10 +5,8 @@ const { EmbedBuilder } = require('discord.js');
 
 const commands = {
     help: {
-        desc: "Help for the bot commands.",
+        description: "Help for the bot commands.",
         execute(interaction) {
-            // const target = null;
-            // if (!target) {
             const embed = new EmbedBuilder()
                 .setTitle(`Available commands in ${Config.username}`)
                 .setAuthor({ name: Config.username, iconURL: Config.avatarURL })
@@ -21,9 +19,16 @@ const commands = {
                 if (file.commands) {
                     const type = Tools.toTitleCase(commandFile.split('.')[0]);
                     let commands = [];
-                    for (const cmd in file.commands) {
-                        if (file.commands[cmd].hidden) continue;
-                        commands.push(cmd);
+                    for (const command in file.commands) {
+                        const commandData = file.commands[command];
+                        if (commandData.hidden) continue;
+                        if (commandData.subcommands) {
+                            for (const subcommand in commandData.subcommands) {
+                                commands.push(subcommand);
+                            }
+                            continue;
+                        }
+                        commands.push(command);
                     }
                     if (commands.length) {
                         commands.sort();
@@ -32,28 +37,6 @@ const commands = {
                 }
             }
             interaction.reply({ embeds: [embed] });
-            // }
-            // else {
-            //     target = Tools.toId(target);
-            //     const cmdInfo = Client.commands.get(target);
-            //     if (cmdInfo) {
-            //         let required = 'User';
-            //         if (cmdInfo.modOnly) required = 'Manager OR Manage Roles permission';
-            //         const embed = new Client.discord.EmbedBuilder()
-            //             .setTitle(`Help for the command: ${target}`)
-            //             .setAuthor(Config.username, Config.avatarURL)
-            //             .setFooter(`Requested by ${user.username}`, user.avatarURL)
-            //             .setTimestamp()
-            //             .addField('Description', cmdInfo.desc)
-            //             .addField('Usage', cmdInfo.usage.join('\n'))
-            //             .addField('Aliases', cmdInfo.aliases.join(', '))
-            //             .addField('Requirement', required)
-            //         channel.send({ embeds: [embed] });
-            //     }
-            //     else {
-            //         channel.send("Command not found.");
-            //     }
-            // }
         }
     }
 };

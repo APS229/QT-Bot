@@ -675,5 +675,5 @@ class Monopoly extends Games.Game {
     }
 }
 
-exports.game = Monopoly;
-exports.id = 'monopoly';
+// exports.game = Monopoly;
+// exports.id = 'monopoly';
