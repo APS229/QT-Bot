@@ -31,6 +31,8 @@ class Empires extends Games.Game {
         for (const player of this.players.keys()) {
             if (!this.aliases.has(player)) {
                 this.sendSync(`<@${player}> didn't choose an alias in time and has been eliminated.`);
+                const ended = this.onLeave(player);
+                if (ended) return;
             }
         }
         this.turn = this.players.randomKey();
@@ -69,7 +71,7 @@ class Empires extends Games.Game {
         clearTimeout(this.playerTimer);
         if (this.aliases.get(guess.playerId) === guess.alias) {
             this.sendSync(`Correct! <@${guess.playerId}> (${guess.alias}) has been eliminated.`);
-            const ended = this.onKLeave(guess.playerId);
+            const ended = this.onLeave(guess.playerId);
             if (ended) return;
             this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
         }
@@ -116,5 +118,5 @@ class Empires extends Games.Game {
     }
 }
 
-// exports.game = Empires;
-// exports.id = 'empires';
+exports.game = Empires;
+exports.id = 'empires';
