@@ -52,7 +52,7 @@ class Events {
                 const commandName = messageContent.split(' ')[0].slice(1).toLowerCase();
                 const command = Client.textCommands.get(commandName);
                 if (messageContent.startsWith(Config.cmdchar) && command) {
-                    if (message.channel.id !== Database.query(message.guild.id).gameChannel && !command.devOnly) return message.reply("(Moderators) Please first set up the bot using the `/settings` command.");
+                    if (message.channel.id !== Database.query(message.guild.id).gameChannel && !command.devOnly) return;
                     if (Client.restart && !command.devOnly) return message.reply("The bot is currently set up to restart. You cannot run any commands during the restart.");
                     if (command.devOnly && !Config.developers.includes(message.member.id)) return message.reply("This command is only for developers.");
                     if (command.modOnly && !message.member.permissions.has(PermissionFlagsBits.ManageChannels) &&
