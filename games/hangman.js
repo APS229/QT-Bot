@@ -122,7 +122,7 @@ class Hangman extends Games.PuzzleGame {
                             text: Config.username,
                             iconURL: Config.avatarURL
                         });
-                    this.sendSyncs({ embeds: [embed], files: [img] });
+                    this.sendSync({ embeds: [embed], files: [img] });
                     if (this.playerTimer) clearTimeout(this.playerTimer);
                     if (this.players.size > 1) this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
                     return;
@@ -178,5 +178,5 @@ class Hangman extends Games.PuzzleGame {
     }
 }
 
-// exports.game = Hangman;
-// exports.id = 'hangman';
+exports.game = Hangman;
+exports.id = 'hangman';

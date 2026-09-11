@@ -77,6 +77,7 @@ class Empires extends Games.Game {
         }
         else {
             this.sendSync("Incorrect...");
+            // TODO: Spamming guess alias before your actual turn causes double onNextRound() or update(), change this
             this.turn = guess.playerId;
             this.cooldownTimer = setTimeout(() => this.onNextRound(), this.cooldownTime * 1000);
         }
