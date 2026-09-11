@@ -91,8 +91,16 @@ const commands = {
         devOnly: true,
         hidden: true,
         async execute(interaction, target) {
-            let guildId = interaction.guild.id;
-            if (target && Client.bot.guilds.cache.has(target)) guildId = target;
+            let guildId = '', guildName = '';
+            if (target) {
+                if (Client.bot.guilds.cache.has(target)) {
+                    guildId = target;
+                    guildName = Client.bot.guilds.cache.get(target).name;
+                }
+                else {
+                    return interaction.reply("Please specify a valid guild ID.");
+                }
+            }
 
             const rest = new REST().setToken(Config.token);
             const slashCommands = [...Client.slashCommands];
@@ -125,11 +133,21 @@ const commands = {
             }
 
             try {
-                const message = await interaction.reply(`Started refreshing ${commands.length} application (/) commands.`);
+                if (guildId) {
+                    const guildCommandsMessage = await interaction.reply(`Started refreshing **${commands.length}** application (/) commands in **${guildName}** (${guildId}).`);
 
-                const data = await rest.put(Routes.applicationGuildCommands(Config.id, guildId), { body: commands });
+                    const data = await rest.put(Routes.applicationGuildCommands(Config.id, guildId), { body: commands });
 
-                message.edit(message.content + `\nSuccessfully reloaded ${data.length} application (/) commands.`);
+                    guildCommandsMessage.edit(`${guildCommandsMessage.content}\n\nSuccessfully reloaded **${data.length}** application (/) commands in **${guildName}** (${guildId}).`);
+                }
+                else {
+                    const globalCommandsMessage = await interaction.reply(`Started removing global application (/) commands.`);
+                    
+                    // In future if global application commands are added, replace the body array with the commands
+                    await rest.put(Routes.applicationCommands(Config.id), { body: [] });
+
+                    globalCommandsMessage.edit(globalCommandsMessage.content + `\n\nSuccessfully removed all global application (/) commands.`);
+                }
             }
             catch (err) {
                 console.error(err);
