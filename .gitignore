@@ -68,3 +68,6 @@ config/config.js
 
 # database
 database/settings
+
+# private code
+private-code/
