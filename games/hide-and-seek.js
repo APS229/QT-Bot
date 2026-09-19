@@ -136,6 +136,7 @@ class HideAndSeek extends Games.Game {
                 if (this.playerTimer) clearTimeout(this.playerTimer);
                 if (this.roundTimer) clearTimeout(this.roundTimer);
                 this.sendSync("The seeker left the game, moving on to next round...");
+                // DEBUG: This causes two updates even if the seeker seeks and finds nobody
                 this.onNextRound();
             }
         }
