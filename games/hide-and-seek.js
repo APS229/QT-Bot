@@ -143,5 +143,5 @@ class HideAndSeek extends Games.Game {
     }
 }
 
-exports.game = HideAndSeek;
-exports.id = 'hideandseek';
+// exports.game = HideAndSeek;
+// exports.id = 'hideandseek';
